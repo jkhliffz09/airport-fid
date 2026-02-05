@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.69
+Stable tag: 0.1.70
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.69 =
-* Timeline text alignment refined for desktop vs mobile.
+= 0.1.70 =
+* Flight number now uses arrival leg data.
 
 == Upgrade Notice ==
 
-= 0.1.69 =
-Timeline alignment refinements.
+= 0.1.70 =
+Arrival leg flight number fix.
