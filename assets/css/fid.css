@@ -282,6 +282,9 @@
     color: var(--fid-text);
     white-space: normal;
     word-break: break-word;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
 }
 
 .airport-fid-table tbody td:nth-child(3) {
@@ -326,7 +329,7 @@
 }
 
 .airport-fid-table tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.03);
+    background: #00bcd421;
 }
 
 .airport-fid-table tbody tr:hover {

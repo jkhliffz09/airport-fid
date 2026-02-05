@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.67
+Stable tag: 0.1.68
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,11 +66,11 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.67 =
-* Expanded timeline now shows 12-hour times with AM/PM.
-* Mobile expanded layout spacing refinements.
+= 0.1.68 =
+* Updated table cell alignment to center.
+* Adjusted alternate row background color.
 
 == Upgrade Notice ==
 
-= 0.1.67 =
-Expanded timeline formatting updates.
+= 0.1.68 =
+Table styling adjustments.
