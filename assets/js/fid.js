@@ -481,6 +481,7 @@
         var suggestBox = board.querySelector('.airport-fid-suggest');
         var dateInput = board.querySelector('.airport-fid-date');
         var dateButton = board.querySelector('.airport-fid-date-button');
+        var sortSelect = board.querySelector('.airport-fid-sort');
         var loadMoreButton = board.querySelector('.airport-fid-load-more');
         var pageNotice = board.querySelector('.airport-fid-page-notice');
         var loadingOverlay = board.querySelector('.airport-fid-loading');
@@ -643,6 +644,9 @@
             var dateValue = dateInput ? fromInputDate(dateInput.value) : '';
             url += '&date=' + encodeURIComponent(dateValue || getLocalDateString());
             url += '&limit=0';
+            if (sortSelect && sortSelect.value) {
+                url += '&sort=' + encodeURIComponent(sortSelect.value);
+            }
 
             fetchJson(url)
                 .then(function (data) {
@@ -692,6 +696,12 @@
         if (dateInput) {
             dateInput.value = toInputDate(getLocalDateString());
             dateInput.addEventListener('change', function () {
+                loadBoard(input ? input.value : defaultAirport);
+            });
+        }
+
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function () {
                 loadBoard(input ? input.value : defaultAirport);
             });
         }

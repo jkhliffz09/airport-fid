@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.74
+ * Version: 0.1.75
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.74';
+const AIRPORT_FID_VERSION = '0.1.75';
 
 function airport_fid_default_settings() {
     return array(
@@ -373,6 +373,14 @@ function airport_fid_shortcode($atts) {
     $output .= '<input type="date" id="' . esc_attr($uid) . '-date" class="airport-fid-input airport-fid-date" />';
     $output .= '<button type="button" class="airport-fid-button airport-fid-button-secondary airport-fid-date-button">Pick date</button>';
     $output .= '</div>';
+    $output .= '<label class="airport-fid-label" for="' . esc_attr($uid) . '-sort">Sort By</label>';
+    $output .= '<div class="airport-fid-input-row">';
+    $output .= '<select id="' . esc_attr($uid) . '-sort" class="airport-fid-input airport-fid-sort">';
+    $output .= '<option value="departure">Departure</option>';
+    $output .= '<option value="arrival">Arrival</option>';
+    $output .= '<option value="duration">Duration</option>';
+    $output .= '</select>';
+    $output .= '</div>';
     $output .= '</div>';
     $output .= '<div class="airport-fid-status">Loading flight data...</div>';
     $output .= '<div class="airport-fid-table-wrapper"></div>';
@@ -470,6 +478,7 @@ function airport_fid_rest_board(WP_REST_Request $request) {
     $debug = $request->get_param('debug') === '1';
     $debug_errors = array();
     $date_param = sanitize_text_field($request->get_param('date'));
+    $sort = strtolower(sanitize_text_field($request->get_param('sort')));
 
     if (empty($airport)) {
         return new WP_REST_Response(array('error' => 'Airport is required.'), 400);
@@ -559,13 +568,26 @@ function airport_fid_rest_board(WP_REST_Request $request) {
         $airport_name = $flights[0]['origin_name'];
     }
 
-    usort($flights, function ($a, $b) {
-        $a_time = isset($a['departure_ts']) ? (int) $a['departure_ts'] : 0;
-        $b_time = isset($b['departure_ts']) ? (int) $b['departure_ts'] : 0;
-        if ($a_time === $b_time) {
+    if ($sort !== 'arrival' && $sort !== 'duration') {
+        $sort = 'departure';
+    }
+
+    usort($flights, function ($a, $b) use ($sort) {
+        if ($sort === 'arrival') {
+            $a_val = isset($a['arrival_ts']) ? (int) $a['arrival_ts'] : 0;
+            $b_val = isset($b['arrival_ts']) ? (int) $b['arrival_ts'] : 0;
+        } elseif ($sort === 'duration') {
+            $a_val = isset($a['duration_minutes']) ? (int) $a['duration_minutes'] : 0;
+            $b_val = isset($b['duration_minutes']) ? (int) $b['duration_minutes'] : 0;
+        } else {
+            $a_val = isset($a['departure_ts']) ? (int) $a['departure_ts'] : 0;
+            $b_val = isset($b['departure_ts']) ? (int) $b['departure_ts'] : 0;
+        }
+
+        if ($a_val === $b_val) {
             return 0;
         }
-        return $a_time < $b_time ? -1 : 1;
+        return $a_val < $b_val ? -1 : 1;
     });
 
     $payload = array(
@@ -823,6 +845,13 @@ function airport_fid_parse_flights($xml, $limit) {
 
         $terminal = airport_fid_format_terminal($departure_terminal, $arrival_terminal);
 
+        $departure_ts = $departure ? strtotime($departure) : 0;
+        $arrival_ts = $arrival ? strtotime($arrival) : 0;
+        $duration_minutes = 0;
+        if ($departure_ts && $arrival_ts) {
+            $duration_minutes = max(0, (int) round(($arrival_ts - $departure_ts) / 60));
+        }
+
         $flights[] = array(
             'airline' => $airline_name,
             'airline_code' => $airline_code,
@@ -831,7 +860,9 @@ function airport_fid_parse_flights($xml, $limit) {
             'arrival_time' => airport_fid_format_time($arrival),
             'departure_date' => airport_fid_format_date($departure),
             'arrival_date' => airport_fid_format_date($arrival),
-            'departure_ts' => $departure ? strtotime($departure) : 0,
+            'departure_ts' => $departure_ts,
+            'arrival_ts' => $arrival_ts,
+            'duration_minutes' => $duration_minutes,
             'status' => airport_fid_calculate_status($departure, $departure_offset, $arrival, $arrival_offset),
             'terminal' => $terminal,
             'destination' => $destination,
