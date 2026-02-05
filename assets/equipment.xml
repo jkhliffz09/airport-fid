@@ -1,0 +1,368 @@
+This XML file does not appear to have any style information associated with it. The document tree is shown below.
+<Equipments>
+<Equipment IATACode="100" Name="Fokker 100"/>
+<Equipment IATACode="141" Name="BAe 146-100 Passenger"/>
+<Equipment IATACode="142" Name="BAe 146-200 Passenger"/>
+<Equipment IATACode="143" Name="BAe 146-300 Passenger"/>
+<Equipment IATACode="146" Name="BAe 146 Passenger"/>
+<Equipment IATACode="14F" Name="BAe 146 Freight"/>
+<Equipment IATACode="221" Name="Airbus A220-100"/>
+<Equipment IATACode="223" Name="Airbus A220-300"/>
+<Equipment IATACode="290" Name="Embraer 190 E2"/>
+<Equipment IATACode="310" Name="Airbus A310 Passenger"/>
+<Equipment IATACode="312" Name="Airbus A310-200 Passenger"/>
+<Equipment IATACode="313" Name="Airbus A310-300 Passenger"/>
+<Equipment IATACode="318" Name="Airbus A318"/>
+<Equipment IATACode="319" Name="Airbus A319"/>
+<Equipment IATACode="31A" Name="Airbus A318 (sharklets)"/>
+<Equipment IATACode="31B" Name="Airbus A319 (sharklets)"/>
+<Equipment IATACode="31F" Name="Airbus A310 Freight"/>
+<Equipment IATACode="31X" Name="Airbus A310-200 Freight"/>
+<Equipment IATACode="31Y" Name="Airbus A310-300 Freight"/>
+<Equipment IATACode="320" Name="Airbus A320"/>
+<Equipment IATACode="321" Name="Airbus A321"/>
+<Equipment IATACode="32A" Name="Airbus A320 (sharklets)"/>
+<Equipment IATACode="32B" Name="Airbus A321-200"/>
+<Equipment IATACode="32N" Name="Airbus A320neo"/>
+<Equipment IATACode="32Q" Name="Airbus A321neo"/>
+<Equipment IATACode="32S" Name="Airbus A318/319/320/321"/>
+<Equipment IATACode="330" Name="Airbus A330"/>
+<Equipment IATACode="332" Name="Airbus A330-200"/>
+<Equipment IATACode="333" Name="Airbus A330-300"/>
+<Equipment IATACode="339" Name="Airbus A330-900neo"/>
+<Equipment IATACode="340" Name="Airbus A340"/>
+<Equipment IATACode="342" Name="Airbus A340-200"/>
+<Equipment IATACode="343" Name="Airbus A340-300"/>
+<Equipment IATACode="345" Name="Airbus A340-500"/>
+<Equipment IATACode="346" Name="Airbus A340-600"/>
+<Equipment IATACode="350" Name="Airbus A350"/>
+<Equipment IATACode="351" Name="Airbus A350-1000"/>
+<Equipment IATACode="359" Name="Airbus A350-900"/>
+<Equipment IATACode="380" Name="Airbus A380-800 Passenger"/>
+<Equipment IATACode="388" Name="Airbus A380-800 Passenger"/>
+<Equipment IATACode="38F" Name="Airbus A380-800F Freight"/>
+<Equipment IATACode="703" Name="Boeing 707-320/320B/320C Passenger"/>
+<Equipment IATACode="707" Name="Boeing 707/720 Passenger"/>
+<Equipment IATACode="70F" Name="Boeing 707-320B/320C Freight"/>
+<Equipment IATACode="70M" Name="Boeing 707-320B/320C Mixed"/>
+<Equipment IATACode="717" Name="Boeing 717-200"/>
+<Equipment IATACode="721" Name="Boeing 727-100 Passenger"/>
+<Equipment IATACode="722" Name="Boeing 727-200 Passenger"/>
+<Equipment IATACode="727" Name="Boeing 727 Passenger"/>
+<Equipment IATACode="72A" Name="Boeing 727-200 Advanced"/>
+<Equipment IATACode="72F" Name="Boeing 727 Freight"/>
+<Equipment IATACode="72M" Name="Boeing 727 Mixed"/>
+<Equipment IATACode="72S" Name="Boeing 727-200 Passenger"/>
+<Equipment IATACode="731" Name="Boeing 737-100 Passenger"/>
+<Equipment IATACode="732" Name="Boeing 737-200 Passenger"/>
+<Equipment IATACode="733" Name="Boeing 737-300 Passenger"/>
+<Equipment IATACode="734" Name="Boeing 737-400 Passenger"/>
+<Equipment IATACode="735" Name="Boeing 737-500 Passenger"/>
+<Equipment IATACode="736" Name="Boeing 737-600 Passenger"/>
+<Equipment IATACode="737" Name="Boeing 737 Passenger"/>
+<Equipment IATACode="738" Name="Boeing 737-800 Passenger"/>
+<Equipment IATACode="739" Name="Boeing 737-900 Passenger"/>
+<Equipment IATACode="73A" Name="Boeing 737-200/200C Advanced Passenger"/>
+<Equipment IATACode="73C" Name="Boeing 737-300 (Winglets) Passenger"/>
+<Equipment IATACode="73E" Name="Boeing 737-500 (winglets)"/>
+<Equipment IATACode="73F" Name="Boeing 737 Freight"/>
+<Equipment IATACode="73G" Name="Boeing 737-700 Passenger"/>
+<Equipment IATACode="73H" Name="Boeing 737-800 (Winglets) Passenger"/>
+<Equipment IATACode="73J" Name="Boeing 737-900 (Winglets) Passenger"/>
+<Equipment IATACode="73L" Name="Boeing 737-200 Mixed"/>
+<Equipment IATACode="73M" Name="Boeing 737 Mixed"/>
+<Equipment IATACode="73N" Name="Boeing 737 Mixed"/>
+<Equipment IATACode="73N" Name="Boeing 737-300 Mixed"/>
+<Equipment IATACode="73P" Name="Boeing 737-400 Freight"/>
+<Equipment IATACode="73Q" Name="Boeing 737-400 Mixed"/>
+<Equipment IATACode="73R" Name="Boeing 737-300 Mixed"/>
+<Equipment IATACode="73S" Name="Boeing 737 Advanced All Series"/>
+<Equipment IATACode="73W" Name="Boeing 737-700 (Winglets) Passenger"/>
+<Equipment IATACode="73X" Name="Boeing 737-200 Freight"/>
+<Equipment IATACode="73Y" Name="Boeing 737-300 Freight"/>
+<Equipment IATACode="741" Name="Boeing 747-100 Passenger"/>
+<Equipment IATACode="742" Name="Boeing 747-200 Passenger"/>
+<Equipment IATACode="743" Name="Boeing 747-300/747-100/200 Sud Passenger"/>
+<Equipment IATACode="744" Name="Boeing 747-400 Passenger"/>
+<Equipment IATACode="747" Name="Boeing 747 Passenger"/>
+<Equipment IATACode="74C" Name="Boeing 747-200 Mixed"/>
+<Equipment IATACode="74D" Name="Boeing 747-300/747-200 Sud Mixed"/>
+<Equipment IATACode="74E" Name="Boeing 747-400 Mixed"/>
+<Equipment IATACode="74F" Name="Boeing 747 Freight"/>
+<Equipment IATACode="74H" Name="Boeing 747-8"/>
+<Equipment IATACode="74J" Name="Boeing 747-400 (Domestic) Passenger"/>
+<Equipment IATACode="74L" Name="Boeing 747SP Passenger"/>
+<Equipment IATACode="74M" Name="Boeing 747 Mixed"/>
+<Equipment IATACode="74R" Name="Boeing 747SR Passenger"/>
+<Equipment IATACode="74T" Name="Boeing 747-100 Freight"/>
+<Equipment IATACode="74X" Name="Boeing 747-200 Freight"/>
+<Equipment IATACode="74Y" Name="Boeing 747-400F Freight"/>
+<Equipment IATACode="752" Name="Boeing 757-200 Passenger"/>
+<Equipment IATACode="753" Name="Boeing 757-300 Passenger"/>
+<Equipment IATACode="757" Name="Boeing 757 Passenger"/>
+<Equipment IATACode="75F" Name="Boeing 757-200PF Freight"/>
+<Equipment IATACode="75T" Name="Boeing 757-300 (Winglets) Passenger"/>
+<Equipment IATACode="75W" Name="Boeing 757-200 (Winglets) Passenger"/>
+<Equipment IATACode="762" Name="Boeing 767-200 Passenger"/>
+<Equipment IATACode="763" Name="Boeing 767-300 Passenger"/>
+<Equipment IATACode="764" Name="Boeing 767-400 Passenger"/>
+<Equipment IATACode="767" Name="Boeing 767 Passenger"/>
+<Equipment IATACode="76F" Name="Boeing 767 Freight"/>
+<Equipment IATACode="76W" Name="Boeing 767-300 (Winglets) Passenger"/>
+<Equipment IATACode="76X" Name="Boeing 767-200 Freight"/>
+<Equipment IATACode="76Y" Name="Boeing 767-300 Freight"/>
+<Equipment IATACode="772" Name="Boeing 777-200 Passenger"/>
+<Equipment IATACode="773" Name="Boeing 777-300 Passenger"/>
+<Equipment IATACode="777" Name="Boeing 777 Passenger"/>
+<Equipment IATACode="77F" Name="Boeing 777 Freight"/>
+<Equipment IATACode="77L" Name="Boeing 777-200LR"/>
+<Equipment IATACode="77W" Name="Boeing 777-300ER Passenger"/>
+<Equipment IATACode="77X" Name="Boeing 777-200F Freight"/>
+<Equipment IATACode="781" Name="Boeing 787-10"/>
+<Equipment IATACode="787" Name="Boeing 787 Dreamliner"/>
+<Equipment IATACode="788" Name="Boeing 787-8 Dreamliner"/>
+<Equipment IATACode="789" Name="Boeing 787-9 Dreamliner"/>
+<Equipment IATACode="7M8" Name="Boeing 737 MAX 8"/>
+<Equipment IATACode="7M9" Name="Boeing 737 MAX 9"/>
+<Equipment IATACode="7S8" Name="Boeing 737-800 (Scimitar Winglets)"/>
+<Equipment IATACode="A26" Name="Antonev An-26"/>
+<Equipment IATACode="A28" Name="Antonov AN28/PZL MIELEC M-28 Skytruck"/>
+<Equipment IATACode="A40" Name="Antonov AN-140"/>
+<Equipment IATACode="A4F" Name="Antonov AN-124 Ruslan"/>
+<Equipment IATACode="A58" Name="Antonov 158"/>
+<Equipment IATACode="A81" Name="Antonev An148-100"/>
+<Equipment IATACode="AB3" Name="Airbus A300 Passenger"/>
+<Equipment IATACode="AB4" Name="Airbus A300B2/B4 Passenger"/>
+<Equipment IATACode="AB6" Name="Airbus A300-600 Passenger"/>
+<Equipment IATACode="ABF" Name="Airbus A300 Freight"/>
+<Equipment IATACode="ABX" Name="Airbus A300B4/A300C4/A300F4"/>
+<Equipment IATACode="ABY" Name="Airbus A300-600 Freight"/>
+<Equipment IATACode="ACD" Name="Twin (Aero) Commander/Turbo/Jetprop"/>
+<Equipment IATACode="AGH" Name="Augusta A109"/>
+<Equipment IATACode="AN4" Name="Antonov AN-24"/>
+<Equipment IATACode="AN6" Name="Antonov AN-26/30/32"/>
+<Equipment IATACode="AN7" Name="Antonov AN-72/74"/>
+<Equipment IATACode="ANF" Name="Antonov AN-12"/>
+<Equipment IATACode="AR1" Name="Avro RJ100"/>
+<Equipment IATACode="AR7" Name="Avro RJ70"/>
+<Equipment IATACode="AR8" Name="Avro RJ85"/>
+<Equipment IATACode="ARJ" Name="Avro RJ70/RJ85/RJ100"/>
+<Equipment IATACode="AT3" Name="Aerospatiale/ALENIA ATR42 300/400"/>
+<Equipment IATACode="AT4" Name="ATR 42-300/320"/>
+<Equipment IATACode="AT5" Name="ATR 42-500"/>
+<Equipment IATACode="AT7" Name="ATR 72"/>
+<Equipment IATACode="ATP" Name="BAe ATP"/>
+<Equipment IATACode="ATR" Name="ATR42/ATR72"/>
+<Equipment IATACode="AW6" Name="AgustaWestland AW169"/>
+<Equipment IATACode="B11" Name="BAe (BAC) 1-11"/>
+<Equipment IATACode="B12" Name="BAC One-Eleven 200"/>
+<Equipment IATACode="B12" Name="BAe (BAC) One-Eleven 200"/>
+<Equipment IATACode="B13" Name="BAC One-Eleven 300"/>
+<Equipment IATACode="B13" Name="BAe (BAC) One-Eleven 300"/>
+<Equipment IATACode="B14" Name="BAe (BAC) 1-11 400/475"/>
+<Equipment IATACode="B15" Name="BAe (BAC) 1-11 500/ROMBAC"/>
+<Equipment IATACode="B72" Name="Boeing 720/020B"/>
+<Equipment IATACode="BE1" Name="Beechcraft 1900 Airliner"/>
+<Equipment IATACode="BE2" Name="Beechcraft-Light Aircraft-Twin Piston Eng."/>
+<Equipment IATACode="BE9" Name="Beechcraft C99 Airliner"/>
+<Equipment IATACode="BEC" Name="Beechcraft (Light Aircraft)"/>
+<Equipment IATACode="BEH" Name="Beechcraft 1900D Airliner"/>
+<Equipment IATACode="BES" Name="Beechcraft 1900C Airliner"/>
+<Equipment IATACode="BET" Name="Beechcraft (Light Aircraft - Twin Turboprop)"/>
+<Equipment IATACode="BH2" Name="Bell (Helicopter)"/>
+<Equipment IATACode="BNI" Name="Britten Norman BN-2A/BN-2B Islander"/>
+<Equipment IATACode="BNT" Name="Britten Norman BN-2A MKIII Trislander"/>
+<Equipment IATACode="BUS" Name="Bus"/>
+<Equipment IATACode="Bus" Name="Bus"/>
+<Equipment IATACode="C27" Name="Comac ARJ21-700"/>
+<Equipment IATACode="CCJ" Name="Canadair CL-600/601/604 Challenger"/>
+<Equipment IATACode="CD2" Name="Govt.Acft.Factories N22B/N24A Nomad"/>
+<Equipment IATACode="CL4" Name="Canadair CL-44D4"/>
+<Equipment IATACode="CN1 " Name="Cessna (Light aircraft-single piston engine)"/>
+<Equipment IATACode="CN2" Name="Cessna (Light aircraft-twin piston engines)"/>
+<Equipment IATACode="CNA" Name="Cessna (Light Aircraft)"/>
+<Equipment IATACode="CNC" Name="Cessna Light Aircraft (Single Turboprop)"/>
+<Equipment IATACode="CNF" Name="Cessna 308B Caravan"/>
+<Equipment IATACode="CNJ" Name="Cessna Citation"/>
+<Equipment IATACode="CNT" Name="Cessna (Light aircraft-twin turboprop engines)"/>
+<Equipment IATACode="CR1" Name="Canadair Regional Jet 100"/>
+<Equipment IATACode="CR2" Name="Canadair Regional Jet 200"/>
+<Equipment IATACode="CR7" Name="Canadair Regional Jet 700"/>
+<Equipment IATACode="CR9" Name="Canadair Regional Jet 900"/>
+<Equipment IATACode="CRA" Name="Canadair CRJ SERIES 705"/>
+<Equipment IATACode="CRJ" Name="Canadair Regional Jet"/>
+<Equipment IATACode="CRK" Name="Canadair (Bombardier) Regional Jet 1000"/>
+<Equipment IATACode="CRV" Name="Aerospatiale SE210 Caravelle"/>
+<Equipment IATACode="CS1" Name="Bombardier CS100"/>
+<Equipment IATACode="CS2" Name="CASA C212/Nusantara NC-212 Aviocar"/>
+<Equipment IATACode="CS3" Name="Bombardier CS300"/>
+<Equipment IATACode="CS5" Name="CASA/Nusantara CN-235"/>
+<Equipment IATACode="CSB" Name="Bombardier C Series"/>
+<Equipment IATACode="CV4" Name="Convair 440 Metropolitan Passenger"/>
+<Equipment IATACode="CV5" Name="Convair 580 Passenger"/>
+<Equipment IATACode="CVF" Name="Convair 440/580/600/640 Freight"/>
+<Equipment IATACode="CVR" Name="Convair 240/440/580 Passenger"/>
+<Equipment IATACode="CWC" Name="Curtiss C-46 Commando"/>
+<Equipment IATACode="D10" Name="Boeing (Douglas) DC10 Passenger"/>
+<Equipment IATACode="D11" Name="Boeing (Douglas) DC10-10/15 Passenger"/>
+<Equipment IATACode="D1C" Name="Boeing (Douglas) DC10-30/40 Passenger"/>
+<Equipment IATACode="D1F" Name="Boeing (Douglas) DC10 Freight"/>
+<Equipment IATACode="D1M" Name="Boeing (Douglas) DC10-30 Mixed"/>
+<Equipment IATACode="D1Y" Name="Boeing (Douglas) DC10 - 30/40 Freight"/>
+<Equipment IATACode="D28" Name="Fairchild Dornier 228"/>
+<Equipment IATACode="D38" Name="Fairchild Dornier 328-100"/>
+<Equipment IATACode="D3F" Name="Boeing (Douglas) DC3 Freight"/>
+<Equipment IATACode="D6F" Name="Boeing (Douglas) DC6A/B/C Freight"/>
+<Equipment IATACode="D8F" Name="Boeing (Douglas) DC8 Freight"/>
+<Equipment IATACode="D8L" Name="Boeing (Douglas) DC-8-62 Passenger"/>
+<Equipment IATACode="D8M" Name="Boeing (Douglas) DC8-62 Mixed"/>
+<Equipment IATACode="D8X" Name="Boeing (Douglas) DC-8-61/62/63 Freight"/>
+<Equipment IATACode="D8Y" Name="Boeing (Douglas) DC-8-71/72/73 Freight"/>
+<Equipment IATACode="D91" Name="Boeing (Douglas) DC-9-10 Passenger"/>
+<Equipment IATACode="D92" Name="Boeing (Douglas) DC-9-20"/>
+<Equipment IATACode="D93" Name="Boeing (Douglas) DC9-30 Passenger"/>
+<Equipment IATACode="D94" Name="Boeing (Douglas) DC9-40 Passenger"/>
+<Equipment IATACode="D95" Name="Boeing (Douglas) DC9-50 Passenger"/>
+<Equipment IATACode="D9F" Name="Boeing (Douglas) DC9 Freight"/>
+<Equipment IATACode="D9S" Name="McDonnell Douglas DC9 30/40/50"/>
+<Equipment IATACode="DC3" Name="Boeing (Douglas) DC-3 Passenger"/>
+<Equipment IATACode="DC6" Name="Boeing (Douglas) DC-6B Passenger"/>
+<Equipment IATACode="DC8" Name="Boeing (Douglas) DC-8 Passenger"/>
+<Equipment IATACode="DC9" Name="Boeing (Douglas) DC-9 Passenger"/>
+<Equipment IATACode="DF2" Name="Dassault Falcon 10/20/100/200/2000"/>
+<Equipment IATACode="DF3" Name="Dassault Falcon 50/900"/>
+<Equipment IATACode="DFL" Name="Dassault Falcon"/>
+<Equipment IATACode="DH1" Name="De Havilland DHC-8-100 Dash 8/8Q"/>
+<Equipment IATACode="DH2" Name="De Havilland DHC-8-200 Dash 8/8Q"/>
+<Equipment IATACode="DH3" Name="De Havilland DHC-8-300 Dash 8/8Q"/>
+<Equipment IATACode="DH4" Name="De Havilland DHC-8 Dash 8-400 Dash 8Q"/>
+<Equipment IATACode="DH7" Name="De Havilland DHC-7 Dash 7"/>
+<Equipment IATACode="DH8" Name="De Havilland DHC-8 Dash 8"/>
+<Equipment IATACode="DHB" Name="De Havilland DHC2 Beaver/Turbo Beaver"/>
+<Equipment IATACode="DHC" Name="De Havilland DHC-4 Caribou"/>
+<Equipment IATACode="DHL" Name="De Havilland DHC-3 Turbo Otter"/>
+<Equipment IATACode="DHO" Name="De Havilland DHC-3 Otter/Turbo Otter"/>
+<Equipment IATACode="DHP" Name="De Havilland DHC-2 Beaver"/>
+<Equipment IATACode="DHS" Name="De Havilland DHC 3 Otter"/>
+<Equipment IATACode="DHT" Name="De Havilland DHC-6 Twin Otter"/>
+<Equipment IATACode="E70" Name="Embraer 170"/>
+<Equipment IATACode="E75" Name="Embraer 175"/>
+<Equipment IATACode="E7W" Name="Embraer 175 (Enhanced Winglets)"/>
+<Equipment IATACode="E90" Name="Embraer 190"/>
+<Equipment IATACode="E95" Name="Embraer 195"/>
+<Equipment IATACode="EC3" Name="Eurocopter EC130"/>
+<Equipment IATACode="EM2" Name="Embraer 120 Brasilia"/>
+<Equipment IATACode="EMB" Name="Embraer 110 Bandeirante"/>
+<Equipment IATACode="EMJ" Name="Embraer 170/195"/>
+<Equipment IATACode="EQV" Name="Equipment Varies"/>
+<Equipment IATACode="ER3" Name="Embraer RJ135"/>
+<Equipment IATACode="ER4" Name="Embraer RJ145"/>
+<Equipment IATACode="ERD" Name="Embraer RJ140"/>
+<Equipment IATACode="ERJ" Name="Embraer RJ 135/140/145"/>
+<Equipment IATACode="F21" Name="Fokker F28-1000 Fellowship"/>
+<Equipment IATACode="F22" Name="Fokker F28-2000 Fellowship"/>
+<Equipment IATACode="F23" Name="Fokker F28-3000 Fellowship"/>
+<Equipment IATACode="F24" Name="Fokker F28-4000 Fellowship"/>
+<Equipment IATACode="F27" Name="Fokker F27 Friendship/Fairchild F27"/>
+<Equipment IATACode="F28" Name="Fokker F28 Fellowship"/>
+<Equipment IATACode="F50" Name="Fokker 50"/>
+<Equipment IATACode="F70" Name="Fokker 70"/>
+<Equipment IATACode="FA7" Name="Fairchild Dornier 728"/>
+<Equipment IATACode="FK7" Name="Fairchilds FH227"/>
+<Equipment IATACode="FRJ" Name="Fairchild Dornier 328JET"/>
+<Equipment IATACode="GA8" Name="Gippsland Aeronautics GA8 Airvan"/>
+<Equipment IATACode="GJ4" Name="Gulfstream Aerospace IV"/>
+<Equipment IATACode="GRG" Name="Grumman G-21 Goose (Amphibian)"/>
+<Equipment IATACode="GRJ" Name="Gulfstream Aerospace Gulfstream 2/3/4/5"/>
+<Equipment IATACode="GRM" Name="Grumman G-73 Mallard (Amphibian)"/>
+<Equipment IATACode="GRS" Name="Gulfstream Aerospace G159 Gulfstream 1"/>
+<Equipment IATACode="H25" Name="BAe (Hawker Siddeley) 125"/>
+<Equipment IATACode="HEC" Name="HELIO H250 Courier/H295/395Supercourier"/>
+<Equipment IATACode="HOV" Name="Hovercraft"/>
+<Equipment IATACode="HS7" Name="BAe (Hawker Siddeley) 748"/>
+<Equipment IATACode="I14" Name="Ilyushin IL114"/>
+<Equipment IATACode="ICE" Name="Inter-City Express Train"/>
+<Equipment IATACode="ICE" Name="Inter-City Express Train"/>
+<Equipment IATACode="IL6" Name="Ilyushin IL-62"/>
+<Equipment IATACode="IL7" Name="Ilyushin IL-76"/>
+<Equipment IATACode="IL8" Name="Ilyushin IL-18"/>
+<Equipment IATACode="IL9" Name="Ilyushin IL-96 Passenger"/>
+<Equipment IATACode="ILW" Name="Ilyushin IL-86"/>
+<Equipment IATACode="J31" Name="BAe Jetstream 31"/>
+<Equipment IATACode="J32" Name="BAe Jetstream 32"/>
+<Equipment IATACode="J41" Name="BAe Jetstream 41"/>
+<Equipment IATACode="JST" Name="BAe Jetstream"/>
+<Equipment IATACode="JU5" Name="Junkers JU 52/3M"/>
+<Equipment IATACode="L10" Name="Lockheed L1011 Tristar Passenger"/>
+<Equipment IATACode="L11" Name="Lockheed L1011 Tristar 1/50/100/150/200"/>
+<Equipment IATACode="L15" Name="Lockheed L1011 Tristar 500 Passenger"/>
+<Equipment IATACode="L1F" Name="Lockheed L1011 Tristar Freight"/>
+<Equipment IATACode="L49" Name="Lockheed L749/L1049 Super Constellation"/>
+<Equipment IATACode="L4T" Name="LET 410"/>
+<Equipment IATACode="LCH" Name="Launch/Boat"/>
+<Equipment IATACode="LMO" Name="Limousine"/>
+<Equipment IATACode="LOE" Name="Lockheed L188 Electra Passenger"/>
+<Equipment IATACode="LOF" Name="Lockheed L188 Electra Freight"/>
+<Equipment IATACode="LOH" Name="Lockheed L182/L282/L382 (L100) Hercules"/>
+<Equipment IATACode="LOM" Name="Lockheed L188 Electra Mixed"/>
+<Equipment IATACode="LRJ" Name="Learjet"/>
+<Equipment IATACode="LRJ" Name="Learjet"/>
+<Equipment IATACode="M11" Name="Boeing (Douglas) MD-11 Passenger"/>
+<Equipment IATACode="M1F" Name="Boeing (Douglas) MD-11 Freight"/>
+<Equipment IATACode="M1M" Name="Boeing (Douglas) MD-11 Mixed"/>
+<Equipment IATACode="M80" Name="Boeing (Douglas) MD-80"/>
+<Equipment IATACode="M81" Name="Boeing (Douglas) MD-81"/>
+<Equipment IATACode="M82" Name="Boeing (Douglas) MD-82"/>
+<Equipment IATACode="M83" Name="Boeing (Douglas) MD-83"/>
+<Equipment IATACode="M87" Name="Boeing (Douglas) MD-87"/>
+<Equipment IATACode="M88" Name="Boeing (Douglas) MD-88"/>
+<Equipment IATACode="M90" Name="Boeing (Douglas) MD-90"/>
+<Equipment IATACode="MA6" Name="Xian Yunshuji MA-60/MA600"/>
+<Equipment IATACode="MBH" Name="Eurocopter (MBB) BO 105"/>
+<Equipment IATACode="MD9" Name="MD Helicopter MD 900 Explorer"/>
+<Equipment IATACode="MIH" Name="MIL MI-8/MI-17/MI-171/MI-172"/>
+<Equipment IATACode="MTL" Name="Metroliner Train"/>
+<Equipment IATACode="MU2" Name="Mitsubishi MU-2"/>
+<Equipment IATACode="ND2" Name="Aerospatiale (Nord) 262"/>
+<Equipment IATACode="NDC" Name="Aerospatiale SN601 Corvette"/>
+<Equipment IATACode="NDE" Name="Eurocopter Ecureuil AS350/AS355 2"/>
+<Equipment IATACode="NDH" Name="Eurocopter SA365C Dauphin 2"/>
+<Equipment IATACode="PA1" Name="Piper (Light Aircraft - Single Piston)"/>
+<Equipment IATACode="PA2" Name="Piper (Light Aircraft - Twin Piston)"/>
+<Equipment IATACode="PAG" Name="Piper (Light Aircraft)"/>
+<Equipment IATACode="PAT" Name="Piper (Light Aircraft - Twin Turboprop)"/>
+<Equipment IATACode="PL2" Name="Pilatus PC-12"/>
+<Equipment IATACode="PL6" Name="Pilatus PC6 Turbo Porter"/>
+<Equipment IATACode="PN6" Name="Partenavia P68"/>
+<Equipment IATACode="RFS" Name="Road Feeder Service (TRUCK)"/>
+<Equipment IATACode="S20" Name="SAAB 2000"/>
+<Equipment IATACode="S58" Name="Sikorsky S-58T"/>
+<Equipment IATACode="S61" Name="Sikorsky S61"/>
+<Equipment IATACode="S76" Name="Sikorsky S-76"/>
+<Equipment IATACode="SF3" Name="SAAB 340"/>
+<Equipment IATACode="SFB" Name="Saab 340B"/>
+<Equipment IATACode="SH3" Name="Shorts 330 (SD3-30)"/>
+<Equipment IATACode="SH6" Name="Shorts 360 (SD3-60)"/>
+<Equipment IATACode="SHB" Name="Shorts SC.5 Belfast"/>
+<Equipment IATACode="SHS" Name="Shorts Skyvan (SC-7)"/>
+<Equipment IATACode="SU1" Name="Sukhoi Superjet 100"/>
+<Equipment IATACode="SU9" Name="Sukhoi Superjet 100-95"/>
+<Equipment IATACode="SWM" Name="Fairchild SA26/SA226/SA277 Merlin/Metro"/>
+<Equipment IATACode="T20" Name="Tupolev TU-204/TU-214"/>
+<Equipment IATACode="T2F" Name="Tupolev TU-204 Freight"/>
+<Equipment IATACode="TGV" Name="Train A Grand Vitesse"/>
+<Equipment IATACode="THS" Name="High Speed Train"/>
+<Equipment IATACode="THT" Name="Hotel Train"/>
+<Equipment IATACode="TRN" Name="Train"/>
+<Equipment IATACode="TRS" Name="Surface Equipment-Train High Speed Train"/>
+<Equipment IATACode="TSL" Name="Sleeper Train"/>
+<Equipment IATACode="TU3" Name="Tupolev TU134"/>
+<Equipment IATACode="TU5" Name="Tupolev TU154"/>
+<Equipment IATACode="VCV" Name="BAe (Vickers) Viscount"/>
+<Equipment IATACode="WWP" Name="Israel Aircraft Ind.1124 Westwind"/>
+<Equipment IATACode="YK2" Name="Yakolev YAK-42/142"/>
+<Equipment IATACode="YK4" Name="Yakolev YAK-40"/>
+<Equipment IATACode="YN2" Name="Harbin Yunshuji Y12"/>
+<Equipment IATACode="YN7" Name="Xian Yunshuji Y7/MA60"/>
+<Equipment IATACode="YS1" Name="NAMC YS-11"/>
+</Equipments>

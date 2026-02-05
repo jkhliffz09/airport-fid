@@ -1,0 +1,359 @@
+This XML file does not appear to have any style information associated with it. The document tree is shown below.
+<OTA_AirDetailsRS xmlns="http://www.opentravel.org/OTA/2003/05" PrimaryLangID="eng" Version="1.0" TransactionIdentifier="" FLSNote="This XML adds attributes not in the OTA XML spec. All such attributes start with FLS" FLSDevice="ota-xml-expanded">
+<Success/>
+<FLSResponseFields FLSOriginCode="MNL" FLSOriginName="Manila" FLSDestinationCode="LAX" FLSDestinationName="Los Angeles" FLSStartDate="2026-11-04" FLSEndDate="2026-11-04" FLSResultCount="26" FLSRoutesFound="26" FLSBranchCount="246" FLSTargetCount="183" FLSRecordCount="48996"/>
+<FlightDetails TotalFlightTime="PT15H10M" TotalMiles="7969" TotalTripTime="PT17H15M" FLSDepartureDateTime="2026-11-04T08:00:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T09:15:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T08:00:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T10:30:00" FLSArrivalTimeOffset="+0800" FlightNumber="912" JourneyDuration="PT2H30M" SequenceNumber="1" LegDistance="713" FLSMeals="B" FLSInflightServices=" 1/ 2/ 4/ 7/ 9/ 10/ 12/ 15" FLSUUID="MNLHKG20261104CX912">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="HKG" FLSLocationName="Hong Kong International Airport" Terminal="1" FLSDayIndicator=""/>
+<MarketingAirline Code="CX" CodeContext="IATA" CompanyShortName="Cathay Pacific"/>
+<Equipment AirEquipType="333"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T12:35:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T09:15:00" FLSArrivalTimeOffset="-0800" FlightNumber="884" JourneyDuration="PT12H40M" SequenceNumber="2" LegDistance="7256" FLSMeals="DL" FLSInflightServices=" 1/ 2/ 4/ 7/ 9/ 10/ 12/ 15/ 18" FLSUUID="HKGLAX20261104CX884">
+<DepartureAirport CodeContext="IATA" LocationCode="HKG" FLSLocationName="Hong Kong International Airport" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="CX" CodeContext="IATA" CompanyShortName="Cathay Pacific"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H00M" TotalMiles="7345" TotalTripTime="PT17H10M" FLSDepartureDateTime="2026-11-04T08:40:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T09:50:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T08:40:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T13:55:00" FLSArrivalTimeOffset="+0900" FlightNumber="8342" JourneyDuration="PT4H15M" SequenceNumber="1" LegDistance="1863" FLSMeals="B" FLSInflightServices=" " FLSUUID="MNLHND20261104AA8342" FLSUUIDActualFlight="MNLHND20261104PR422">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="HND" FLSLocationName="Tokyo Haneda International Airport" Terminal="3" FLSDayIndicator=""/>
+<MarketingAirline Code="AA" CodeContext="IATA" CompanyShortName="American Airlines"/>
+<OperatingAirline Code="PR" CodeContext="IATA" CompanyShortName="Philippine Airlines" FlightNumber="422"/>
+<Equipment AirEquipType="321"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T17:05:00" FLSDepartureTimeOffset="+0900" ArrivalDateTime="2026-11-04T09:50:00" FLSArrivalTimeOffset="-0800" FlightNumber="8423" JourneyDuration="PT9H45M" SequenceNumber="2" LegDistance="5482" FLSMeals="M" FLSInflightServices=" " FLSUUID="HNDLAX20261104AA8423" FLSUUIDActualFlight="HNDLAX20261104JL16">
+<DepartureAirport CodeContext="IATA" LocationCode="HND" FLSLocationName="Tokyo Haneda International Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="AA" CodeContext="IATA" CompanyShortName="American Airlines"/>
+<OperatingAirline Code="JL" CodeContext="IATA" CompanyShortName="JAL" FlightNumber="16"/>
+<Equipment AirEquipType="351"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H15M" TotalMiles="7308" TotalTripTime="PT17H50M" FLSDepartureDateTime="2026-11-04T08:40:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T10:30:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T08:40:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T13:55:00" FLSArrivalTimeOffset="+0900" FlightNumber="5334" JourneyDuration="PT4H15M" SequenceNumber="1" LegDistance="1863" FLSMeals="B" FLSInflightServices=" 9" FLSUUID="MNLHND20261104NH5334" FLSUUIDActualFlight="MNLHND20261104PR422">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="HND" FLSLocationName="Tokyo Haneda International Airport" Terminal="3" FLSDayIndicator=""/>
+<MarketingAirline Code="NH" CodeContext="IATA" CompanyShortName="ANA"/>
+<OperatingAirline Code="PR" CodeContext="IATA" CompanyShortName="Philippine Airlines" FlightNumber="422"/>
+<Equipment AirEquipType="321"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T17:30:00" FLSDepartureTimeOffset="+0900" ArrivalDateTime="2026-11-04T10:30:00" FLSArrivalTimeOffset="-0800" FlightNumber="7018" JourneyDuration="PT10H00M" SequenceNumber="2" LegDistance="5445" FLSMeals="M" FLSInflightServices=" " FLSUUID="NRTLAX20261104NH7018" FLSUUIDActualFlight="NRTLAX20261104UA33">
+<DepartureAirport CodeContext="IATA" LocationCode="NRT" FLSLocationName="Tokyo Narita International Airport" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="7" FLSDayIndicator=""/>
+<MarketingAirline Code="NH" CodeContext="IATA" CompanyShortName="ANA"/>
+<OperatingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines" FlightNumber="33"/>
+<Equipment AirEquipType="789"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT13H40M" TotalMiles="7343" TotalTripTime="PT16H00M" FLSDepartureDateTime="2026-11-04T09:40:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T09:40:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T09:40:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T14:45:00" FLSArrivalTimeOffset="+0900" FlightNumber="746" JourneyDuration="PT4H05M" SequenceNumber="1" LegDistance="1898" FLSMeals="M" FLSInflightServices=" 9/ 18" FLSUUID="MNLNRT20261104JL746">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="NRT" FLSLocationName="Tokyo Narita International Airport" Terminal="2" FLSDayIndicator=""/>
+<MarketingAirline Code="JL" CodeContext="IATA" CompanyShortName="JAL"/>
+<Equipment AirEquipType="788"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T17:05:00" FLSDepartureTimeOffset="+0900" ArrivalDateTime="2026-11-04T09:40:00" FLSArrivalTimeOffset="-0800" FlightNumber="62" JourneyDuration="PT9H35M" SequenceNumber="2" LegDistance="5445" FLSMeals="M" FLSInflightServices=" 9/ 18" FLSUUID="NRTLAX20261104JL62">
+<DepartureAirport CodeContext="IATA" LocationCode="NRT" FLSLocationName="Tokyo Narita International Airport" Terminal="2" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="JL" CodeContext="IATA" CompanyShortName="JAL"/>
+<Equipment AirEquipType="789"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H10M" TotalMiles="7343" TotalTripTime="PT16H05M" FLSDepartureDateTime="2026-11-04T09:45:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T09:50:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T09:45:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T15:05:00" FLSArrivalTimeOffset="+0900" FlightNumber="820" JourneyDuration="PT4H20M" SequenceNumber="1" LegDistance="1898" FLSMeals="M" FLSInflightServices=" " FLSUUID="MNLNRT20261104NH820">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="NRT" FLSLocationName="Tokyo Narita International Airport" Terminal="1" FLSDayIndicator=""/>
+<MarketingAirline Code="NH" CodeContext="IATA" CompanyShortName="ANA"/>
+<Equipment AirEquipType="788"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T17:00:00" FLSDepartureTimeOffset="+0900" ArrivalDateTime="2026-11-04T09:50:00" FLSArrivalTimeOffset="-0800" FlightNumber="6" JourneyDuration="PT9H50M" SequenceNumber="2" LegDistance="5445" FLSMeals="M" FLSInflightServices=" " FLSUUID="NRTLAX20261104NH6">
+<DepartureAirport CodeContext="IATA" LocationCode="NRT" FLSLocationName="Tokyo Narita International Airport" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="NH" CodeContext="IATA" CompanyShortName="ANA"/>
+<Equipment AirEquipType="789"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H20M" TotalMiles="7343" TotalTripTime="PT16H45M" FLSDepartureDateTime="2026-11-04T09:45:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T10:30:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T09:45:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T15:05:00" FLSArrivalTimeOffset="+0900" FlightNumber="820" JourneyDuration="PT4H20M" SequenceNumber="1" LegDistance="1898" FLSMeals="M" FLSInflightServices=" " FLSUUID="MNLNRT20261104NH820">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="NRT" FLSLocationName="Tokyo Narita International Airport" Terminal="1" FLSDayIndicator=""/>
+<MarketingAirline Code="NH" CodeContext="IATA" CompanyShortName="ANA"/>
+<Equipment AirEquipType="788"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T17:30:00" FLSDepartureTimeOffset="+0900" ArrivalDateTime="2026-11-04T10:30:00" FLSArrivalTimeOffset="-0800" FlightNumber="7018" JourneyDuration="PT10H00M" SequenceNumber="2" LegDistance="5445" FLSMeals="M" FLSInflightServices=" " FLSUUID="NRTLAX20261104NH7018" FLSUUIDActualFlight="NRTLAX20261104UA33">
+<DepartureAirport CodeContext="IATA" LocationCode="NRT" FLSLocationName="Tokyo Narita International Airport" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="7" FLSDayIndicator=""/>
+<MarketingAirline Code="NH" CodeContext="IATA" CompanyShortName="ANA"/>
+<OperatingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines" FlightNumber="33"/>
+<Equipment AirEquipType="789"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H19M" TotalMiles="7323" TotalTripTime="PT16H15M" FLSDepartureDateTime="2026-11-04T09:55:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T10:10:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T09:55:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T06:25:00" FLSArrivalTimeOffset="-0800" FlightNumber="190" JourneyDuration="PT12H30M" SequenceNumber="1" LegDistance="6985" FLSMeals="M" FLSInflightServices=" " FLSUUID="MNLSFO20261104UA190">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal=" " FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T08:21:00" FLSDepartureTimeOffset="-0800" ArrivalDateTime="2026-11-04T10:10:00" FLSArrivalTimeOffset="-0800" FlightNumber="5747" JourneyDuration="PT1H49M" SequenceNumber="2" LegDistance="338" FLSMeals="N" FLSInflightServices=" " FLSUUID="SFOLAX20261104UA5747" FLSDOTDisclosure="Owned By:SKYWEST DBA UNITED EXPRESS">
+<DepartureAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="7" FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="E7W"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H16M" TotalMiles="7323" TotalTripTime="PT16H36M" FLSDepartureDateTime="2026-11-04T09:55:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T10:31:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T09:55:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T06:25:00" FLSArrivalTimeOffset="-0800" FlightNumber="190" JourneyDuration="PT12H30M" SequenceNumber="1" LegDistance="6985" FLSMeals="M" FLSInflightServices=" " FLSUUID="MNLSFO20261104UA190">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal=" " FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T08:45:00" FLSDepartureTimeOffset="-0800" ArrivalDateTime="2026-11-04T10:31:00" FLSArrivalTimeOffset="-0800" FlightNumber="1896" JourneyDuration="PT1H46M" SequenceNumber="2" LegDistance="338" FLSMeals="N" FLSInflightServices=" " FLSUUID="SFOLAX20261104UA1896">
+<DepartureAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="7" FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="7M8"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H07M" TotalMiles="7323" TotalTripTime="PT18H05M" FLSDepartureDateTime="2026-11-04T09:55:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T12:00:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T09:55:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T06:25:00" FLSArrivalTimeOffset="-0800" FlightNumber="190" JourneyDuration="PT12H30M" SequenceNumber="1" LegDistance="6985" FLSMeals="M" FLSInflightServices=" " FLSUUID="MNLSFO20261104UA190">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal=" " FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T10:23:00" FLSDepartureTimeOffset="-0800" ArrivalDateTime="2026-11-04T12:00:00" FLSArrivalTimeOffset="-0800" FlightNumber="1164" JourneyDuration="PT1H37M" SequenceNumber="2" LegDistance="338" FLSMeals="N" FLSInflightServices=" " FLSUUID="SFOLAX20261104UA1164">
+<DepartureAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="7" FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="738"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H38M" TotalMiles="7648" TotalTripTime="PT17H13M" FLSDepartureDateTime="2026-11-04T10:00:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T11:13:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T10:00:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T05:35:00" FLSArrivalTimeOffset="-0800" FlightNumber="18" JourneyDuration="PT11H35M" SequenceNumber="1" LegDistance="6565" FLSMeals="MB" FLSInflightServices=" 3/ 9/ 12/ 18/ 20" FLSUUID="MNLYVR20261104AC18">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="YVR" FLSLocationName="Vancouver International Airport" Terminal="M" FLSDayIndicator=""/>
+<MarketingAirline Code="AC" CodeContext="IATA" CompanyShortName="Air Canada"/>
+<Equipment AirEquipType="789"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T08:10:00" FLSDepartureTimeOffset="-0800" ArrivalDateTime="2026-11-04T11:13:00" FLSArrivalTimeOffset="-0800" FlightNumber="552" JourneyDuration="PT3H03M" SequenceNumber="2" LegDistance="1083" FLSMeals="F" FLSInflightServices=" 3/ 9/ 12/ 18" FLSUUID="YVRLAX20261104AC552">
+<DepartureAirport CodeContext="IATA" LocationCode="YVR" FLSLocationName="Vancouver International Airport" Terminal="M" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="6" FLSDayIndicator=""/>
+<MarketingAirline Code="AC" CodeContext="IATA" CompanyShortName="Air Canada"/>
+<Equipment AirEquipType="7M8"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT13H35M" TotalMiles="7303" TotalTripTime="PT13H35M" FLSDepartureDateTime="2026-11-04T11:25:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T10:00:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="NonStop" FLSFlightLegs="1" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T11:25:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T10:00:00" FLSArrivalTimeOffset="-0800" FlightNumber="112" JourneyDuration="PT13H35M" SequenceNumber="1" LegDistance="7303" FLSMeals="L" FLSInflightServices=" 9" FLSUUID="MNLLAX20261104PR112">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="PR" CodeContext="IATA" CompanyShortName="Philippine Airlines"/>
+<Equipment AirEquipType="773"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H55M" TotalMiles="7610" TotalTripTime="PT17H10M" FLSDepartureDateTime="2026-11-04T12:30:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T13:40:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T12:30:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T17:25:00" FLSArrivalTimeOffset="+0900" FlightNumber="622" JourneyDuration="PT3H55M" SequenceNumber="1" LegDistance="1622" FLSMeals="L" FLSInflightServices=" 3/ 7/ 9/ 20/ 22/ 27" FLSUUID="MNLICN20261104KE622">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="ICN" FLSLocationName="Seoul Incheon International Airport" Terminal="2" FLSDayIndicator=""/>
+<MarketingAirline Code="KE" CodeContext="IATA" CompanyShortName="Korean Air"/>
+<Equipment AirEquipType="333"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T19:40:00" FLSDepartureTimeOffset="+0900" ArrivalDateTime="2026-11-04T13:40:00" FLSArrivalTimeOffset="-0800" FlightNumber="11" JourneyDuration="PT11H00M" SequenceNumber="2" LegDistance="5988" FLSMeals="BD" FLSInflightServices=" 3/ 7/ 9/ 19/ 20/ 22/ 27" FLSUUID="ICNLAX20261104KE11">
+<DepartureAirport CodeContext="IATA" LocationCode="ICN" FLSLocationName="Seoul Incheon International Airport" Terminal="2" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="KE" CodeContext="IATA" CompanyShortName="Korean Air"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT19H05M" TotalMiles="10248" TotalTripTime="PT21H25M" FLSDepartureDateTime="2026-11-04T12:45:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T18:10:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T12:45:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T16:40:00" FLSArrivalTimeOffset="+0800" FlightNumber="913" JourneyDuration="PT3H55M" SequenceNumber="1" LegDistance="1477" FLSMeals="M" FLSInflightServices=" 9" FLSUUID="MNLSIN20261104SQ913">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SIN" FLSLocationName="Singapore Changi Airport" Terminal=" " FLSDayIndicator=""/>
+<MarketingAirline Code="SQ" CodeContext="IATA" CompanyShortName="Singapore Airlines"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T19:00:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T18:10:00" FLSArrivalTimeOffset="-0800" FlightNumber="36" JourneyDuration="PT15H10M" SequenceNumber="2" LegDistance="8771" FLSMeals="" FLSInflightServices=" 9" FLSUUID="SINLAX20261104SQ36">
+<DepartureAirport CodeContext="IATA" LocationCode="SIN" FLSLocationName="Singapore Changi Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="SQ" CodeContext="IATA" CompanyShortName="Singapore Airlines"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT19H05M" TotalMiles="10248" TotalTripTime="PT20H05M" FLSDepartureDateTime="2026-11-04T14:05:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T18:10:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T14:05:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T18:00:00" FLSArrivalTimeOffset="+0800" FlightNumber="917" JourneyDuration="PT3H55M" SequenceNumber="1" LegDistance="1477" FLSMeals="M" FLSInflightServices=" 9" FLSUUID="MNLSIN20261104SQ917">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SIN" FLSLocationName="Singapore Changi Airport" Terminal=" " FLSDayIndicator=""/>
+<MarketingAirline Code="SQ" CodeContext="IATA" CompanyShortName="Singapore Airlines"/>
+<Equipment AirEquipType="787"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T19:00:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T18:10:00" FLSArrivalTimeOffset="-0800" FlightNumber="36" JourneyDuration="PT15H10M" SequenceNumber="2" LegDistance="8771" FLSMeals="" FLSInflightServices=" 9" FLSUUID="SINLAX20261104SQ36">
+<DepartureAirport CodeContext="IATA" LocationCode="SIN" FLSLocationName="Singapore Changi Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="SQ" CodeContext="IATA" CompanyShortName="Singapore Airlines"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT19H05M" TotalMiles="10248" TotalTripTime="PT21H50M" FLSDepartureDateTime="2026-11-04T14:05:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T19:55:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T14:05:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T18:00:00" FLSArrivalTimeOffset="+0800" FlightNumber="917" JourneyDuration="PT3H55M" SequenceNumber="1" LegDistance="1477" FLSMeals="M" FLSInflightServices=" 9" FLSUUID="MNLSIN20261104SQ917">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SIN" FLSLocationName="Singapore Changi Airport" Terminal=" " FLSDayIndicator=""/>
+<MarketingAirline Code="SQ" CodeContext="IATA" CompanyShortName="Singapore Airlines"/>
+<Equipment AirEquipType="787"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T20:45:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T19:55:00" FLSArrivalTimeOffset="-0800" FlightNumber="38" JourneyDuration="PT15H10M" SequenceNumber="2" LegDistance="8771" FLSMeals="M" FLSInflightServices=" 9" FLSUUID="SINLAX20261104SQ38">
+<DepartureAirport CodeContext="IATA" LocationCode="SIN" FLSLocationName="Singapore Changi Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="SQ" CodeContext="IATA" CompanyShortName="Singapore Airlines"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT18H50M" TotalMiles="10248" TotalTripTime="PT20H45M" FLSDepartureDateTime="2026-11-04T15:10:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T19:55:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T15:10:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T18:50:00" FLSArrivalTimeOffset="+0800" FlightNumber="5051" JourneyDuration="PT3H40M" SequenceNumber="1" LegDistance="1477" FLSMeals="" FLSInflightServices=" 9" FLSUUID="MNLSIN20261104SQ5051" FLSUUIDActualFlight="MNLSIN20261104PR501">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SIN" FLSLocationName="Singapore Changi Airport" Terminal="2" FLSDayIndicator=""/>
+<MarketingAirline Code="SQ" CodeContext="IATA" CompanyShortName="Singapore Airlines"/>
+<OperatingAirline Code="PR" CodeContext="IATA" CompanyShortName="Philippine Airlines" FlightNumber="501"/>
+<Equipment AirEquipType="321"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T20:45:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T19:55:00" FLSArrivalTimeOffset="-0800" FlightNumber="38" JourneyDuration="PT15H10M" SequenceNumber="2" LegDistance="8771" FLSMeals="M" FLSInflightServices=" 9" FLSUUID="SINLAX20261104SQ38">
+<DepartureAirport CodeContext="IATA" LocationCode="SIN" FLSLocationName="Singapore Changi Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="SQ" CodeContext="IATA" CompanyShortName="Singapore Airlines"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT13H30M" TotalMiles="7303" TotalTripTime="PT13H30M" FLSDepartureDateTime="2026-11-04T15:15:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T12:45:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="NonStop" FLSFlightLegs="1" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T15:15:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T12:45:00" FLSArrivalTimeOffset="-0800" FlightNumber="122" JourneyDuration="PT13H30M" SequenceNumber="1" LegDistance="7303" FLSMeals="H" FLSInflightServices=" 9" FLSUUID="MNLLAX20261104PR122">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="PR" CodeContext="IATA" CompanyShortName="Philippine Airlines"/>
+<Equipment AirEquipType="773"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT13H35M" TotalMiles="7557" TotalTripTime="PT15H55M" FLSDepartureDateTime="2026-11-04T16:55:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T16:50:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T16:55:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T19:05:00" FLSArrivalTimeOffset="+0800" FlightNumber="704" JourneyDuration="PT2H10M" SequenceNumber="1" LegDistance="731" FLSMeals="M" FLSInflightServices=" 9" FLSUUID="MNLTPE20261104CI704">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="TPE" FLSLocationName="Taiwan Taoyuan International Airport" Terminal="1" FLSDayIndicator=""/>
+<MarketingAirline Code="CI" CodeContext="IATA" CompanyShortName="China Airlines"/>
+<Equipment AirEquipType="333"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T21:25:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T16:50:00" FLSArrivalTimeOffset="-0800" FlightNumber="24" JourneyDuration="PT11H25M" SequenceNumber="2" LegDistance="6826" FLSMeals="M" FLSInflightServices=" 1/ 2/ 3/ 4/ 7/ 9/ 12/ 16/ 18/ 22/ 27" FLSUUID="TPEONT20261104CI24">
+<DepartureAirport CodeContext="IATA" LocationCode="TPE" FLSLocationName="Taiwan Taoyuan International Airport" Terminal="2" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="ONT" FLSLocationName="Ontario International Airport" Terminal="I" FLSDayIndicator=""/>
+<MarketingAirline Code="CI" CodeContext="IATA" CompanyShortName="China Airlines"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT13H45M" TotalMiles="7557" TotalTripTime="PT15H10M" FLSDepartureDateTime="2026-11-04T17:40:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T16:50:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T17:40:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T20:00:00" FLSArrivalTimeOffset="+0800" FlightNumber="9800" JourneyDuration="PT2H20M" SequenceNumber="1" LegDistance="731" FLSMeals="M" FLSInflightServices=" 9" FLSUUID="MNLTPE20261104CI9800" FLSUUIDActualFlight="MNLTPE20261104PR894">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="TPE" FLSLocationName="Taiwan Taoyuan International Airport" Terminal="1" FLSDayIndicator=""/>
+<MarketingAirline Code="CI" CodeContext="IATA" CompanyShortName="China Airlines"/>
+<OperatingAirline Code="PR" CodeContext="IATA" CompanyShortName="Philippine Airlines" FlightNumber="894"/>
+<Equipment AirEquipType="321"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T21:25:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T16:50:00" FLSArrivalTimeOffset="-0800" FlightNumber="24" JourneyDuration="PT11H25M" SequenceNumber="2" LegDistance="6826" FLSMeals="M" FLSInflightServices=" 1/ 2/ 3/ 4/ 7/ 9/ 12/ 16/ 18/ 22/ 27" FLSUUID="TPEONT20261104CI24">
+<DepartureAirport CodeContext="IATA" LocationCode="TPE" FLSLocationName="Taiwan Taoyuan International Airport" Terminal="2" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="ONT" FLSLocationName="Ontario International Airport" Terminal="I" FLSDayIndicator=""/>
+<MarketingAirline Code="CI" CodeContext="IATA" CompanyShortName="China Airlines"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT13H55M" TotalMiles="7526" TotalTripTime="PT17H45M" FLSDepartureDateTime="2026-11-04T17:40:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T19:25:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T17:40:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T20:00:00" FLSArrivalTimeOffset="+0800" FlightNumber="9800" JourneyDuration="PT2H20M" SequenceNumber="1" LegDistance="731" FLSMeals="M" FLSInflightServices=" 9" FLSUUID="MNLTPE20261104CI9800" FLSUUIDActualFlight="MNLTPE20261104PR894">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="TPE" FLSLocationName="Taiwan Taoyuan International Airport" Terminal="1" FLSDayIndicator=""/>
+<MarketingAirline Code="CI" CodeContext="IATA" CompanyShortName="China Airlines"/>
+<OperatingAirline Code="PR" CodeContext="IATA" CompanyShortName="Philippine Airlines" FlightNumber="894"/>
+<Equipment AirEquipType="321"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T23:50:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T19:25:00" FLSArrivalTimeOffset="-0800" FlightNumber="8" JourneyDuration="PT11H35M" SequenceNumber="2" LegDistance="6795" FLSMeals="M" FLSInflightServices=" 1/ 2/ 3/ 4/ 7/ 9/ 12/ 16/ 18/ 22/ 27" FLSUUID="TPELAX20261104CI8">
+<DepartureAirport CodeContext="IATA" LocationCode="TPE" FLSLocationName="Taiwan Taoyuan International Airport" Terminal="2" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="CI" CodeContext="IATA" CompanyShortName="China Airlines"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT15H15M" TotalMiles="8022" TotalTripTime="PT16H35M" FLSDepartureDateTime="2026-11-04T17:55:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T18:30:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T17:55:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T20:30:00" FLSArrivalTimeOffset="+0800" FlightNumber="398" JourneyDuration="PT2H35M" SequenceNumber="1" LegDistance="795" FLSMeals="D" FLSInflightServices=" 9" FLSUUID="MNLCAN20261104CZ398">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="CAN" FLSLocationName="Guangzhou Baiyun International Airport" Terminal="2" FLSDayIndicator=""/>
+<MarketingAirline Code="CZ" CodeContext="IATA" CompanyShortName="China Southern Airlines"/>
+<Equipment AirEquipType="320"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T21:50:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T18:30:00" FLSArrivalTimeOffset="-0800" FlightNumber="327" JourneyDuration="PT12H40M" SequenceNumber="2" LegDistance="7227" FLSMeals="D" FLSInflightServices=" 9" FLSUUID="CANLAX20261104CZ327">
+<DepartureAirport CodeContext="IATA" LocationCode="CAN" FLSLocationName="Guangzhou Baiyun International Airport" Terminal="2" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="CZ" CodeContext="IATA" CompanyShortName="China Southern Airlines"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H00M" TotalMiles="7526" TotalTripTime="PT16H45M" FLSDepartureDateTime="2026-11-04T18:50:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T19:35:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T18:50:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T21:10:00" FLSArrivalTimeOffset="+0800" FlightNumber="278" JourneyDuration="PT2H20M" SequenceNumber="1" LegDistance="731" FLSMeals="M" FLSInflightServices=" 1/ 2/ 3/ 4/ 7/ 9/ 10/ 15/ 18/ 22/ 27" FLSUUID="MNLTPE20261104BR278">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="TPE" FLSLocationName="Taiwan Taoyuan International Airport" Terminal="2" FLSDayIndicator=""/>
+<MarketingAirline Code="BR" CodeContext="IATA" CompanyShortName="EVA Air"/>
+<Equipment AirEquipType="333"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T23:55:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T19:35:00" FLSArrivalTimeOffset="-0800" FlightNumber="16" JourneyDuration="PT11H40M" SequenceNumber="2" LegDistance="6795" FLSMeals="M" FLSInflightServices=" 1/ 2/ 3/ 4/ 7/ 9/ 10/ 15/ 18/ 20/ 22/ 27" FLSUUID="TPELAX20261104BR16">
+<DepartureAirport CodeContext="IATA" LocationCode="TPE" FLSLocationName="Taiwan Taoyuan International Airport" Terminal="2" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="BR" CodeContext="IATA" CompanyShortName="EVA Air"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT15H00M" TotalMiles="7969" TotalTripTime="PT17H10M" FLSDepartureDateTime="2026-11-04T19:45:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T20:55:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T19:45:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T22:20:00" FLSArrivalTimeOffset="+0800" FlightNumber="902" JourneyDuration="PT2H35M" SequenceNumber="1" LegDistance="713" FLSMeals="D" FLSInflightServices=" 1/ 2/ 4/ 7/ 9/ 10/ 12/ 15" FLSUUID="MNLHKG20261104CX902">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="HKG" FLSLocationName="Hong Kong International Airport" Terminal="1" FLSDayIndicator=""/>
+<MarketingAirline Code="CX" CodeContext="IATA" CompanyShortName="Cathay Pacific"/>
+<Equipment AirEquipType="333"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-05T00:30:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T20:55:00" FLSArrivalTimeOffset="-0800" DateChangeNbr="-1" FlightNumber="880" JourneyDuration="PT12H25M" SequenceNumber="2" LegDistance="7256" FLSMeals="BD" FLSInflightServices=" 1/ 2/ 4/ 7/ 9/ 10/ 12/ 15/ 18" FLSUUID="HKGLAX20261104CX880">
+<DepartureAirport CodeContext="IATA" LocationCode="HKG" FLSLocationName="Hong Kong International Airport" Terminal="1" FLSDayIndicator="+1"/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="CX" CodeContext="IATA" CompanyShortName="Cathay Pacific"/>
+<Equipment AirEquipType="359"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT12H40M" TotalMiles="7303" TotalTripTime="PT12H40M" FLSDepartureDateTime="2026-11-04T22:20:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T20:00:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="NonStop" FLSFlightLegs="1" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T22:20:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T20:00:00" FLSArrivalTimeOffset="-0800" FlightNumber="102" JourneyDuration="PT12H40M" SequenceNumber="1" LegDistance="7303" FLSMeals="D" FLSInflightServices=" 9" FLSUUID="MNLLAX20261104PR102">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="1" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="B" FLSDayIndicator=""/>
+<MarketingAirline Code="PR" CodeContext="IATA" CompanyShortName="Philippine Airlines"/>
+<Equipment AirEquipType="773"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H06M" TotalMiles="7348" TotalTripTime="PT15H41M" FLSDepartureDateTime="2026-11-04T23:25:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-04T23:06:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="">
+<FlightLegDetails DepartureDateTime="2026-11-04T23:25:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T19:55:00" FLSArrivalTimeOffset="-0800" FlightNumber="810" JourneyDuration="PT12H30M" SequenceNumber="1" LegDistance="6985" FLSMeals="M" FLSInflightServices=" " FLSUUID="MNLSFO20261104UA810">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal=" " FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T21:30:00" FLSDepartureTimeOffset="-0800" ArrivalDateTime="2026-11-04T23:06:00" FLSArrivalTimeOffset="-0800" FlightNumber="552" JourneyDuration="PT1H36M" SequenceNumber="2" LegDistance="363" FLSMeals="N" FLSInflightServices=" " FLSUUID="SFOONT20261104UA552">
+<DepartureAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="ONT" FLSLocationName="Ontario International Airport" Terminal="2" FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="7M9"/>
+</FlightLegDetails>
+</FlightDetails>
+<FlightDetails TotalFlightTime="PT14H11M" TotalMiles="7323" TotalTripTime="PT17H00M" FLSDepartureDateTime="2026-11-04T23:25:00" FLSDepartureTimeOffset="+0800" FLSDepartureCode="MNL" FLSDepartureName="Manila" FLSArrivalDateTime="2026-11-05T00:25:00" FLSArrivalTimeOffset="-0800" FLSArrivalCode="LAX" FLSArrivalName="Los Angeles" FLSFlightType="Connect" FLSFlightLegs="2" FLSFlightDays="..3...." FLSDayIndicator="+1">
+<FlightLegDetails DepartureDateTime="2026-11-04T23:25:00" FLSDepartureTimeOffset="+0800" ArrivalDateTime="2026-11-04T19:55:00" FLSArrivalTimeOffset="-0800" FlightNumber="810" JourneyDuration="PT12H30M" SequenceNumber="1" LegDistance="6985" FLSMeals="M" FLSInflightServices=" " FLSUUID="MNLSFO20261104UA810">
+<DepartureAirport CodeContext="IATA" LocationCode="MNL" FLSLocationName="Manila Ninoy Aquino International Airpo" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal=" " FLSDayIndicator=""/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="77W"/>
+</FlightLegDetails>
+<FlightLegDetails DepartureDateTime="2026-11-04T22:44:00" FLSDepartureTimeOffset="-0800" ArrivalDateTime="2026-11-05T00:25:00" FLSArrivalTimeOffset="-0800" DateChangeNbr="+1" FlightNumber="2179" JourneyDuration="PT1H41M" SequenceNumber="2" LegDistance="338" FLSMeals="N" FLSInflightServices=" " FLSUUID="SFOLAX20261104UA2179">
+<DepartureAirport CodeContext="IATA" LocationCode="SFO" FLSLocationName="San Francisco International Airport" Terminal="3" FLSDayIndicator=""/>
+<ArrivalAirport CodeContext="IATA" LocationCode="LAX" FLSLocationName="Los Angeles International Airport" Terminal="7" FLSDayIndicator="+1"/>
+<MarketingAirline Code="UA" CodeContext="IATA" CompanyShortName="United Airlines"/>
+<Equipment AirEquipType="738"/>
+</FlightLegDetails>
+</FlightDetails>
+</OTA_AirDetailsRS>
