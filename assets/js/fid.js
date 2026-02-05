@@ -641,44 +641,68 @@
         function sortFlights(list, mode) {
             var key = mode || 'departure_time';
             list.sort(function (a, b) {
-                if (key === 'arrival_time') {
-                    var aArrival = a.arrival_ts || 0;
-                    var bArrival = b.arrival_ts || 0;
-                    if (aArrival === bArrival) {
+                function compareNumber(aVal, bVal) {
+                    if (aVal === bVal) {
                         return 0;
                     }
-                    return aArrival < bArrival ? -1 : 1;
+                    return aVal < bVal ? -1 : 1;
                 }
-                if (key === 'duration') {
-                    var aDur = a.duration_minutes || 0;
-                    var bDur = b.duration_minutes || 0;
-                    if (aDur === bDur) {
+
+                function compareString(aVal, bVal) {
+                    if (aVal === bVal) {
                         return 0;
                     }
-                    return aDur < bDur ? -1 : 1;
+                    return aVal < bVal ? -1 : 1;
                 }
-                if (key === 'airport') {
-                    var aAirport = (a.destination_name || a.destination || '').toUpperCase();
-                    var bAirport = (b.destination_name || b.destination || '').toUpperCase();
-                    if (aAirport === bAirport) {
-                        return 0;
-                    }
-                    return aAirport < bAirport ? -1 : 1;
-                }
-                if (key === 'airline') {
-                    var aAirline = (a.airline || a.airline_code || '').toUpperCase();
-                    var bAirline = (b.airline || b.airline_code || '').toUpperCase();
-                    if (aAirline === bAirline) {
-                        return 0;
-                    }
-                    return aAirline < bAirline ? -1 : 1;
-                }
+
                 var aDep = a.departure_ts || 0;
                 var bDep = b.departure_ts || 0;
-                if (aDep === bDep) {
-                    return 0;
+                var aArr = a.arrival_ts || 0;
+                var bArr = b.arrival_ts || 0;
+                var aDur = a.duration_minutes || 0;
+                var bDur = b.duration_minutes || 0;
+                var aAirport = (a.destination_name || a.destination || '').toUpperCase();
+                var bAirport = (b.destination_name || b.destination || '').toUpperCase();
+                var aAirline = (a.airline || a.airline_code || '').toUpperCase();
+                var bAirline = (b.airline || b.airline_code || '').toUpperCase();
+
+                if (key === 'airline') {
+                    return (
+                        compareString(aAirline, bAirline) ||
+                        compareNumber(aDep, bDep) ||
+                        compareString(aAirport, bAirport)
+                    );
                 }
-                return aDep < bDep ? -1 : 1;
+                if (key === 'airport') {
+                    return (
+                        compareString(aAirport, bAirport) ||
+                        compareNumber(aDep, bDep) ||
+                        compareString(aAirline, bAirline)
+                    );
+                }
+                if (key === 'arrival_time') {
+                    return (
+                        compareNumber(aArr, bArr) ||
+                        compareString(aAirport, bAirport) ||
+                        compareString(aAirline, bAirline)
+                    );
+                }
+                if (key === 'departure_time') {
+                    return (
+                        compareNumber(aDep, bDep) ||
+                        compareString(aAirport, bAirport) ||
+                        compareString(aAirline, bAirline)
+                    );
+                }
+                if (key === 'duration') {
+                    return (
+                        compareNumber(aDur, bDur) ||
+                        compareNumber(aDep, bDep) ||
+                        compareString(aAirport, bAirport)
+                    );
+                }
+
+                return compareNumber(aDep, bDep);
             });
         }
 
