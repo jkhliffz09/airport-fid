@@ -264,23 +264,71 @@
 
             var originLabel =
                 (flight.origin_name || '') && flight.origin_code
-                    ? flight.origin_name + ' (' + flight.origin_code + ')'
+                    ? flight.origin_code + ' - ' + flight.origin_name
                     : flight.origin_code || '';
             var destinationLabel =
                 (flight.destination_name || '') && flight.destination
-                    ? flight.destination_name + ' (' + flight.destination + ')'
+                    ? flight.destination + ' - ' + flight.destination_name
                     : flight.destination || '';
 
             var equipmentLabel = flight.equipment_name
                 ? flight.equipment_name + ' (' + (flight.equipment || '') + ')'
                 : flight.equipment || '';
 
+            var dateLabel = '';
+            if (flight.departure_date) {
+                dateLabel = flight.departure_date;
+            }
+
+            var timeline = document.createElement('div');
+            timeline.className = 'airport-fid-timeline';
+
+            var left = document.createElement('div');
+            left.className = 'airport-fid-timeline-side';
+            var leftDate = document.createElement('div');
+            leftDate.className = 'airport-fid-timeline-date';
+            leftDate.textContent = dateLabel || '';
+            var leftTime = document.createElement('div');
+            leftTime.className = 'airport-fid-timeline-time';
+            leftTime.textContent = flight.departure_time || '';
+            var leftAirport = document.createElement('div');
+            leftAirport.className = 'airport-fid-timeline-airport';
+            leftAirport.textContent = originLabel;
+            left.appendChild(leftDate);
+            left.appendChild(leftTime);
+            left.appendChild(leftAirport);
+
+            var right = document.createElement('div');
+            right.className = 'airport-fid-timeline-side airport-fid-timeline-right';
+            var rightDate = document.createElement('div');
+            rightDate.className = 'airport-fid-timeline-date';
+            rightDate.textContent = dateLabel || '';
+            var rightTime = document.createElement('div');
+            rightTime.className = 'airport-fid-timeline-time';
+            rightTime.textContent = flight.arrival_time || '';
+            var rightAirport = document.createElement('div');
+            rightAirport.className = 'airport-fid-timeline-airport';
+            rightAirport.textContent = destinationLabel;
+            right.appendChild(rightDate);
+            right.appendChild(rightTime);
+            right.appendChild(rightAirport);
+
+            var line = document.createElement('div');
+            line.className = 'airport-fid-timeline-line';
+            line.innerHTML =
+                '<span class=\"airport-fid-timeline-dot\"></span>' +
+                '<span class=\"airport-fid-timeline-dash\"></span>' +
+                '<span class=\"airport-fid-timeline-plane\">✈</span>' +
+                '<span class=\"airport-fid-timeline-dash\"></span>' +
+                '<span class=\"airport-fid-timeline-dot\"></span>';
+
+            timeline.appendChild(left);
+            timeline.appendChild(line);
+            timeline.appendChild(right);
+            details.appendChild(timeline);
+
             addDetail('Equipment', equipmentLabel);
-            addDetail('Departure', flight.departure_time || '');
-            addDetail('Arrival', flight.arrival_time || '');
             addDetail('Terminal', flight.terminal || '');
-            addDetail('Origin', originLabel);
-            addDetail('Destination', destinationLabel);
 
             detailCell.appendChild(details);
             detailRow.appendChild(detailCell);
@@ -365,6 +413,7 @@
                     Origin: originLabel,
                     Destination: destinationLabel,
                 },
+                departure_date: flight.departure_date || '',
             };
         });
 

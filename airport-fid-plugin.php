@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.64
+ * Version: 0.1.65
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.64';
+const AIRPORT_FID_VERSION = '0.1.65';
 
 function airport_fid_default_settings() {
     return array(
@@ -817,6 +817,7 @@ function airport_fid_parse_flights($xml, $limit) {
             'flight_number' => $flight_number,
             'departure_time' => airport_fid_format_time($departure),
             'arrival_time' => airport_fid_format_time($arrival),
+            'departure_date' => airport_fid_format_date($departure),
             'status' => airport_fid_calculate_status($departure, $departure_offset, $arrival, $arrival_offset),
             'terminal' => $terminal,
             'destination' => $destination,
@@ -880,6 +881,19 @@ function airport_fid_format_time($date_time) {
     }
 
     return substr($date_time, 11, 5);
+}
+
+function airport_fid_format_date($date_time) {
+    if (empty($date_time) || strlen($date_time) < 10) {
+        return '';
+    }
+
+    try {
+        $dt = new DateTimeImmutable(substr($date_time, 0, 10));
+        return $dt->format('D j M Y');
+    } catch (Exception $e) {
+        return substr($date_time, 0, 10);
+    }
 }
 
 function airport_fid_format_terminal($departure_terminal, $arrival_terminal) {

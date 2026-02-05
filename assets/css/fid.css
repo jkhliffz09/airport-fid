@@ -575,6 +575,72 @@
     display: inline-block;
 }
 
+.airport-fid-timeline {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.airport-fid-timeline-side {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--fid-text);
+}
+
+.airport-fid-timeline-right {
+    text-align: right;
+}
+
+.airport-fid-timeline-date {
+    font-size: 12px;
+    color: var(--fid-muted);
+}
+
+.airport-fid-timeline-time {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.airport-fid-timeline-airport {
+    font-size: 14px;
+    color: var(--fid-text);
+}
+
+.airport-fid-timeline-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--fid-text);
+}
+
+.airport-fid-timeline-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.airport-fid-timeline-dash {
+    width: 140px;
+    height: 0;
+    border-top: 2px dashed currentColor;
+}
+
+.airport-fid-timeline-plane {
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.12);
+    color: var(--fid-text);
+}
+
+.airport-fid-board.is-light .airport-fid-timeline-plane {
+    background: rgba(0, 0, 0, 0.06);
+}
+
 @media (max-width: 640px) {
     .airport-fid-board {
         padding: 16px;
