@@ -642,6 +642,28 @@
     .airport-fid-arrival-line {
         display: none;
     }
+
+    .airport-fid-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .airport-fid-stack-airline {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .airport-fid-stack .airport-fid-logo-cell {
+        width: auto;
+    }
+
+    .airport-fid-stack .airport-fid-airport,
+    .airport-fid-stack .airport-fid-aircraft {
+        word-break: normal;
+        overflow-wrap: break-word;
+    }
 }
 
 @media (min-width: 641px) {

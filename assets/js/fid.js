@@ -38,7 +38,7 @@
         var headerRow = document.createElement('tr');
 
         var isCompact = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
-        var headers = ['', 'Airline', 'Airport', ''];
+        var headers = isCompact ? [''] : ['', 'Airline', 'Airport', ''];
 
         headers.forEach(function (label) {
             var th = document.createElement('th');
@@ -135,7 +135,6 @@
             var departureText = flight.departure_time || '';
             var previous = lastMap && lastMap[key] ? lastMap[key] : null;
             var animateDeparture = !previous || previous.departure_time !== departureText;
-            departureCell.appendChild(createFlipSpan(departureText, '', animateDeparture, 0));
             var arrivalText = flight.arrival_time || '';
             var animateArrival = !previous || previous.arrival_time !== arrivalText;
             var rangeLine = document.createElement('div');
@@ -147,11 +146,15 @@
             rangeLine.appendChild(sep);
             rangeLine.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
             departureCell.appendChild(rangeLine);
-            var arrivalLine = document.createElement('div');
-            arrivalLine.className = 'airport-fid-arrival-line';
-            arrivalLine.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
-            departureCell.appendChild(arrivalLine);
-            row.appendChild(departureCell);
+            if (!isCompact) {
+                departureCell.appendChild(createFlipSpan(departureText, '', animateDeparture, 0));
+                var arrivalLine = document.createElement('div');
+                arrivalLine.className = 'airport-fid-arrival-line';
+                arrivalLine.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
+                departureCell.appendChild(arrivalLine);
+            } else {
+                departureCell.className = 'airport-fid-stack';
+            }
 
             var logoCell = document.createElement('td');
             logoCell.className = 'airport-fid-logo-cell';
@@ -180,7 +183,6 @@
             } else {
                 logoCell.textContent = flight.airline || '';
             }
-            row.appendChild(logoCell);
 
             var airportCell = document.createElement('td');
             var airportName = shortenAirportName(flight.destination_name || '');
@@ -211,8 +213,6 @@
             airportCell.appendChild(airportLine);
             airportCell.appendChild(flightLine);
             airportCell.appendChild(equipmentLine);
-            row.appendChild(airportCell);
-
             var toggleCell = document.createElement('td');
             var toggleButton = document.createElement('button');
             toggleButton.type = 'button';
@@ -224,7 +224,24 @@
                 '<path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
                 '</svg>';
             toggleCell.appendChild(toggleButton);
-            row.appendChild(toggleCell);
+            if (isCompact) {
+                var stackAirline = document.createElement('div');
+                stackAirline.className = 'airport-fid-stack-airline';
+                stackAirline.appendChild(logoCell);
+                var airlineNameNode = logoCell.querySelector('.airport-fid-airline-name');
+                if (airlineNameNode) {
+                    stackAirline.appendChild(airlineNameNode.cloneNode(true));
+                }
+                departureCell.appendChild(stackAirline);
+                departureCell.appendChild(airportCell);
+                departureCell.appendChild(toggleCell);
+                row.appendChild(departureCell);
+            } else {
+                row.appendChild(departureCell);
+                row.appendChild(logoCell);
+                row.appendChild(airportCell);
+                row.appendChild(toggleCell);
+            }
 
             tbody.appendChild(row);
 
