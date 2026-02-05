@@ -215,7 +215,7 @@ function airport_fid_sanitize_settings($settings) {
     $clean['api_key'] = isset($settings['api_key']) ? sanitize_text_field($settings['api_key']) : $defaults['api_key'];
     $clean['default_airport'] = isset($settings['default_airport']) ? strtoupper(sanitize_text_field($settings['default_airport'])) : $defaults['default_airport'];
     $clean['use_geolocation_default'] = !empty($settings['use_geolocation_default']) ? 1 : 0;
-    $clean['github_repo'] = isset($settings['github_repo']) ? esc_url_raw($settings['github_repo']) : $defaults['github_repo'];
+    $clean['github_repo'] = isset($settings['github_repo']) ? airport_fid_normalize_github_repo($settings['github_repo']) : $defaults['github_repo'];
     $clean['github_token'] = isset($settings['github_token']) ? sanitize_text_field($settings['github_token']) : $defaults['github_token'];
     $clean['max_destinations'] = isset($settings['max_destinations']) ? max(1, (int) $settings['max_destinations']) : $defaults['max_destinations'];
     $clean['max_flights'] = isset($settings['max_flights']) ? max(1, (int) $settings['max_flights']) : $defaults['max_flights'];
@@ -266,6 +266,7 @@ add_action('wp_enqueue_scripts', 'airport_fid_register_assets');
 function airport_fid_init_updater() {
     $settings = airport_fid_get_settings();
     $repo = isset($settings['github_repo']) ? trim($settings['github_repo']) : '';
+    $repo = airport_fid_normalize_github_repo($repo);
     if ($repo === '') {
         $repo = 'https://github.com/jkhliffz09/airport-fid/';
     }
@@ -300,6 +301,26 @@ function airport_fid_init_updater() {
     }
 }
 add_action('init', 'airport_fid_init_updater');
+
+function airport_fid_normalize_github_repo($repo) {
+    $repo = trim((string) $repo);
+    if ($repo === '') {
+        return '';
+    }
+
+    if (strpos($repo, 'git@') === 0) {
+        // git@github.com:user/repo.git
+        $repo = preg_replace('#^git@github\\.com:#', 'https://github.com/', $repo);
+    }
+
+    $repo = preg_replace('#\\.git$#', '', $repo);
+
+    if (strpos($repo, 'http') !== 0) {
+        $repo = 'https://github.com/' . ltrim($repo, '/');
+    }
+
+    return esc_url_raw($repo);
+}
 
 function airport_fid_shortcode($atts) {
     $settings = airport_fid_get_settings();
