@@ -344,6 +344,7 @@
             timeline.appendChild(right);
             details.appendChild(timeline);
 
+            addDetail('Duration', flight.duration_label || '');
             addDetail('Equipment', equipmentLabel);
             addDetail('Terminal', flight.terminal || '');
 

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.75
+ * Version: 0.1.76
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.75';
+const AIRPORT_FID_VERSION = '0.1.76';
 
 function airport_fid_default_settings() {
     return array(
@@ -778,6 +778,7 @@ function airport_fid_parse_flights($xml, $limit) {
 
         $first_leg = $legs[0];
         $last_leg = $legs[count($legs) - 1];
+        $journey_duration = (string) $first_leg['JourneyDuration'];
 
         $marketing_list = $first_leg->xpath('.//*[local-name()="MarketingAirline"]');
         $operating_list = $first_leg->xpath('.//*[local-name()="OperatingAirline"]');
@@ -851,6 +852,9 @@ function airport_fid_parse_flights($xml, $limit) {
         if ($departure_ts && $arrival_ts) {
             $duration_minutes = max(0, (int) round(($arrival_ts - $departure_ts) / 60));
         }
+        if ($duration_minutes === 0 && $journey_duration) {
+            $duration_minutes = airport_fid_duration_to_minutes($journey_duration);
+        }
 
         $flights[] = array(
             'airline' => $airline_name,
@@ -863,6 +867,7 @@ function airport_fid_parse_flights($xml, $limit) {
             'departure_ts' => $departure_ts,
             'arrival_ts' => $arrival_ts,
             'duration_minutes' => $duration_minutes,
+            'duration_label' => airport_fid_format_duration($duration_minutes, $journey_duration),
             'status' => airport_fid_calculate_status($departure, $departure_offset, $arrival, $arrival_offset),
             'terminal' => $terminal,
             'destination' => $destination,
@@ -939,6 +944,41 @@ function airport_fid_format_date($date_time) {
     } catch (Exception $e) {
         return substr($date_time, 0, 10);
     }
+}
+
+function airport_fid_duration_to_minutes($duration) {
+    if (empty($duration)) {
+        return 0;
+    }
+
+    if (preg_match('/PT(?:(\\d+)H)?(?:(\\d+)M)?/i', $duration, $matches)) {
+        $hours = isset($matches[1]) ? (int) $matches[1] : 0;
+        $minutes = isset($matches[2]) ? (int) $matches[2] : 0;
+        return ($hours * 60) + $minutes;
+    }
+
+    return 0;
+}
+
+function airport_fid_format_duration($minutes, $fallback_duration = '') {
+    $total = (int) $minutes;
+    if ($total <= 0 && $fallback_duration) {
+        $total = airport_fid_duration_to_minutes($fallback_duration);
+    }
+    if ($total <= 0) {
+        return '--';
+    }
+
+    $hours = (int) floor($total / 60);
+    $mins = $total % 60;
+    $parts = array();
+    if ($hours > 0) {
+        $parts[] = $hours . 'h';
+    }
+    if ($mins > 0 || empty($parts)) {
+        $parts[] = $mins . 'm';
+    }
+    return implode(' ', $parts);
 }
 
 function airport_fid_format_terminal($departure_terminal, $arrival_terminal) {
