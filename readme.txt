@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.82
+Stable tag: 0.1.83
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.82 =
-* Added secondary and tertiary sort rules.
+= 0.1.83 =
+* Duration sort now uses arrival city and airline tie-breakers.
 
 == Upgrade Notice ==
 
-= 0.1.82 =
-Sort tie-breaker rules.
+= 0.1.83 =
+Duration sort tie-breakers.

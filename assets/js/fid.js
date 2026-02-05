@@ -198,6 +198,9 @@
             if (flight.equipment) {
                 flightLabel = flightLabel + ' (' + flight.equipment + ')';
             }
+            if (flight.duration_label) {
+                flightLabel = flightLabel + ' • ' + String(flight.duration_label).toUpperCase();
+            }
             var airportLine = document.createElement('div');
             airportLine.className = 'airport-fid-airport';
             var animateAirport = !previous || previous.airport_label !== airportLabel;
@@ -409,6 +412,9 @@
             if (flight.equipment) {
                 flightLabel = flightLabel + ' (' + flight.equipment + ')';
             }
+            if (flight.duration_label) {
+                flightLabel = flightLabel + ' • ' + String(flight.duration_label).toUpperCase();
+            }
             var originLabel =
                 (flight.origin_name || '') && flight.origin_code
                     ? flight.origin_name + ' (' + flight.origin_code + ')'
@@ -432,6 +438,7 @@
                     Destination: destinationLabel,
                 },
                 departure_date: flight.departure_date || '',
+                duration_label: flight.duration_label || '',
             };
         });
 
@@ -697,8 +704,8 @@
                 if (key === 'duration') {
                     return (
                         compareNumber(aDur, bDur) ||
-                        compareNumber(aDep, bDep) ||
-                        compareString(aAirport, bAirport)
+                        compareString(aAirport, bAirport) ||
+                        compareString(aAirline, bAirline)
                     );
                 }
 
