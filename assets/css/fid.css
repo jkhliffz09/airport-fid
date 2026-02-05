@@ -284,6 +284,11 @@
     word-break: break-word;
 }
 
+.airport-fid-table tbody td:nth-child(3) {
+    word-break: keep-all;
+    overflow-wrap: normal;
+}
+
 .airport-fid-board.is-light .airport-fid-table tbody td {
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
@@ -436,6 +441,8 @@
 
 .airport-fid-airport {
     font-weight: 600;
+    word-break: keep-all;
+    overflow-wrap: normal;
 }
 
 .airport-fid-flight {

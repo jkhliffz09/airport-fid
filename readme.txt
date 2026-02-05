@@ -67,9 +67,11 @@ FlightLookup XML APIs.
 == Changelog ==
 
 = 0.1.49 =
-* GitHub updater support.
+* Status line now shows full airport name when available.
+* Departure/arrival display tweaks and column sizing adjustments.
+* Word-wrapping improvements for airport names.
 
 == Upgrade Notice ==
 
 = 0.1.49 =
-GitHub updater support and UI refinements.
+UI and layout refinements.
