@@ -178,7 +178,9 @@
                 var airlineText = flight.airline || flight.airline_code || '';
                 var animateAirline = !previous || previous.airline !== airlineText;
                 airlineName.appendChild(createFlipSpan(airlineText, '', animateAirline, 1));
-                airlineWrap.appendChild(airlineName);
+                if (!isCompact) {
+                    airlineWrap.appendChild(airlineName);
+                }
                 logoCell.appendChild(airlineWrap);
             } else {
                 logoCell.textContent = flight.airline || '';
@@ -221,9 +223,8 @@
                 var stackAirline = document.createElement('div');
                 stackAirline.className = 'airport-fid-stack-airline';
                 stackAirline.appendChild(logoCell);
-                var airlineNameNode = logoCell.querySelector('.airport-fid-airline-name');
-                if (airlineNameNode) {
-                    stackAirline.appendChild(airlineNameNode.cloneNode(true));
+                if (airlineName) {
+                    stackAirline.appendChild(airlineName);
                 }
                 departureCell.appendChild(stackAirline);
                 departureCell.appendChild(airportCell);
