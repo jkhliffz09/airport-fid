@@ -3,7 +3,7 @@
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
  * Version: 0.1.44
- * Author: Your Name
+ * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
  */
