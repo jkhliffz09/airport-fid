@@ -587,6 +587,37 @@
         max-width: 40px;
         max-height: 22px;
     }
+
+    .airport-fid-table thead th:first-child,
+    .airport-fid-table tbody td:first-child {
+        width: 64px;
+    }
+
+    .airport-fid-table thead th:nth-child(2),
+    .airport-fid-table tbody td:nth-child(2) {
+        width: 120px;
+    }
+
+    .airport-fid-table thead th:nth-child(3),
+    .airport-fid-table tbody td:nth-child(3) {
+        width: auto;
+    }
+
+    .airport-fid-table thead th:last-child,
+    .airport-fid-table tbody td:last-child {
+        width: 36px;
+    }
+
+    .airport-fid-airport {
+        letter-spacing: 0.08em;
+        word-break: normal;
+        overflow-wrap: break-word;
+    }
+
+    .airport-fid-airline {
+        gap: 6px;
+        flex-wrap: nowrap;
+    }
 }
 
 @media (min-width: 641px) {
