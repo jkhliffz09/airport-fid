@@ -38,7 +38,7 @@
         var headerRow = document.createElement('tr');
 
         var isCompact = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
-        var headers = [isCompact ? 'DEP' : 'Departure', 'Airline', 'Airport', ''];
+        var headers = ['', 'Airline', 'Airport', ''];
 
         headers.forEach(function (label) {
             var th = document.createElement('th');
@@ -136,6 +136,12 @@
             var previous = lastMap && lastMap[key] ? lastMap[key] : null;
             var animateDeparture = !previous || previous.departure_time !== departureText;
             departureCell.appendChild(createFlipSpan(departureText, '', animateDeparture, 0));
+            var arrivalText = flight.arrival_time || '';
+            var animateArrival = !previous || previous.arrival_time !== arrivalText;
+            var arrivalLine = document.createElement('div');
+            arrivalLine.className = 'airport-fid-arrival-line';
+            arrivalLine.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
+            departureCell.appendChild(arrivalLine);
             row.appendChild(departureCell);
 
             var logoCell = document.createElement('td');
@@ -237,11 +243,11 @@
                 ? flight.equipment_name + ' (' + (flight.equipment || '') + ')'
                 : flight.equipment || '';
 
-            addDetail('Airline', flight.airline || flight.airline_code || '');
-            addDetail('Arrival', flight.arrival_time || '');
-            addDetail('Terminal', flight.terminal || '');
             addDetail('Equipment', equipmentLabel);
+            addDetail('Terminal', flight.terminal || '');
+            addDetail('Departure', flight.departure_time || '');
             addDetail('Origin', originLabel);
+            addDetail('Arrival', flight.arrival_time || '');
             addDetail('Destination', destinationLabel);
 
             detailCell.appendChild(details);
@@ -315,6 +321,7 @@
                     : flight.destination || '';
             nextMap[key] = {
                 departure_time: flight.departure_time || '',
+                arrival_time: flight.arrival_time || '',
                 airline: flight.airline || flight.airline_code || '',
                 airport_label: airportLabel,
                 flight_label: flightLabel,
@@ -541,7 +548,7 @@
 
             fetchJson(url)
                 .then(function (data) {
-                    var label = data.airport_name ? data.airport_name + ' (' + data.airport + ')' : data.airport;
+                    var label = data.airport_name || data.airport;
                     updateStatus('Showing flights for ' + label + '.');
                     allFlights = data.flights || [];
                     visibleCount = Math.min(pageSize, allFlights.length);
