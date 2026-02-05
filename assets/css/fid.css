@@ -710,6 +710,9 @@
     .airport-fid-toggle {
         margin: 0 auto;
         display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: row;
         gap: 8px;
         padding: 10px 14px;
         height: auto;
@@ -720,5 +723,12 @@
         letter-spacing: 0.12em;
         color: var(--fid-text);
         text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .airport-fid-toggle .airport-fid-chevron {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 auto;
     }
 }
