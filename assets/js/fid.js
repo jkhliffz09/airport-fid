@@ -138,6 +138,15 @@
             departureCell.appendChild(createFlipSpan(departureText, '', animateDeparture, 0));
             var arrivalText = flight.arrival_time || '';
             var animateArrival = !previous || previous.arrival_time !== arrivalText;
+            var rangeLine = document.createElement('div');
+            rangeLine.className = 'airport-fid-time-range';
+            rangeLine.appendChild(createFlipSpan(departureText, '', animateDeparture, 0));
+            var sep = document.createElement('span');
+            sep.className = 'airport-fid-time-sep';
+            sep.textContent = ' - ';
+            rangeLine.appendChild(sep);
+            rangeLine.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
+            departureCell.appendChild(rangeLine);
             var arrivalLine = document.createElement('div');
             arrivalLine.className = 'airport-fid-arrival-line';
             arrivalLine.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
@@ -193,8 +202,15 @@
             flightLine.className = 'airport-fid-flight';
             var animateFlight = !previous || previous.flight_label !== flightLabel;
             flightLine.appendChild(createFlipSpan(flightLabel, 'airport-fid-flip-muted', animateFlight, 2));
+            var equipmentLine = document.createElement('div');
+            equipmentLine.className = 'airport-fid-aircraft';
+            var equipmentLabel = flight.equipment_name
+                ? flight.equipment_name + ' (' + (flight.equipment || '') + ')'
+                : flight.equipment || '';
+            equipmentLine.appendChild(createFlipSpan(equipmentLabel, 'airport-fid-flip-muted', animateFlight, 2));
             airportCell.appendChild(airportLine);
             airportCell.appendChild(flightLine);
+            airportCell.appendChild(equipmentLine);
             row.appendChild(airportCell);
 
             var toggleCell = document.createElement('td');

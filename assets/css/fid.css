@@ -307,6 +307,22 @@
     margin-top: 6px;
 }
 
+.airport-fid-time-range {
+    display: none;
+    margin-top: 2px;
+    font-size: 13px;
+}
+
+.airport-fid-time-sep {
+    opacity: 0.7;
+}
+
+.airport-fid-aircraft {
+    font-size: 12px;
+    color: var(--fid-muted);
+    margin-top: 4px;
+}
+
 .airport-fid-table tbody tr:nth-child(even) {
     background: rgba(255, 255, 255, 0.03);
 }
@@ -617,6 +633,14 @@
     .airport-fid-airline {
         gap: 6px;
         flex-wrap: nowrap;
+    }
+
+    .airport-fid-time-range {
+        display: block;
+    }
+
+    .airport-fid-arrival-line {
+        display: none;
     }
 }
 
