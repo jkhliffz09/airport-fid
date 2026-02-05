@@ -15,24 +15,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract release notes from readme.txt
+      - name: Generate release notes from PR titles
         id: notes
-        shell: bash
-        run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          NOTES=$(awk -v ver="$TAG" '
-            $0 ~ "= "ver" =" {found=1; next}
-            found && /^= / {exit}
-            found {print}
-          ' readme.txt)
-          if [ -z "$NOTES" ]; then
-            NOTES="Release $TAG"
-          fi
-          {
-            echo "notes<<EOF"
-            echo "$NOTES"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const tag = context.ref.replace('refs/tags/', '').replace(/^v/, '');
+
+            const releases = await github.rest.repos.listReleases({ owner, repo, per_page: 100 });
+            const prev = releases.data
+              .map(r => r.tag_name.replace(/^v/, ''))
+              .filter(t => t !== tag)
+              .sort((a,b) => a.localeCompare(b, undefined, {numeric:true}))
+              .pop();
+
+            let base = prev ? `v${prev}` : null;
+            if (base && !(await github.rest.repos.getCommit({ owner, repo, ref: base }).catch(() => null))) {
+              base = prev;
+            }
+
+            const commits = await github.rest.repos.listCommits({
+              owner,
+              repo,
+              sha: context.sha,
+              per_page: 100,
+            });
+
+            const prTitles = new Set();
+            for (const c of commits.data) {
+              const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: c.sha,
+              });
+              for (const pr of prs.data) {
+                if (pr.merged_at) {
+                  prTitles.add(pr.title);
+                }
+              }
+            }
+
+            const lines = Array.from(prTitles).map(t => `* ${t}`);
+            const body = lines.length ? lines.join('\n') : `Release ${tag}`;
+            core.setOutput('notes', body);
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
