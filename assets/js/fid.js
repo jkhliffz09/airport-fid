@@ -204,15 +204,8 @@
             flightLine.className = 'airport-fid-flight';
             var animateFlight = !previous || previous.flight_label !== flightLabel;
             flightLine.appendChild(createFlipSpan(flightLabel, 'airport-fid-flip-muted', animateFlight, 2));
-            var equipmentLine = document.createElement('div');
-            equipmentLine.className = 'airport-fid-aircraft';
-            var equipmentLabel = flight.equipment_name
-                ? flight.equipment_name + ' (' + (flight.equipment || '') + ')'
-                : flight.equipment || '';
-            equipmentLine.appendChild(createFlipSpan(equipmentLabel, 'airport-fid-flip-muted', animateFlight, 2));
             airportCell.appendChild(airportLine);
             airportCell.appendChild(flightLine);
-            airportCell.appendChild(equipmentLine);
             var toggleCell = document.createElement('td');
             var toggleButton = document.createElement('button');
             toggleButton.type = 'button';

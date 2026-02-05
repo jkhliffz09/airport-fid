@@ -621,7 +621,7 @@
 
     .airport-fid-table thead th:last-child,
     .airport-fid-table tbody td:last-child {
-        width: 36px;
+        width: auto;
     }
 
     .airport-fid-airport {
