@@ -541,7 +541,8 @@
 
             fetchJson(url)
                 .then(function (data) {
-                    updateStatus('Showing flights for ' + data.airport + '.');
+                    var label = data.airport_name ? data.airport_name + ' (' + data.airport + ')' : data.airport;
+                    updateStatus('Showing flights for ' + label + '.');
                     allFlights = data.flights || [];
                     visibleCount = Math.min(pageSize, allFlights.length);
                     renderPage();

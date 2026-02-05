@@ -257,7 +257,7 @@
 
 .airport-fid-table thead th:first-child,
 .airport-fid-table tbody td:first-child {
-    width: max-content;
+    width: 88px;
 }
 
 .airport-fid-table thead th:nth-child(2),
@@ -267,7 +267,7 @@
 
 .airport-fid-table thead th:nth-child(3),
 .airport-fid-table tbody td:nth-child(3) {
-    width: 55%;
+    width: 45%;
 }
 
 .airport-fid-table thead th:last-child,

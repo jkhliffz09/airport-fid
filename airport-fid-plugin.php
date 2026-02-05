@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.45
+ * Version: 0.1.46
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.45';
+const AIRPORT_FID_VERSION = '0.1.46';
 
 function airport_fid_default_settings() {
     return array(
@@ -361,7 +361,7 @@ function airport_fid_shortcode($atts) {
     $output .= '<button type="button" class="airport-fid-theme-toggle" aria-pressed="false">Light mode</button>';
     $output .= '</div>';
     $output .= '<div class="airport-fid-controls">';
-    $output .= '<label class="airport-fid-label" for="' . esc_attr($uid) . '-input">Airport IATA</label>';
+    $output .= '<label class="airport-fid-label" for="' . esc_attr($uid) . '-input">Airport</label>';
     $output .= '<div class="airport-fid-input-row">';
     $output .= '<input type="text" id="' . esc_attr($uid) . '-input" class="airport-fid-input" placeholder="Airport name or IATA" />';
     $output .= '<button type="button" class="airport-fid-button airport-fid-button-ghost airport-fid-geo-inline"><span class="airport-fid-geo-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 2.75a1 1 0 0 1 1 1v1.29a7 7 0 0 1 6.21 6.21h1.29a1 1 0 1 1 0 2h-1.29A7 7 0 0 1 13 19.25v1.29a1 1 0 1 1-2 0v-1.29A7 7 0 0 1 4.79 13H3.5a1 1 0 1 1 0-2h1.29A7 7 0 0 1 11 4.79V3.75a1 1 0 0 1 1-1zm0 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2.75a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5z" fill="currentColor"/></svg></span>Use my location</button>';
@@ -503,6 +503,13 @@ function airport_fid_rest_board(WP_REST_Request $request) {
         return new WP_REST_Response(array('error' => $routes_xml->get_error_message()), 500);
     }
 
+    $airport_name = '';
+    if (isset($routes_xml['FLSOriginName'])) {
+        $airport_name = (string) $routes_xml['FLSOriginName'];
+    } elseif (isset($routes_xml['OriginName'])) {
+        $airport_name = (string) $routes_xml['OriginName'];
+    }
+
     $destinations = airport_fid_extract_destinations($routes_xml, $airport, $max_destinations);
     if (empty($destinations)) {
         if ($debug) {
@@ -550,6 +557,7 @@ function airport_fid_rest_board(WP_REST_Request $request) {
 
     $payload = array(
         'airport' => $airport,
+        'airport_name' => $airport_name,
         'date' => $date,
         'flights' => array_slice($flights, 0, $max_flights),
     );
