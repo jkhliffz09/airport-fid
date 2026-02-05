@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.79
+Stable tag: 0.1.80
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.79 =
-* Progressive loading for faster results with background fetching.
+= 0.1.80 =
+* Sort dropdown now reorders existing results without refetch.
 
 == Upgrade Notice ==
 
-= 0.1.79 =
-Background batch fetching.
+= 0.1.80 =
+Local sort for loaded results.

@@ -801,7 +801,11 @@
 
         if (sortSelect) {
             sortSelect.addEventListener('change', function () {
-                loadBoard(input ? input.value : defaultAirport);
+                if (!allFlights.length) {
+                    return;
+                }
+                sortFlights(allFlights, sortSelect.value);
+                renderPage();
             });
         }
 
