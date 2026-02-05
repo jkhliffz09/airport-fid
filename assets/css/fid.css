@@ -262,7 +262,7 @@
 
 .airport-fid-table thead th:nth-child(2),
 .airport-fid-table tbody td:nth-child(2) {
-    width: 180px;
+    width: 260px;
 }
 
 .airport-fid-table thead th:nth-child(3),
@@ -410,11 +410,13 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    white-space: nowrap;
 }
 
 .airport-fid-airline-name {
     font-weight: 600;
     color: var(--fid-text);
+    white-space: nowrap;
 }
 
 .airport-fid-board.is-dark .airport-fid-logo {
