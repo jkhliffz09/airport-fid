@@ -280,6 +280,19 @@
                 dateLabel = flight.departure_date;
             }
 
+            function formatTime12h(timeValue) {
+                if (!timeValue) return '';
+                var parts = String(timeValue).trim().split(':');
+                if (parts.length < 2) return timeValue;
+                var hours = parseInt(parts[0], 10);
+                var minutes = parts[1];
+                if (isNaN(hours)) return timeValue;
+                var suffix = hours >= 12 ? 'PM' : 'AM';
+                var displayHour = hours % 12;
+                if (displayHour === 0) displayHour = 12;
+                return displayHour + ':' + minutes + ' ' + suffix;
+            }
+
             var timeline = document.createElement('div');
             timeline.className = 'airport-fid-timeline';
 
@@ -290,7 +303,7 @@
             leftDate.textContent = dateLabel || '';
             var leftTime = document.createElement('div');
             leftTime.className = 'airport-fid-timeline-time';
-            leftTime.textContent = flight.departure_time || '';
+            leftTime.textContent = formatTime12h(flight.departure_time || '');
             var leftAirport = document.createElement('div');
             leftAirport.className = 'airport-fid-timeline-airport';
             leftAirport.textContent = originLabel;
@@ -305,7 +318,7 @@
             rightDate.textContent = dateLabel || '';
             var rightTime = document.createElement('div');
             rightTime.className = 'airport-fid-timeline-time';
-            rightTime.textContent = flight.arrival_time || '';
+            rightTime.textContent = formatTime12h(flight.arrival_time || '');
             var rightAirport = document.createElement('div');
             rightAirport.className = 'airport-fid-timeline-airport';
             rightAirport.textContent = destinationLabel;
