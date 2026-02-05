@@ -595,6 +595,18 @@
         font-size: 12px;
     }
 
+    .airport-fid-table tbody td {
+        border-bottom: none;
+    }
+
+    .airport-fid-row {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .airport-fid-board.is-light .airport-fid-row {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
     .airport-fid-toggle {
         width: 32px;
         height: 32px;
