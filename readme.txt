@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.77
+Stable tag: 0.1.78
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.77 =
-* Switched routes endpoint to nonstop routes.
+= 0.1.78 =
+* Allow 0 = unlimited for max destinations and max flights.
 
 == Upgrade Notice ==
 
-= 0.1.77 =
-Nonstop routes endpoint.
+= 0.1.78 =
+Unlimited destinations/flights setting.

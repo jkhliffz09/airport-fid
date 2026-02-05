@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.77
+ * Version: 0.1.78
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.77';
+const AIRPORT_FID_VERSION = '0.1.78';
 
 function airport_fid_default_settings() {
     return array(
@@ -166,19 +166,21 @@ function airport_fid_use_geolocation_default_field() {
 function airport_fid_max_destinations_field() {
     $settings = airport_fid_get_settings();
     printf(
-        '<input type="number" name="%s[max_destinations]" value="%d" class="small-text" min="1" max="50" />',
+        '<input type="number" name="%s[max_destinations]" value="%d" class="small-text" min="0" max="500" />',
         esc_attr(AIRPORT_FID_OPTION_KEY),
         (int) $settings['max_destinations']
     );
+    echo '<p class="description">Set to 0 for no limit.</p>';
 }
 
 function airport_fid_max_flights_field() {
     $settings = airport_fid_get_settings();
     printf(
-        '<input type="number" name="%s[max_flights]" value="%d" class="small-text" min="1" max="200" />',
+        '<input type="number" name="%s[max_flights]" value="%d" class="small-text" min="0" max="1000" />',
         esc_attr(AIRPORT_FID_OPTION_KEY),
         (int) $settings['max_flights']
     );
+    echo '<p class="description">Set to 0 for no limit.</p>';
 }
 
 function airport_fid_cache_ttl_field() {
@@ -217,8 +219,8 @@ function airport_fid_sanitize_settings($settings) {
     $clean['use_geolocation_default'] = !empty($settings['use_geolocation_default']) ? 1 : 0;
     $clean['github_repo'] = isset($settings['github_repo']) ? airport_fid_normalize_github_repo($settings['github_repo']) : $defaults['github_repo'];
     $clean['github_token'] = isset($settings['github_token']) ? sanitize_text_field($settings['github_token']) : $defaults['github_token'];
-    $clean['max_destinations'] = isset($settings['max_destinations']) ? max(1, (int) $settings['max_destinations']) : $defaults['max_destinations'];
-    $clean['max_flights'] = isset($settings['max_flights']) ? max(1, (int) $settings['max_flights']) : $defaults['max_flights'];
+    $clean['max_destinations'] = isset($settings['max_destinations']) ? max(0, (int) $settings['max_destinations']) : $defaults['max_destinations'];
+    $clean['max_flights'] = isset($settings['max_flights']) ? max(0, (int) $settings['max_flights']) : $defaults['max_flights'];
     $clean['cache_ttl_minutes'] = isset($settings['cache_ttl_minutes']) ? max(1, (int) $settings['cache_ttl_minutes']) : $defaults['cache_ttl_minutes'];
 
     return array_merge($defaults, $clean);
@@ -490,12 +492,18 @@ function airport_fid_rest_board(WP_REST_Request $request) {
     }
 
     $max_destinations = (int) $settings['max_destinations'];
+    if ($max_destinations === 0) {
+        $max_destinations = PHP_INT_MAX;
+    }
     if ($limit === 0) {
         $max_flights = PHP_INT_MAX;
     } elseif ($limit > 0) {
         $max_flights = min($limit, (int) $settings['max_flights']);
     } else {
         $max_flights = (int) $settings['max_flights'];
+    }
+    if ($max_flights === 0) {
+        $max_flights = PHP_INT_MAX;
     }
 
     $routes_url = sprintf(
