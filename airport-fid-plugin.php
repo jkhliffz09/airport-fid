@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.48
+ * Version: 0.1.49
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.48';
+const AIRPORT_FID_VERSION = '0.1.49';
 
 function airport_fid_default_settings() {
     return array(
@@ -553,6 +553,10 @@ function airport_fid_rest_board(WP_REST_Request $request) {
         if (!empty($parsed)) {
             $flights = array_merge($flights, $parsed);
         }
+    }
+
+    if ($airport_name === '' && !empty($flights) && !empty($flights[0]['origin_name'])) {
+        $airport_name = $flights[0]['origin_name'];
     }
 
     $payload = array(
