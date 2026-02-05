@@ -675,13 +675,7 @@
         display: inline-flex;
     }
 
-    .airport-fid-airport {
-        justify-content: center;
-    }
-
-    .airport-fid-flight {
-        text-align: center;
-    }
+    /* removed mobile centering for airport/flight */
 }
 
 @media (min-width: 641px) {
@@ -715,7 +709,8 @@
         flex-direction: row;
         gap: 8px;
         padding: 10px 14px;
-        height: auto;
+        width: 100%;
+        height: 32px;
     }
 
     .airport-fid-more-text {
