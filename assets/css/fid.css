@@ -717,3 +717,23 @@
     width: 100%;
     height: 100%;
 }
+
+@media (max-width: 640px) {
+    .airport-fid-icon {
+        display: inline-flex;
+    }
+
+    .airport-fid-more-label {
+        display: block;
+        text-align: center;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        margin-bottom: 6px;
+        color: var(--fid-muted);
+    }
+
+    .airport-fid-toggle {
+        margin: 0 auto;
+        display: inline-flex;
+    }
+}

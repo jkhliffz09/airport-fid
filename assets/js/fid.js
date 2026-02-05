@@ -243,6 +243,10 @@
                 if (airlineName) {
                     stackAirline.appendChild(airlineName);
                 }
+                var moreLabel = document.createElement('span');
+                moreLabel.className = 'airport-fid-more-label';
+                moreLabel.textContent = 'See more details';
+                toggleCell.insertBefore(moreLabel, toggleButton);
                 departureCell.appendChild(stackAirline);
                 departureCell.appendChild(airportCell);
                 departureCell.appendChild(toggleCell);
