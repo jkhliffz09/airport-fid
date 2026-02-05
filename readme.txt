@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.72
+Stable tag: 0.1.73
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.72 =
-* Added sorting parameter to timetable requests.
+= 0.1.73 =
+* Sorted results by departure time.
 
 == Upgrade Notice ==
 
-= 0.1.72 =
-Timetable sorting parameter.
+= 0.1.73 =
+Departure time sorting.

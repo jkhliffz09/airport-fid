@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.72
+ * Version: 0.1.73
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.72';
+const AIRPORT_FID_VERSION = '0.1.73';
 
 function airport_fid_default_settings() {
     return array(
@@ -559,6 +559,15 @@ function airport_fid_rest_board(WP_REST_Request $request) {
         $airport_name = $flights[0]['origin_name'];
     }
 
+    usort($flights, function ($a, $b) {
+        $a_time = isset($a['departure_ts']) ? (int) $a['departure_ts'] : 0;
+        $b_time = isset($b['departure_ts']) ? (int) $b['departure_ts'] : 0;
+        if ($a_time === $b_time) {
+            return 0;
+        }
+        return $a_time < $b_time ? -1 : 1;
+    });
+
     $payload = array(
         'airport' => $airport,
         'airport_name' => $airport_name,
@@ -821,6 +830,7 @@ function airport_fid_parse_flights($xml, $limit) {
             'departure_time' => airport_fid_format_time($departure),
             'arrival_time' => airport_fid_format_time($arrival),
             'departure_date' => airport_fid_format_date($departure),
+            'departure_ts' => $departure ? strtotime($departure) : 0,
             'status' => airport_fid_calculate_status($departure, $departure_offset, $arrival, $arrival_offset),
             'terminal' => $terminal,
             'destination' => $destination,
