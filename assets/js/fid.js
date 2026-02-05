@@ -496,6 +496,8 @@
         var pendingRequests = 0;
         var activeToken = 0;
         var isFetchingMore = false;
+        var currentLabel = '';
+        var labelIsCode = false;
 
         function updateStatus(message) {
             if (statusEl) {
@@ -637,28 +639,50 @@
         }
 
         function sortFlights(list, mode) {
-            var key = mode || 'departure';
+            var key = mode || 'departure_time';
             list.sort(function (a, b) {
-                var aVal = 0;
-                var bVal = 0;
-                if (key === 'arrival') {
-                    aVal = a.arrival_ts || 0;
-                    bVal = b.arrival_ts || 0;
-                } else if (key === 'duration') {
-                    aVal = a.duration_minutes || 0;
-                    bVal = b.duration_minutes || 0;
-                } else {
-                    aVal = a.departure_ts || 0;
-                    bVal = b.departure_ts || 0;
+                if (key === 'arrival_time') {
+                    var aArrival = a.arrival_ts || 0;
+                    var bArrival = b.arrival_ts || 0;
+                    if (aArrival === bArrival) {
+                        return 0;
+                    }
+                    return aArrival < bArrival ? -1 : 1;
                 }
-                if (aVal === bVal) {
+                if (key === 'duration') {
+                    var aDur = a.duration_minutes || 0;
+                    var bDur = b.duration_minutes || 0;
+                    if (aDur === bDur) {
+                        return 0;
+                    }
+                    return aDur < bDur ? -1 : 1;
+                }
+                if (key === 'airport') {
+                    var aAirport = (a.destination_name || a.destination || '').toUpperCase();
+                    var bAirport = (b.destination_name || b.destination || '').toUpperCase();
+                    if (aAirport === bAirport) {
+                        return 0;
+                    }
+                    return aAirport < bAirport ? -1 : 1;
+                }
+                if (key === 'airline') {
+                    var aAirline = (a.airline || a.airline_code || '').toUpperCase();
+                    var bAirline = (b.airline || b.airline_code || '').toUpperCase();
+                    if (aAirline === bAirline) {
+                        return 0;
+                    }
+                    return aAirline < bAirline ? -1 : 1;
+                }
+                var aDep = a.departure_ts || 0;
+                var bDep = b.departure_ts || 0;
+                if (aDep === bDep) {
                     return 0;
                 }
-                return aVal < bVal ? -1 : 1;
+                return aDep < bDep ? -1 : 1;
             });
         }
 
-        function fetchTimetableBatch(iata, destinations, dateValue, label, token) {
+        function fetchTimetableBatch(iata, destinations, dateValue, token) {
             var concurrency = 6;
             var index = 0;
             pendingRequests = 0;
@@ -686,7 +710,15 @@
                             var flights = (data && data.flights) || [];
                             if (flights.length) {
                                 allFlights = allFlights.concat(flights);
-                                sortFlights(allFlights, sortSelect ? sortSelect.value : 'departure');
+                                if (labelIsCode) {
+                                    var first = flights[0];
+                                    if (first && first.origin_name) {
+                                        currentLabel = first.origin_name;
+                                        labelIsCode = false;
+                                        updateStatus('Showing flights for ' + currentLabel + '.');
+                                    }
+                                }
+                                sortFlights(allFlights, sortSelect ? sortSelect.value : 'departure_time');
                                 visibleCount = Math.min(Math.max(visibleCount, pageSize), allFlights.length);
                                 renderPage();
                             }
@@ -702,7 +734,7 @@
                             }
                             if (index >= destinations.length && pendingRequests === 0) {
                                 isFetchingMore = false;
-                                updateStatus('Showing flights for ' + label + '.');
+                                updateStatus('Showing flights for ' + currentLabel + '.');
                                 updatePagination();
                                 return;
                             }
@@ -734,6 +766,8 @@
             lastFlightMap = {};
             isFetchingMore = false;
             pendingRequests = 0;
+            currentLabel = iata;
+            labelIsCode = true;
             renderPage();
 
             var url = AirportFID.restUrl + '/routes?airport=' + encodeURIComponent(iata);
@@ -744,17 +778,18 @@
                     if (token !== activeToken) {
                         return;
                     }
-                    var label = data.airport_name || data.airport || iata;
-                    updateStatus('Fetching flights for ' + label + '...');
+                    currentLabel = data.airport_name || data.airport || iata;
+                    labelIsCode = currentLabel.length === 3;
+                    updateStatus('Fetching flights for ' + currentLabel + '...');
                     var destinations = (data && data.destinations) || [];
                     if (!destinations.length) {
-                        updateStatus('No destinations found for ' + label + '.');
+                        updateStatus('No destinations found for ' + currentLabel + '.');
                         hideLoading();
                         return;
                     }
                     isFetchingMore = true;
                     updatePagination();
-                    fetchTimetableBatch(iata, destinations, dateValue, label, token);
+                    fetchTimetableBatch(iata, destinations, dateValue, token);
                 })
                 .catch(function () {
                     updateStatus('Unable to load flight data.');
