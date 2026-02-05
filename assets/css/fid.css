@@ -642,6 +642,7 @@
 
     .airport-fid-time-range {
         display: block;
+        justify-content: center;
     }
 
     .airport-fid-arrival-line {
@@ -669,6 +670,18 @@
         word-break: normal;
         overflow-wrap: break-word;
     }
+
+    .airport-fid-icon {
+        display: inline-flex;
+    }
+
+    .airport-fid-airport {
+        justify-content: center;
+    }
+
+    .airport-fid-flight {
+        text-align: center;
+    }
 }
 
 @media (min-width: 641px) {
@@ -694,7 +707,7 @@
     }
 }
 .airport-fid-icon {
-    display: inline-flex;
+    display: none;
     width: 14px;
     height: 14px;
     color: var(--fid-text);

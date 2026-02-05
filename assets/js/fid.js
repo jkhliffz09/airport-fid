@@ -215,7 +215,7 @@
             planeIcon.setAttribute('aria-hidden', 'true');
             planeIcon.innerHTML =
                 '<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">' +
-                '<path d="M2 13l9-2 6-7 2 2-7 6-2 9-2-3-3-2z" fill="currentColor"></path>' +
+                '<path d="M2 12l9-2 7-7 3 3-7 7-2 9-3-4-4-2z" fill="currentColor"></path>' +
                 '</svg>';
             airportLine.appendChild(planeIcon);
             airportLine.appendChild(createFlipSpan(airportLabel, '', animateAirport, 2));
