@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.76
+ * Version: 0.1.77
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.76';
+const AIRPORT_FID_VERSION = '0.1.77';
 
 function airport_fid_default_settings() {
     return array(
@@ -499,7 +499,7 @@ function airport_fid_rest_board(WP_REST_Request $request) {
     }
 
     $routes_url = sprintf(
-        'https://services.flightlookup.com/v1/xml/airports/%s/routes?subscription-key=%s',
+        'https://services.flightlookup.com/v1/xml/airports/%s/routes/nonstops?subscription-key=%s',
         rawurlencode($airport),
         rawurlencode($settings['api_key'])
     );
