@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.68
+Stable tag: 0.1.69
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,11 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.68 =
-* Updated table cell alignment to center.
-* Adjusted alternate row background color.
+= 0.1.69 =
+* Timeline text alignment refined for desktop vs mobile.
 
 == Upgrade Notice ==
 
-= 0.1.68 =
-Table styling adjustments.
+= 0.1.69 =
+Timeline alignment refinements.

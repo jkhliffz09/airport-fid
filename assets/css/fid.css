@@ -282,9 +282,6 @@
     color: var(--fid-text);
     white-space: normal;
     word-break: break-word;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
 }
 
 .airport-fid-table tbody td:nth-child(3) {
@@ -591,6 +588,7 @@
     flex-direction: column;
     gap: 6px;
     color: var(--fid-text);
+    text-align: left;
 }
 
 .airport-fid-timeline-right {
@@ -662,6 +660,9 @@
     .airport-fid-table tbody td {
         padding: 10px 8px;
         font-size: 12px;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
     }
 
     .airport-fid-table tbody td {
@@ -765,6 +766,7 @@
     .airport-fid-timeline-side {
         align-items: center;
         gap: 6px;
+        text-align: center;
     }
 
     .airport-fid-timeline-right {
@@ -831,8 +833,8 @@
     .airport-fid-table thead th:last-child,
     .airport-fid-table tbody td:last-child {
         width: 46px;
-        padding-left: 6px;
-        padding-right: 6px;
+        padding-left: 15px;
+        padding-right: 15px;
     }
 
     .airport-fid-toggle {
