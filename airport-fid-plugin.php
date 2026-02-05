@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.78
+ * Version: 0.1.79
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.78';
+const AIRPORT_FID_VERSION = '0.1.79';
 
 function airport_fid_default_settings() {
     return array(
@@ -420,6 +420,31 @@ function airport_fid_register_routes() {
         ),
     ));
 
+    register_rest_route('airport-fid/v1', '/routes', array(
+        'methods' => 'GET',
+        'callback' => 'airport_fid_rest_routes',
+        'permission_callback' => '__return_true',
+        'args' => array(
+            'airport' => array(
+                'required' => true,
+            ),
+        ),
+    ));
+
+    register_rest_route('airport-fid/v1', '/timetable', array(
+        'methods' => 'GET',
+        'callback' => 'airport_fid_rest_timetable',
+        'permission_callback' => '__return_true',
+        'args' => array(
+            'airport' => array(
+                'required' => true,
+            ),
+            'destination' => array(
+                'required' => true,
+            ),
+        ),
+    ));
+
     register_rest_route('airport-fid/v1', '/airports', array(
         'methods' => 'GET',
         'callback' => 'airport_fid_rest_airports',
@@ -607,6 +632,125 @@ function airport_fid_rest_board(WP_REST_Request $request) {
     if ($debug) {
         $payload['errors'] = $debug_errors;
         $payload['destinations'] = $destinations;
+    }
+
+    return new WP_REST_Response($payload, 200);
+}
+
+function airport_fid_rest_routes(WP_REST_Request $request) {
+    $airport = strtoupper(sanitize_text_field($request->get_param('airport')));
+    $debug = $request->get_param('debug') === '1';
+    $debug_errors = array();
+
+    if (empty($airport)) {
+        return new WP_REST_Response(array('error' => 'Airport is required.'), 400);
+    }
+
+    $settings = airport_fid_get_settings();
+    if (empty($settings['api_key'])) {
+        return new WP_REST_Response(array('error' => 'API key not configured.'), 400);
+    }
+
+    $max_destinations = (int) $settings['max_destinations'];
+    if ($max_destinations === 0) {
+        $max_destinations = PHP_INT_MAX;
+    }
+
+    $routes_url = sprintf(
+        'https://services.flightlookup.com/v1/xml/airports/%s/routes/nonstops?subscription-key=%s',
+        rawurlencode($airport),
+        rawurlencode($settings['api_key'])
+    );
+
+    $routes_xml = airport_fid_get_xml($routes_url, 'airport_fid_routes_' . md5($airport));
+    if (is_wp_error($routes_xml)) {
+        if ($debug) {
+            $debug_errors[] = 'Routes error: ' . $routes_xml->get_error_message();
+        }
+        return new WP_REST_Response(array('error' => $routes_xml->get_error_message()), 500);
+    }
+
+    $airport_name = '';
+    if (isset($routes_xml['FLSOriginName'])) {
+        $airport_name = (string) $routes_xml['FLSOriginName'];
+    } elseif (isset($routes_xml['OriginName'])) {
+        $airport_name = (string) $routes_xml['OriginName'];
+    }
+
+    $destinations = airport_fid_extract_destinations($routes_xml, $airport, $max_destinations);
+    if (empty($destinations)) {
+        if ($debug) {
+            $debug_errors[] = 'No destinations found for ' . $airport . '.';
+        }
+        return new WP_REST_Response(array('error' => 'No destinations found.'), 404);
+    }
+
+    $payload = array(
+        'airport' => $airport,
+        'airport_name' => $airport_name,
+        'destinations' => $destinations,
+    );
+    if ($debug) {
+        $payload['errors'] = $debug_errors;
+    }
+
+    return new WP_REST_Response($payload, 200);
+}
+
+function airport_fid_rest_timetable(WP_REST_Request $request) {
+    $airport = strtoupper(sanitize_text_field($request->get_param('airport')));
+    $destination = strtoupper(sanitize_text_field($request->get_param('destination')));
+    $date_param = sanitize_text_field($request->get_param('date'));
+    $debug = $request->get_param('debug') === '1';
+    $debug_errors = array();
+
+    if (empty($airport) || empty($destination)) {
+        return new WP_REST_Response(array('error' => 'Airport and destination are required.'), 400);
+    }
+
+    $settings = airport_fid_get_settings();
+    if (empty($settings['api_key'])) {
+        return new WP_REST_Response(array('error' => 'API key not configured.'), 400);
+    }
+
+    if ($date_param && preg_match('/^\\d{8}$/', $date_param)) {
+        $date = $date_param;
+    } else {
+        $date = wp_date('Ymd');
+    }
+
+    $max_flights = (int) $settings['max_flights'];
+    if ($max_flights === 0) {
+        $max_flights = PHP_INT_MAX;
+    }
+
+    $timetable_url = sprintf(
+        'https://services.flightlookup.com/v1/xml/TimeTable/%s/%s/%s/?Airline=---&Language=en&Nofilter=Y&Compression=MOST&Connection=nonstop&Sort=1&subscription-key=%s',
+        rawurlencode($airport),
+        rawurlencode($destination),
+        rawurlencode($date),
+        rawurlencode($settings['api_key'])
+    );
+
+    $cache_key = 'airport_fid_timetable_' . md5($airport . '|' . $destination . '|' . $date);
+    $timetable_xml = airport_fid_get_xml($timetable_url, $cache_key);
+    if (is_wp_error($timetable_xml)) {
+        if ($debug) {
+            $debug_errors[] = 'Timetable error for ' . $airport . '->' . $destination . ': ' . $timetable_xml->get_error_message();
+        }
+        return new WP_REST_Response(array('error' => $timetable_xml->get_error_message()), 500);
+    }
+
+    $flights = airport_fid_parse_flights($timetable_xml, $max_flights);
+
+    $payload = array(
+        'airport' => $airport,
+        'destination' => $destination,
+        'date' => $date,
+        'flights' => $flights,
+    );
+    if ($debug) {
+        $payload['errors'] = $debug_errors;
     }
 
     return new WP_REST_Response($payload, 200);
