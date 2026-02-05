@@ -706,34 +706,19 @@
         height: 32px;
     }
 }
-.airport-fid-icon {
-    display: none;
-    width: 14px;
-    height: 14px;
-    color: var(--fid-text);
-}
-
-.airport-fid-icon svg {
-    width: 100%;
-    height: 100%;
-}
-
 @media (max-width: 640px) {
-    .airport-fid-icon {
-        display: inline-flex;
-    }
-
-    .airport-fid-more-label {
-        display: block;
-        text-align: center;
-        font-size: 11px;
-        letter-spacing: 0.12em;
-        margin-bottom: 6px;
-        color: var(--fid-muted);
-    }
-
     .airport-fid-toggle {
         margin: 0 auto;
         display: inline-flex;
+        gap: 8px;
+        padding: 10px 14px;
+        height: auto;
+    }
+
+    .airport-fid-more-text {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        color: var(--fid-text);
+        text-transform: uppercase;
     }
 }

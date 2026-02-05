@@ -139,15 +139,6 @@
             var animateArrival = !previous || previous.arrival_time !== arrivalText;
             var rangeLine = document.createElement('div');
             rangeLine.className = 'airport-fid-time-range';
-            var clockIcon = document.createElement('span');
-            clockIcon.className = 'airport-fid-icon';
-            clockIcon.setAttribute('aria-hidden', 'true');
-            clockIcon.innerHTML =
-                '<svg viewBox="0 0 20 20" focusable="false" aria-hidden="true">' +
-                '<circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"></circle>' +
-                '<path d="M10 6v4l3 2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
-                '</svg>';
-            rangeLine.appendChild(clockIcon);
             rangeLine.appendChild(createFlipSpan(departureText, '', animateDeparture, 0));
             var sep = document.createElement('span');
             sep.className = 'airport-fid-time-sep';
@@ -210,14 +201,6 @@
             var airportLine = document.createElement('div');
             airportLine.className = 'airport-fid-airport';
             var animateAirport = !previous || previous.airport_label !== airportLabel;
-            var planeIcon = document.createElement('span');
-            planeIcon.className = 'airport-fid-icon';
-            planeIcon.setAttribute('aria-hidden', 'true');
-            planeIcon.innerHTML =
-                '<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">' +
-                '<path d="M2 12l9-2 7-7 3 3-7 7-2 9-3-4-4-2z" fill="currentColor"></path>' +
-                '</svg>';
-            airportLine.appendChild(planeIcon);
             airportLine.appendChild(createFlipSpan(airportLabel, '', animateAirport, 2));
             var flightLine = document.createElement('div');
             flightLine.className = 'airport-fid-flight';
@@ -243,10 +226,11 @@
                 if (airlineName) {
                     stackAirline.appendChild(airlineName);
                 }
-                var moreLabel = document.createElement('span');
-                moreLabel.className = 'airport-fid-more-label';
-                moreLabel.textContent = 'See more details';
-                toggleCell.insertBefore(moreLabel, toggleButton);
+                toggleButton.innerHTML =
+                    '<span class="airport-fid-more-text">See more details</span>' +
+                    '<svg class="airport-fid-chevron" viewBox="0 0 20 20" aria-hidden="true" focusable="false">' +
+                    '<path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+                    '</svg>';
                 departureCell.appendChild(stackAirline);
                 departureCell.appendChild(airportCell);
                 departureCell.appendChild(toggleCell);
