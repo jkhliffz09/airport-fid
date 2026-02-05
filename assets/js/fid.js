@@ -244,10 +244,10 @@
                 : flight.equipment || '';
 
             addDetail('Equipment', equipmentLabel);
-            addDetail('Terminal', flight.terminal || '');
             addDetail('Departure', flight.departure_time || '');
-            addDetail('Origin', originLabel);
             addDetail('Arrival', flight.arrival_time || '');
+            addDetail('Terminal', flight.terminal || '');
+            addDetail('Origin', originLabel);
             addDetail('Destination', destinationLabel);
 
             detailCell.appendChild(details);
