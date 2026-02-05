@@ -20,7 +20,7 @@ function airport_fid_default_settings() {
         'api_key' => '',
         'default_airport' => 'MNL',
         'use_geolocation_default' => 0,
-        'github_repo' => '',
+        'github_repo' => 'https://github.com/jkhliffz09/airport-fid/',
         'github_token' => '',
         'max_destinations' => 8,
         'max_flights' => 24,
@@ -266,6 +266,9 @@ add_action('wp_enqueue_scripts', 'airport_fid_register_assets');
 function airport_fid_init_updater() {
     $settings = airport_fid_get_settings();
     $repo = isset($settings['github_repo']) ? trim($settings['github_repo']) : '';
+    if ($repo === '') {
+        $repo = 'https://github.com/jkhliffz09/airport-fid/';
+    }
     if ($repo === '') {
         return;
     }
