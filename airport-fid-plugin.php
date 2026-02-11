@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.85
+ * Version: 0.1.86
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.85';
+const AIRPORT_FID_VERSION = '0.1.86';
 
 function airport_fid_default_settings() {
     return array(
@@ -920,6 +920,7 @@ function airport_fid_parse_flights($xml, $limit) {
         $departure_offset = (string) $attributes['FLSDepartureTimeOffset'];
         $arrival = (string) $attributes['FLSArrivalDateTime'];
         $arrival_offset = (string) $attributes['FLSArrivalTimeOffset'];
+        $total_flight_time = (string) $attributes['TotalFlightTime'];
         $destination = (string) $attributes['FLSArrivalCode'];
         $destination_name = (string) $attributes['FLSArrivalName'];
         $origin_name = (string) $attributes['FLSDepartureName'];
@@ -1006,8 +1007,9 @@ function airport_fid_parse_flights($xml, $limit) {
         if ($departure_ts && $arrival_ts) {
             $duration_minutes = max(0, (int) round(($arrival_ts - $departure_ts) / 60));
         }
-        if ($duration_minutes === 0 && $journey_duration) {
-            $duration_minutes = airport_fid_duration_to_minutes($journey_duration);
+        $duration_source = $total_flight_time ?: $journey_duration;
+        if ($duration_minutes === 0 && $duration_source) {
+            $duration_minutes = airport_fid_duration_to_minutes($duration_source);
         }
 
         $flights[] = array(
@@ -1021,7 +1023,7 @@ function airport_fid_parse_flights($xml, $limit) {
             'departure_ts' => $departure_ts,
             'arrival_ts' => $arrival_ts,
             'duration_minutes' => $duration_minutes,
-            'duration_label' => airport_fid_format_duration($duration_minutes, $journey_duration),
+            'duration_label' => airport_fid_format_duration($duration_minutes, $duration_source),
             'status' => airport_fid_calculate_status($departure, $departure_offset, $arrival, $arrival_offset),
             'terminal' => $terminal,
             'destination' => $destination,

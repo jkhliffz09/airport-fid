@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.85
+Stable tag: 0.1.86
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.85 =
-* Added README with screenshots and restored content.
+= 0.1.86 =
+* Duration now uses TotalFlightTime when available.
 
 == Upgrade Notice ==
 
-= 0.1.85 =
-README content restored.
+= 0.1.86 =
+TotalFlightTime duration fix.
