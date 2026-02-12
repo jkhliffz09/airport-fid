@@ -637,7 +637,9 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--fid-muted);
+    color: var(--fid-text);
+    display: block;
+    margin-top: 4px;
 }
 
 .airport-fid-timeline-airport {
