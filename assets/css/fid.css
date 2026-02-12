@@ -325,16 +325,12 @@
     margin-top: 4px;
 }
 
-.airport-fid-row {
+.airport-fid-row:nth-of-type(4n+1) {
     background: #0f1216;
 }
 
-.airport-fid-row:nth-of-type(even) {
+.airport-fid-row:nth-of-type(4n+3) {
     background: #171717;
-}
-
-.airport-fid-row:nth-of-type(odd) {
-    background: #0f1216;
 }
 
 .airport-fid-table tbody tr:hover {
