@@ -333,6 +333,10 @@
     background: #171717;
 }
 
+.airport-fid-details-row {
+    background: inherit;
+}
+
 .airport-fid-table tbody tr:hover {
     background: #1c2127;
 }
@@ -347,6 +351,10 @@
 
 .airport-fid-board.is-light .airport-fid-table tbody tr:nth-child(even) {
     background: #f4f4f4;
+}
+
+.airport-fid-board.is-light .airport-fid-details-row {
+    background: inherit;
 }
 
 .airport-fid-board.is-light .airport-fid-table tbody tr:hover {
