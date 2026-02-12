@@ -345,16 +345,12 @@
     background: #222830;
 }
 
-.airport-fid-board.is-light .airport-fid-row {
+.airport-fid-board.is-light .airport-fid-row:nth-of-type(4n+1) {
     background: #ffffff;
 }
 
-.airport-fid-board.is-light .airport-fid-row:nth-of-type(even) {
+.airport-fid-board.is-light .airport-fid-row:nth-of-type(4n+3) {
     background: #f5f5f5;
-}
-
-.airport-fid-board.is-light .airport-fid-row:nth-of-type(odd) {
-    background: #ffffff;
 }
 
 .airport-fid-row.is-open + .airport-fid-details-row {
