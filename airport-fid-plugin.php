@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.96
+ * Version: 0.1.97
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.96';
+const AIRPORT_FID_VERSION = '0.1.97';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 
 function airport_fid_install() {
@@ -901,10 +901,17 @@ function airport_fid_rest_cache_get(WP_REST_Request $request) {
 
     $payload = is_array($cached['payload']) ? $cached['payload'] : array();
     $flights = isset($payload['flights']) && is_array($payload['flights']) ? $payload['flights'] : array();
+    $missing_day_indicator = false;
+    foreach ($flights as $flight) {
+        if (!is_array($flight) || !array_key_exists('day_indicator', $flight)) {
+            $missing_day_indicator = true;
+            break;
+        }
+    }
 
     return new WP_REST_Response(array(
         'cached' => true,
-        'stale' => (bool) $cached['stale'],
+        'stale' => (bool) $cached['stale'] || $missing_day_indicator,
         'airport_name' => isset($payload['airport_name']) ? $payload['airport_name'] : '',
         'flights' => $flights,
         'updated_at' => $cached['updated_at'],

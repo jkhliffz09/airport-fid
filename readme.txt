@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.1.96
+Stable tag: 0.1.97
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.1.96 =
-* Day indicator now shows NEXT DAY format under arrival time.
+= 0.1.97 =
+* Cache refreshes if day indicator is missing.
 
 == Upgrade Notice ==
 
-= 0.1.96 =
-Arrival day label update.
+= 0.1.97 =
+Day indicator cache refresh.
