@@ -328,11 +328,35 @@
             var leftTime = document.createElement('div');
             leftTime.className = 'airport-fid-timeline-time';
             leftTime.textContent = formatTime12h(flight.departure_time || '');
+            var leftDay = document.createElement('div');
+            leftDay.className = 'airport-fid-timeline-day';
             var leftAirport = document.createElement('div');
             leftAirport.className = 'airport-fid-timeline-airport';
             leftAirport.textContent = originLabel;
+
+            var dayLabel = '';
+            if (flight.day_indicator) {
+                var dayMatch = String(flight.day_indicator).match(/[-+]?\\d+/);
+                if (dayMatch) {
+                    var dayValue = parseInt(dayMatch[0], 10);
+                    if (!isNaN(dayValue) && dayValue !== 0) {
+                        var absDay = Math.abs(dayValue);
+                        dayLabel =
+                            (dayValue > 0 ? '+' : '-') +
+                            absDay +
+                            ' ' +
+                            (absDay === 1 ? 'Day' : 'Days');
+                    }
+                }
+            }
+            if (dayLabel) {
+                leftDay.textContent = dayLabel;
+            }
             left.appendChild(leftDate);
             left.appendChild(leftTime);
+            if (dayLabel) {
+                left.appendChild(leftDay);
+            }
             left.appendChild(leftAirport);
 
             var right = document.createElement('div');
@@ -343,11 +367,17 @@
             var rightTime = document.createElement('div');
             rightTime.className = 'airport-fid-timeline-time';
             rightTime.textContent = formatTime12h(flight.arrival_time || '');
+            var rightDay = document.createElement('div');
+            rightDay.className = 'airport-fid-timeline-day';
             var rightAirport = document.createElement('div');
             rightAirport.className = 'airport-fid-timeline-airport';
             rightAirport.textContent = destinationLabel;
             right.appendChild(rightDate);
             right.appendChild(rightTime);
+            if (dayLabel) {
+                rightDay.textContent = dayLabel;
+                right.appendChild(rightDay);
+            }
             right.appendChild(rightAirport);
 
             var line = document.createElement('div');

@@ -633,6 +633,13 @@
     font-weight: 600;
 }
 
+.airport-fid-timeline-day {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fid-muted);
+}
+
 .airport-fid-timeline-airport {
     font-size: 14px;
     color: var(--fid-text);
