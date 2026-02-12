@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.87
+ * Version: 0.1.88
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,102 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.87';
+const AIRPORT_FID_VERSION = '0.1.88';
+const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
+
+function airport_fid_install() {
+    global $wpdb;
+    $table = $wpdb->prefix . AIRPORT_FID_CACHE_TABLE;
+    $charset = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE {$table} (
+        id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        airport char(3) NOT NULL,
+        flight_date char(8) NOT NULL,
+        sort varchar(20) NOT NULL,
+        payload longtext NOT NULL,
+        updated_at datetime NOT NULL,
+        PRIMARY KEY  (id),
+        UNIQUE KEY airport_date_sort (airport, flight_date, sort),
+        KEY updated_at (updated_at)
+    ) {$charset};";
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    dbDelta($sql);
+}
+register_activation_hook(__FILE__, 'airport_fid_install');
+
+function airport_fid_maybe_install() {
+    global $wpdb;
+    $table = $wpdb->prefix . AIRPORT_FID_CACHE_TABLE;
+    $exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
+    if ($exists !== $table) {
+        airport_fid_install();
+    }
+}
+add_action('plugins_loaded', 'airport_fid_maybe_install');
+
+function airport_fid_get_cache_table() {
+    global $wpdb;
+    return $wpdb->prefix . AIRPORT_FID_CACHE_TABLE;
+}
+
+function airport_fid_get_last_saturday() {
+    $tz = wp_timezone();
+    $now = new DateTimeImmutable('now', $tz);
+    $weekday = (int) $now->format('w'); // 0=Sun ... 6=Sat
+    $days_since = $weekday >= 6 ? ($weekday - 6) : ($weekday + 1);
+    return $now->modify('-' . $days_since . ' days')->setTime(0, 0, 0);
+}
+
+function airport_fid_is_cache_stale($updated_at) {
+    if (empty($updated_at)) {
+        return true;
+    }
+    try {
+        $tz = wp_timezone();
+        $updated = new DateTimeImmutable($updated_at, $tz);
+        $last_saturday = airport_fid_get_last_saturday();
+        return $updated < $last_saturday;
+    } catch (Exception $e) {
+        return true;
+    }
+}
+
+function airport_fid_get_cache($airport, $date, $sort) {
+    global $wpdb;
+    $table = airport_fid_get_cache_table();
+    $row = $wpdb->get_row($wpdb->prepare(
+        "SELECT payload, updated_at FROM {$table} WHERE airport = %s AND flight_date = %s AND sort = %s LIMIT 1",
+        $airport,
+        $date,
+        $sort
+    ));
+    if (!$row) {
+        return null;
+    }
+    $payload = json_decode($row->payload, true);
+    if (!is_array($payload)) {
+        $payload = array();
+    }
+    return array(
+        'payload' => $payload,
+        'updated_at' => $row->updated_at,
+        'stale' => airport_fid_is_cache_stale($row->updated_at),
+    );
+}
+
+function airport_fid_set_cache($airport, $date, $sort, $payload) {
+    global $wpdb;
+    $table = airport_fid_get_cache_table();
+    $wpdb->replace($table, array(
+        'airport' => $airport,
+        'flight_date' => $date,
+        'sort' => $sort,
+        'payload' => wp_json_encode($payload),
+        'updated_at' => current_time('mysql'),
+    ), array('%s', '%s', '%s', '%s', '%s'));
+}
 
 function airport_fid_default_settings() {
     return array(
@@ -347,6 +442,7 @@ function airport_fid_shortcode($atts) {
         'defaultAirport' => strtoupper($atts['airport']),
         'useGeolocation' => $atts['use_geolocation'] === '1',
         'limit' => (int) $atts['limit'],
+        'nonce' => wp_create_nonce('wp_rest'),
     );
 
     wp_localize_script('airport-fid-script', 'AirportFID', $config);
@@ -445,6 +541,18 @@ function airport_fid_register_routes() {
                 'required' => true,
             ),
         ),
+    ));
+
+    register_rest_route('airport-fid/v1', '/cache', array(
+        'methods' => 'GET',
+        'callback' => 'airport_fid_rest_cache_get',
+        'permission_callback' => '__return_true',
+    ));
+
+    register_rest_route('airport-fid/v1', '/cache', array(
+        'methods' => 'POST',
+        'callback' => 'airport_fid_rest_cache_set',
+        'permission_callback' => 'airport_fid_can_write_cache',
     ));
 
     register_rest_route('airport-fid/v1', '/airports', array(
@@ -756,6 +864,81 @@ function airport_fid_rest_timetable(WP_REST_Request $request) {
     }
 
     return new WP_REST_Response($payload, 200);
+}
+
+function airport_fid_can_write_cache(WP_REST_Request $request) {
+    $nonce = $request->get_header('X-WP-Nonce');
+    return $nonce && wp_verify_nonce($nonce, 'wp_rest');
+}
+
+function airport_fid_rest_cache_get(WP_REST_Request $request) {
+    $airport = strtoupper(sanitize_text_field($request->get_param('airport')));
+    $date_param = sanitize_text_field($request->get_param('date'));
+    $sort = sanitize_text_field($request->get_param('sort'));
+
+    if (empty($airport)) {
+        return new WP_REST_Response(array('error' => 'Airport is required.'), 400);
+    }
+
+    if ($date_param && preg_match('/^\\d{8}$/', $date_param)) {
+        $date = $date_param;
+    } else {
+        $date = wp_date('Ymd');
+    }
+
+    if (empty($sort)) {
+        $sort = 'departure_time';
+    }
+
+    $cached = airport_fid_get_cache($airport, $date, $sort);
+    if (!$cached) {
+        return new WP_REST_Response(array(
+            'cached' => false,
+            'stale' => true,
+            'flights' => array(),
+        ), 200);
+    }
+
+    $payload = is_array($cached['payload']) ? $cached['payload'] : array();
+    $flights = isset($payload['flights']) && is_array($payload['flights']) ? $payload['flights'] : array();
+
+    return new WP_REST_Response(array(
+        'cached' => true,
+        'stale' => (bool) $cached['stale'],
+        'airport_name' => isset($payload['airport_name']) ? $payload['airport_name'] : '',
+        'flights' => $flights,
+        'updated_at' => $cached['updated_at'],
+    ), 200);
+}
+
+function airport_fid_rest_cache_set(WP_REST_Request $request) {
+    $params = $request->get_json_params();
+    $airport = strtoupper(sanitize_text_field($params['airport'] ?? ''));
+    $date = sanitize_text_field($params['date'] ?? '');
+    $sort = sanitize_text_field($params['sort'] ?? '');
+    $airport_name = sanitize_text_field($params['airport_name'] ?? '');
+    $flights = $params['flights'] ?? array();
+
+    if (empty($airport) || empty($date) || empty($sort)) {
+        return new WP_REST_Response(array('error' => 'Airport, date, and sort are required.'), 400);
+    }
+    if (!preg_match('/^\\d{8}$/', $date)) {
+        return new WP_REST_Response(array('error' => 'Invalid date format.'), 400);
+    }
+    if (!is_array($flights)) {
+        return new WP_REST_Response(array('error' => 'Flights payload must be an array.'), 400);
+    }
+
+    $payload = array(
+        'airport' => $airport,
+        'airport_name' => $airport_name,
+        'date' => $date,
+        'flights' => $flights,
+    );
+
+    airport_fid_set_cache($airport, $date, $sort, $payload);
+
+    return new WP_REST_Response(array('saved' => true), 200);
 }
 
 function airport_fid_rest_airports(WP_REST_Request $request) {

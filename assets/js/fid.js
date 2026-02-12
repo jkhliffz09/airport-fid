@@ -14,6 +14,23 @@
         });
     }
 
+    function postJson(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': (AirportFID && AirportFID.nonce) || '',
+            },
+            body: JSON.stringify(body || {}),
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error('Request failed');
+            }
+            return response.json();
+        });
+    }
+
     function clearNode(node) {
         while (node.firstChild) {
             node.removeChild(node.firstChild);
@@ -713,7 +730,7 @@
             });
         }
 
-        function fetchTimetableBatch(iata, destinations, dateValue, token) {
+        function fetchTimetableBatch(iata, destinations, dateValue, sortValue, token) {
             var concurrency = 6;
             var index = 0;
             pendingRequests = 0;
@@ -749,7 +766,7 @@
                                         updateStatus('Showing flights for ' + currentLabel + '.');
                                     }
                                 }
-                                sortFlights(allFlights, sortSelect ? sortSelect.value : 'departure_time');
+                                sortFlights(allFlights, sortValue || 'departure_time');
                                 visibleCount = Math.min(Math.max(visibleCount, pageSize), allFlights.length);
                                 renderPage();
                             }
@@ -767,6 +784,15 @@
                                 isFetchingMore = false;
                                 updateStatus('Showing flights for ' + currentLabel + '.');
                                 updatePagination();
+                                postJson(AirportFID.restUrl + '/cache', {
+                                    airport: iata,
+                                    date: dateValue || getLocalDateString(),
+                                    sort: sortValue || 'departure_time',
+                                    airport_name: currentLabel,
+                                    flights: allFlights,
+                                }).catch(function () {
+                                    // ignore cache save errors
+                                });
                                 return;
                             }
                             isFetchingMore = true;
@@ -801,30 +827,70 @@
             labelIsCode = true;
             renderPage();
 
-            var url = AirportFID.restUrl + '/routes?airport=' + encodeURIComponent(iata);
             var dateValue = dateInput ? fromInputDate(dateInput.value) : '';
+            var sortValue = sortSelect && sortSelect.value ? sortSelect.value : 'departure_time';
 
-            fetchJson(url)
-                .then(function (data) {
+            var cacheUrl =
+                AirportFID.restUrl +
+                '/cache?airport=' +
+                encodeURIComponent(iata) +
+                '&date=' +
+                encodeURIComponent(dateValue || getLocalDateString()) +
+                '&sort=' +
+                encodeURIComponent(sortValue);
+
+            fetchJson(cacheUrl)
+                .then(function (cacheData) {
                     if (token !== activeToken) {
-                        return;
+                        return { skipRefresh: true };
                     }
-                    currentLabel = data.airport_name || data.airport || iata;
-                    labelIsCode = currentLabel.length === 3;
-                    updateStatus('Fetching flights for ' + currentLabel + '...');
-                    var destinations = (data && data.destinations) || [];
-                    if (!destinations.length) {
-                        updateStatus('No destinations found for ' + currentLabel + '.');
-                        hideLoading();
-                        return;
+                    if (cacheData && cacheData.cached && cacheData.flights && cacheData.flights.length) {
+                        currentLabel = cacheData.airport_name || iata;
+                        labelIsCode = currentLabel.length === 3;
+                        allFlights = cacheData.flights;
+                        sortFlights(allFlights, sortValue);
+                        visibleCount = Math.min(pageSize, allFlights.length);
+                        renderPage();
+                        if (!cacheData.stale) {
+                            updateStatus('Showing flights for ' + currentLabel + '.');
+                            hideLoading();
+                            return { skipRefresh: true };
+                        }
+                        updateStatus('Fetching latest flights for ' + currentLabel + '...');
                     }
-                    isFetchingMore = true;
-                    updatePagination();
-                    fetchTimetableBatch(iata, destinations, dateValue, token);
+                    return { skipRefresh: false };
                 })
                 .catch(function () {
-                    updateStatus('Unable to load flight data.');
-                    hideLoading();
+                    return { skipRefresh: false };
+                })
+                .then(function (state) {
+                    if (!state || state.skipRefresh || token !== activeToken) {
+                        return;
+                    }
+
+                    var url = AirportFID.restUrl + '/routes?airport=' + encodeURIComponent(iata);
+                    fetchJson(url)
+                        .then(function (data) {
+                            if (token !== activeToken) {
+                                return;
+                            }
+                            currentLabel = data.airport_name || data.airport || iata;
+                            labelIsCode = currentLabel.length === 3;
+                            updateStatus('Fetching flights for ' + currentLabel + '...');
+                            var destinations = (data && data.destinations) || [];
+                            if (!destinations.length) {
+                                updateStatus('No destinations found for ' + currentLabel + '.');
+                                hideLoading();
+                                return;
+                            }
+                            isFetchingMore = true;
+                            updatePagination();
+                            fetchTimetableBatch(iata, destinations, dateValue, sortValue, token);
+                        })
+                        .catch(function () {
+                            updateStatus('Unable to load flight data.');
+                            hideLoading();
+                        });
                 });
         }
 
