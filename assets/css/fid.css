@@ -325,16 +325,36 @@
     margin-top: 4px;
 }
 
+.airport-fid-table tbody tr {
+    background: #0f1216;
+}
+
 .airport-fid-table tbody tr:nth-child(even) {
-    background: #00bcd421;
+    background: #171717;
 }
 
 .airport-fid-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: #1c2127;
 }
 
 .airport-fid-row.is-open {
-    background: rgba(255, 255, 255, 0.08);
+    background: #222830;
+}
+
+.airport-fid-board.is-light .airport-fid-table tbody tr {
+    background: #ffffff;
+}
+
+.airport-fid-board.is-light .airport-fid-table tbody tr:nth-child(even) {
+    background: #f4f4f4;
+}
+
+.airport-fid-board.is-light .airport-fid-table tbody tr:hover {
+    background: #ececec;
+}
+
+.airport-fid-board.is-light .airport-fid-row.is-open {
+    background: #e6f2f4;
 }
 
 .airport-fid-empty {
