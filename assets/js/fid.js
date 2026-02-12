@@ -361,10 +361,8 @@
             }
             right.appendChild(rightDate);
             right.appendChild(rightTime);
-            if (dayLabel) {
-                rightDay.textContent = dayLabel;
-                right.appendChild(rightDay);
-            }
+            rightDay.textContent = dayLabel || ' ';
+            right.appendChild(rightDay);
             right.appendChild(rightAirport);
 
             var line = document.createElement('div');
