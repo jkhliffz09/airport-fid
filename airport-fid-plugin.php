@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.1.97
+ * Version: 0.1.98
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.1.97';
+const AIRPORT_FID_VERSION = '0.1.98';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 
 function airport_fid_install() {
@@ -1111,7 +1111,7 @@ function airport_fid_parse_flights($xml, $limit) {
         $arrival = (string) $attributes['FLSArrivalDateTime'];
         $arrival_offset = (string) $attributes['FLSArrivalTimeOffset'];
         $total_flight_time = (string) $attributes['TotalFlightTime'];
-        $day_indicator = (string) $attributes['FLSDayIndicator'];
+        $day_indicator = '';
         $destination = (string) $attributes['FLSArrivalCode'];
         $destination_name = (string) $attributes['FLSArrivalName'];
         $origin_name = (string) $attributes['FLSDepartureName'];
