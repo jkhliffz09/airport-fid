@@ -80,7 +80,7 @@
 
 .airport-fid-status {
     font-size: 13px;
-    color: var(--fid-muted);
+    color: #00bcd4;
     margin-bottom: 18px;
 }
 
@@ -257,7 +257,7 @@
 
 .airport-fid-table thead th:first-child,
 .airport-fid-table tbody td:first-child {
-    width: 72px;
+    width: 84px;
 }
 
 .airport-fid-table thead th:nth-child(2),
@@ -736,7 +736,7 @@
 
     .airport-fid-table thead th:first-child,
     .airport-fid-table tbody td:first-child {
-        width: 64px;
+        width: 72px;
     }
 
     .airport-fid-table thead th:nth-child(2),
