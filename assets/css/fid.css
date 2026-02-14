@@ -644,6 +644,14 @@
     margin-top: 4px;
 }
 
+.airport-fid-day-badge {
+    font-size: 11px;
+    vertical-align: super;
+    margin-left: 4px;
+    letter-spacing: 0.08em;
+    color: var(--fid-text);
+}
+
 .airport-fid-timeline-airport {
     font-size: 14px;
     color: var(--fid-text);

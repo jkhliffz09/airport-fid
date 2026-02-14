@@ -357,8 +357,6 @@
             var rightTime = document.createElement('div');
             rightTime.className = 'airport-fid-timeline-time';
             rightTime.textContent = formatTime12h(flight.arrival_time || '');
-            var rightDay = document.createElement('div');
-            rightDay.className = 'airport-fid-timeline-day';
             var rightAirport = document.createElement('div');
             rightAirport.className = 'airport-fid-timeline-airport';
             rightAirport.textContent = destinationLabel;
@@ -368,15 +366,19 @@
                 var dayMatch = indicatorValue.match(/[-+]?\d+/);
                 if (dayMatch) {
                     var dayValue = parseInt(dayMatch[0], 10);
-                    if (!isNaN(dayValue) && dayValue > 0) {
-                        dayLabel = dayValue === 1 ? 'NEXT DAY' : 'NEXT ' + dayValue + ' DAYS';
+                    if (!isNaN(dayValue) && dayValue !== 0) {
+                        dayLabel = (dayValue > 0 ? '+' : '') + dayValue;
                     }
                 }
             }
             right.appendChild(rightDate);
+            if (dayLabel) {
+                var badge = document.createElement('span');
+                badge.className = 'airport-fid-day-badge';
+                badge.textContent = dayLabel;
+                rightTime.appendChild(badge);
+            }
             right.appendChild(rightTime);
-            rightDay.textContent = dayLabel || ' ';
-            right.appendChild(rightDay);
             right.appendChild(rightAirport);
 
             var line = document.createElement('div');

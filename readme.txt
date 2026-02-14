@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.07
+Stable tag: 0.2.08
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,9 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
+= 0.2.08 =
+* Arrival day indicator now renders as superscript badge.
+
 = 0.2.07 =
 * Increased time column width and highlighted status text.
 
@@ -88,6 +91,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.08 =
+Arrival day badge update.
 
 = 0.2.07 =
 Time column width and status color update.
