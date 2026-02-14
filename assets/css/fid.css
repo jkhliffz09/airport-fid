@@ -305,6 +305,7 @@
 
 .airport-fid-arrival-line {
     margin-top: 6px;
+    white-space: nowrap;
 }
 
 .airport-fid-time-range {
@@ -313,6 +314,7 @@
     font-size: 13px;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
 }
 
 .airport-fid-time-sep {

@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.05
+Stable tag: 0.2.06
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,9 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
+= 0.2.06 =
+* Added sort order control and fixed time wrapping.
+
 = 0.2.05 =
 * Changelog now appends previous entries.
 
@@ -82,6 +85,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.06 =
+Sort order control and time wrapping fix.
 
 = 0.2.05 =
 Changelog now appends previous entries.

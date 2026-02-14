@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.05
+ * Version: 0.2.06
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.05';
+const AIRPORT_FID_VERSION = '0.2.06';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 
 function airport_fid_install() {
@@ -479,6 +479,10 @@ function airport_fid_shortcode($atts) {
     $output .= '<option value="airport">Airport</option>';
     $output .= '<option value="airline">Airline</option>';
     $output .= '<option value="duration">Duration</option>';
+    $output .= '</select>';
+    $output .= '<select id="' . esc_attr($uid) . '-order" class="airport-fid-input airport-fid-order">';
+    $output .= '<option value="asc">Ascending</option>';
+    $output .= '<option value="desc">Descending</option>';
     $output .= '</select>';
     $output .= '</div>';
     $output .= '</div>';

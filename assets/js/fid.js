@@ -536,6 +536,7 @@
         var dateInput = board.querySelector('.airport-fid-date');
         var dateButton = board.querySelector('.airport-fid-date-button');
         var sortSelect = board.querySelector('.airport-fid-sort');
+        var orderSelect = board.querySelector('.airport-fid-order');
         var loadMoreButton = board.querySelector('.airport-fid-load-more');
         var pageNotice = board.querySelector('.airport-fid-page-notice');
         var loadingOverlay = board.querySelector('.airport-fid-loading');
@@ -691,8 +692,9 @@
             return (value || '').trim().toUpperCase();
         }
 
-        function sortFlights(list, mode) {
+        function sortFlights(list, mode, order) {
             var key = mode || 'departure_time';
+            var direction = order === 'desc' ? -1 : 1;
             list.sort(function (a, b) {
                 function compareNumber(aVal, bVal) {
                     if (aVal === bVal) {
@@ -724,38 +726,38 @@
                         compareString(aAirline, bAirline) ||
                         compareNumber(aDep, bDep) ||
                         compareString(aAirport, bAirport)
-                    );
+                    ) * direction;
                 }
                 if (key === 'airport') {
                     return (
                         compareString(aAirport, bAirport) ||
                         compareNumber(aDep, bDep) ||
                         compareString(aAirline, bAirline)
-                    );
+                    ) * direction;
                 }
                 if (key === 'arrival_time') {
                     return (
                         compareNumber(aArr, bArr) ||
                         compareString(aAirport, bAirport) ||
                         compareString(aAirline, bAirline)
-                    );
+                    ) * direction;
                 }
                 if (key === 'departure_time') {
                     return (
                         compareNumber(aDep, bDep) ||
                         compareString(aAirport, bAirport) ||
                         compareString(aAirline, bAirline)
-                    );
+                    ) * direction;
                 }
                 if (key === 'duration') {
                     return (
                         compareNumber(aDur, bDur) ||
                         compareString(aAirport, bAirport) ||
                         compareString(aAirline, bAirline)
-                    );
+                    ) * direction;
                 }
 
-                return compareNumber(aDep, bDep);
+                return compareNumber(aDep, bDep) * direction;
             });
         }
 
@@ -795,7 +797,7 @@
                                         updateStatus('Showing flights for ' + currentLabel + '.');
                                     }
                                 }
-                                sortFlights(allFlights, sortValue || 'departure_time');
+                                sortFlights(allFlights, sortValue || 'departure_time', orderSelect && orderSelect.value);
                                 visibleCount = Math.min(Math.max(visibleCount, pageSize), allFlights.length);
                                 renderPage();
                             }
@@ -858,6 +860,7 @@
 
             var dateValue = dateInput ? fromInputDate(dateInput.value) : '';
             var sortValue = sortSelect && sortSelect.value ? sortSelect.value : 'departure_time';
+            var sortOrder = orderSelect && orderSelect.value ? orderSelect.value : 'asc';
 
             var cacheUrl =
                 AirportFID.restUrl +
@@ -877,7 +880,7 @@
                         currentLabel = cacheData.airport_name || iata;
                         labelIsCode = currentLabel.length === 3;
                         allFlights = cacheData.flights;
-                        sortFlights(allFlights, sortValue);
+                        sortFlights(allFlights, sortValue, sortOrder);
                         visibleCount = Math.min(pageSize, allFlights.length);
                         renderPage();
                         if (!cacheData.stale) {
@@ -965,7 +968,17 @@
                 if (!allFlights.length) {
                     return;
                 }
-                sortFlights(allFlights, sortSelect.value);
+                sortFlights(allFlights, sortSelect.value, orderSelect && orderSelect.value);
+                renderPage();
+            });
+        }
+
+        if (orderSelect) {
+            orderSelect.addEventListener('change', function () {
+                if (!allFlights.length) {
+                    return;
+                }
+                sortFlights(allFlights, sortSelect ? sortSelect.value : 'departure_time', orderSelect.value);
                 renderPage();
             });
         }
