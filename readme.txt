@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.02
+Stable tag: 0.2.03
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
-= 0.2.02 =
-* Fixed day indicator parsing for NEXT DAY labels.
+= 0.2.03 =
+* Removed debug output helpers from update checker.
 
 == Upgrade Notice ==
 
-= 0.2.02 =
-Day indicator parsing fix.
+= 0.2.03 =
+Update checker debug output removed.
