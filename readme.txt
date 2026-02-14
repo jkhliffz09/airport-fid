@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.04
+Stable tag: 0.2.05
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,10 +66,25 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
+= 0.2.05 =
+* Changelog now appends previous entries.
+
 = 0.2.04 =
 * Main row times now use 12-hour format.
 
+= 0.2.03 =
+* Removed debug output helpers from update checker.
+
+= 0.2.02 =
+* Fixed day indicator parsing for NEXT DAY labels.
+
+= 0.2.00 =
+* Improved day indicator visibility in expanded timeline.
+
 == Upgrade Notice ==
+
+= 0.2.05 =
+Changelog now appends previous entries.
 
 = 0.2.04 =
 Main row time format update.
