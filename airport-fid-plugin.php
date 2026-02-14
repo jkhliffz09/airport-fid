@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.08
+ * Version: 0.2.09
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.08';
+const AIRPORT_FID_VERSION = '0.2.09';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 
 function airport_fid_install() {
@@ -53,11 +53,26 @@ function airport_fid_get_cache_table() {
     return $wpdb->prefix . AIRPORT_FID_CACHE_TABLE;
 }
 
-function airport_fid_get_last_saturday() {
+function airport_fid_get_last_refresh_day() {
+    $settings = airport_fid_get_settings();
+    $refresh_day = isset($settings['cache_refresh_day']) && $settings['cache_refresh_day']
+        ? $settings['cache_refresh_day']
+        : 'wednesday';
+    $day_map = array(
+        'sunday' => 0,
+        'monday' => 1,
+        'tuesday' => 2,
+        'wednesday' => 3,
+        'thursday' => 4,
+        'friday' => 5,
+        'saturday' => 6,
+    );
+
+    $target = isset($day_map[$refresh_day]) ? $day_map[$refresh_day] : 3;
     $tz = wp_timezone();
     $now = new DateTimeImmutable('now', $tz);
     $weekday = (int) $now->format('w'); // 0=Sun ... 6=Sat
-    $days_since = $weekday >= 6 ? ($weekday - 6) : ($weekday + 1);
+    $days_since = $weekday >= $target ? ($weekday - $target) : ($weekday + (7 - $target));
     return $now->modify('-' . $days_since . ' days')->setTime(0, 0, 0);
 }
 
@@ -68,8 +83,8 @@ function airport_fid_is_cache_stale($updated_at) {
     try {
         $tz = wp_timezone();
         $updated = new DateTimeImmutable($updated_at, $tz);
-        $last_saturday = airport_fid_get_last_saturday();
-        return $updated < $last_saturday;
+        $last_refresh = airport_fid_get_last_refresh_day();
+        return $updated < $last_refresh;
     } catch (Exception $e) {
         return true;
     }
@@ -120,6 +135,7 @@ function airport_fid_default_settings() {
         'max_destinations' => 8,
         'max_flights' => 24,
         'cache_ttl_minutes' => 30,
+        'cache_refresh_day' => 'wednesday',
     );
 }
 
@@ -194,6 +210,14 @@ function airport_fid_register_settings() {
         'airport_fid_cache_ttl',
         'Cache (minutes)',
         'airport_fid_cache_ttl_field',
+        'airport-fid-settings',
+        'airport_fid_main_section'
+    );
+
+    add_settings_field(
+        'airport_fid_cache_refresh_day',
+        'Cache Refresh Day',
+        'airport_fid_cache_refresh_day_field',
         'airport-fid-settings',
         'airport_fid_main_section'
     );
@@ -287,6 +311,31 @@ function airport_fid_cache_ttl_field() {
     );
 }
 
+function airport_fid_cache_refresh_day_field() {
+    $settings = airport_fid_get_settings();
+    $days = array(
+        'sunday' => 'Sunday',
+        'monday' => 'Monday',
+        'tuesday' => 'Tuesday',
+        'wednesday' => 'Wednesday',
+        'thursday' => 'Thursday',
+        'friday' => 'Friday',
+        'saturday' => 'Saturday',
+    );
+    $current = isset($settings['cache_refresh_day']) ? $settings['cache_refresh_day'] : 'wednesday';
+    echo '<select name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[cache_refresh_day]" class="regular-text">';
+    foreach ($days as $value => $label) {
+        printf(
+            '<option value="%s"%s>%s</option>',
+            esc_attr($value),
+            selected($current, $value, false),
+            esc_html($label)
+        );
+    }
+    echo '</select>';
+    echo '<p class="description">Cached data refreshes after this day.</p>';
+}
+
 function airport_fid_github_repo_field() {
     $settings = airport_fid_get_settings();
     printf(
@@ -317,6 +366,9 @@ function airport_fid_sanitize_settings($settings) {
     $clean['max_destinations'] = isset($settings['max_destinations']) ? max(0, (int) $settings['max_destinations']) : $defaults['max_destinations'];
     $clean['max_flights'] = isset($settings['max_flights']) ? max(0, (int) $settings['max_flights']) : $defaults['max_flights'];
     $clean['cache_ttl_minutes'] = isset($settings['cache_ttl_minutes']) ? max(1, (int) $settings['cache_ttl_minutes']) : $defaults['cache_ttl_minutes'];
+    $allowed_days = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
+    $day_value = isset($settings['cache_refresh_day']) ? strtolower((string) $settings['cache_refresh_day']) : $defaults['cache_refresh_day'];
+    $clean['cache_refresh_day'] = in_array($day_value, $allowed_days, true) ? $day_value : $defaults['cache_refresh_day'];
 
     return array_merge($defaults, $clean);
 }
