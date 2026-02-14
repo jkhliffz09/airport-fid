@@ -137,6 +137,19 @@
 
         var nextMap = {};
 
+        function formatTime12h(timeValue) {
+            if (!timeValue) return '';
+            var parts = String(timeValue).trim().split(':');
+            if (parts.length < 2) return timeValue;
+            var hours = parseInt(parts[0], 10);
+            var minutes = parts[1];
+            if (isNaN(hours)) return timeValue;
+            var suffix = hours >= 12 ? 'PM' : 'AM';
+            var displayHour = hours % 12;
+            if (displayHour === 0) displayHour = 12;
+            return displayHour + ':' + minutes + ' ' + suffix;
+        }
+
         flights.forEach(function (flight) {
             var row = document.createElement('tr');
             row.className = 'airport-fid-row';
@@ -149,10 +162,10 @@
                 (flight.destination || '');
 
             var departureCell = document.createElement('td');
-            var departureText = flight.departure_time || '';
+            var departureText = formatTime12h(flight.departure_time || '');
             var previous = lastMap && lastMap[key] ? lastMap[key] : null;
             var animateDeparture = !previous || previous.departure_time !== departureText;
-            var arrivalText = flight.arrival_time || '';
+            var arrivalText = formatTime12h(flight.arrival_time || '');
             var animateArrival = !previous || previous.arrival_time !== arrivalText;
             var rangeLine = document.createElement('div');
             rangeLine.className = 'airport-fid-time-range';
