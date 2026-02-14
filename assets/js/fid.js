@@ -352,7 +352,7 @@
             var dayLabel = '';
             var indicatorValue = String(flight.day_indicator || '').trim();
             if (indicatorValue) {
-                var dayMatch = indicatorValue.match(/[-+]?\\d+/);
+                var dayMatch = indicatorValue.match(/[-+]?\d+/);
                 if (dayMatch) {
                     var dayValue = parseInt(dayMatch[0], 10);
                     if (!isNaN(dayValue) && dayValue > 0) {
