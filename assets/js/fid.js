@@ -150,6 +150,16 @@
             return displayHour + ':' + minutes + ' ' + suffix;
         }
 
+        function getDayIndicatorLabel(indicator) {
+            var indicatorValue = String(indicator || '').trim();
+            if (!indicatorValue) return '';
+            var dayMatch = indicatorValue.match(/[-+]?\d+/);
+            if (!dayMatch) return '';
+            var dayValue = parseInt(dayMatch[0], 10);
+            if (isNaN(dayValue) || dayValue === 0) return '';
+            return (dayValue > 0 ? '+' : '') + dayValue;
+        }
+
         flights.forEach(function (flight) {
             var row = document.createElement('tr');
             row.className = 'airport-fid-row';
@@ -167,6 +177,7 @@
             var animateDeparture = !previous || previous.departure_time !== departureText;
             var arrivalText = formatTime12h(flight.arrival_time || '');
             var animateArrival = !previous || previous.arrival_time !== arrivalText;
+            var dayIndicatorLabel = getDayIndicatorLabel(flight.day_indicator);
             var rangeLine = document.createElement('div');
             rangeLine.className = 'airport-fid-time-range';
             rangeLine.appendChild(createFlipSpan(departureText, '', animateDeparture, 0));
@@ -174,13 +185,27 @@
             sep.className = 'airport-fid-time-sep';
             sep.textContent = ' - ';
             rangeLine.appendChild(sep);
-            rangeLine.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
+            var rangeArrival = document.createElement('span');
+            rangeArrival.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
+            if (dayIndicatorLabel) {
+                var rangeBadge = document.createElement('span');
+                rangeBadge.className = 'airport-fid-day-badge';
+                rangeBadge.textContent = dayIndicatorLabel;
+                rangeArrival.appendChild(rangeBadge);
+            }
+            rangeLine.appendChild(rangeArrival);
             departureCell.appendChild(rangeLine);
             if (!isCompact) {
                 departureCell.appendChild(createFlipSpan(departureText, '', animateDeparture, 0));
                 var arrivalLine = document.createElement('div');
                 arrivalLine.className = 'airport-fid-arrival-line';
                 arrivalLine.appendChild(createFlipSpan(arrivalText, 'airport-fid-flip-muted', animateArrival, 0));
+                if (dayIndicatorLabel) {
+                    var arrivalBadge = document.createElement('span');
+                    arrivalBadge.className = 'airport-fid-day-badge';
+                    arrivalBadge.textContent = dayIndicatorLabel;
+                    arrivalLine.appendChild(arrivalBadge);
+                }
                 departureCell.appendChild(arrivalLine);
             } else {
                 departureCell.className = 'airport-fid-stack';

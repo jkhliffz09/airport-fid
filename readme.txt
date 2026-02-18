@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.09
+Stable tag: 0.2.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,9 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
+= 0.2.10 =
+* Added day indicator badge to main row arrival time.
+
 = 0.2.09 =
 * Added cache refresh day setting with Wednesday fallback.
 
@@ -94,6 +97,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.10 =
+Main row day indicator badge.
 
 = 0.2.09 =
 Cache refresh day fallback.
