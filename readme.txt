@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.11
+Stable tag: 0.2.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,9 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
+= 0.2.12 =
+* Defer sorting until all batch results are fetched to avoid repeated flip animation.
+
 = 0.2.11 =
 * Redesigned admin settings into tabbed General, Typography, and Layout panels.
 * Added configurable typography, colors, sizing, theme mode, and animation controls.
@@ -101,6 +104,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.12 =
+Batch sorting after fetch completes.
 
 = 0.2.11 =
 Tabbed admin settings with typography/layout controls.

@@ -836,7 +836,6 @@
                                         updateStatus('Showing flights for ' + currentLabel + '.');
                                     }
                                 }
-                                sortFlights(allFlights, sortValue || 'departure_time', orderSelect && orderSelect.value);
                                 visibleCount = Math.min(Math.max(visibleCount, pageSize), allFlights.length);
                                 renderPage();
                             }
@@ -852,6 +851,8 @@
                             }
                             if (index >= destinations.length && pendingRequests === 0) {
                                 isFetchingMore = false;
+                                sortFlights(allFlights, sortValue || 'departure_time', orderSelect && orderSelect.value);
+                                renderPage();
                                 updateStatus('Showing flights for ' + currentLabel + '.');
                                 updatePagination();
                                 postJson(AirportFID.restUrl + '/cache', {
