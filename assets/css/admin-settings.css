@@ -1,0 +1,118 @@
+.airport-fid-admin {
+    max-width: 1120px;
+    margin: 24px 20px 0 0;
+    background: #0f1720;
+    color: #e7eef7;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 18px 40px rgba(15, 23, 32, 0.2);
+}
+
+.airport-fid-admin h1 {
+    color: #ffffff;
+    margin: 0 0 18px;
+    letter-spacing: 0.04em;
+}
+
+.airport-fid-admin-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.airport-fid-admin-tab {
+    border: 1px solid #274056;
+    background: #122230;
+    color: #cde2f7;
+    border-radius: 999px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.airport-fid-admin-tab.is-active {
+    background: #00bcd4;
+    color: #051217;
+    border-color: #00bcd4;
+}
+
+.airport-fid-admin-panel {
+    display: none;
+}
+
+.airport-fid-admin-panel.is-active {
+    display: block;
+}
+
+.airport-fid-admin-panel h2 {
+    color: #ffffff;
+    margin: 0 0 12px;
+    font-size: 18px;
+}
+
+.airport-fid-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.airport-fid-admin-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #122230;
+    border: 1px solid #22384d;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.airport-fid-admin-field > span {
+    color: #b7cfdf;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.airport-fid-admin-field input,
+.airport-fid-admin-field select {
+    width: 100%;
+    border: 1px solid #29465f;
+    border-radius: 8px;
+    background: #0f1d2a;
+    color: #e7eef7;
+    min-height: 36px;
+    padding: 6px 10px;
+}
+
+.airport-fid-admin-checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.airport-fid-admin-checkbox input {
+    width: 18px;
+    height: 18px;
+    min-height: 18px;
+    padding: 0;
+}
+
+.airport-fid-admin-checkbox span {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+}
+
+.airport-fid-admin-actions {
+    margin-top: 18px;
+}
+
+.airport-fid-admin .button-primary {
+    background: #00bcd4;
+    border-color: #00bcd4;
+    color: #041318;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 8px 18px;
+}

@@ -2,6 +2,7 @@
     if (typeof AirportFID === 'undefined') {
         return;
     }
+    var animationsEnabled = AirportFID.enableAnimation !== false && AirportFID.enableAnimation !== 0;
 
     function fetchJson(url) {
         return fetch(url, {
@@ -74,7 +75,8 @@
             if (className) {
                 span.classList.add(className);
             }
-            if (animate) {
+            var shouldAnimate = animationsEnabled && animate;
+            if (shouldAnimate) {
                 span.classList.add('is-animate');
             }
             span.style.setProperty('--fid-col', columnIndex || 0);
@@ -93,12 +95,12 @@
                 if (ch === ' ') {
                     letter.classList.add('space');
                     letter.textContent = '';
-                } else if (animate) {
+                } else if (shouldAnimate) {
                     letter.textContent = 'X';
                 } else {
                     letter.textContent = ch;
                 }
-                if (animate && ch.trim()) {
+                if (shouldAnimate && ch.trim()) {
                     scheduleScramble(letter, ch, columnIndex || 0, i);
                 }
                 span.appendChild(letter);
@@ -605,6 +607,16 @@
         }
 
         function initTheme() {
+            var themeMode = AirportFID.themeMode || 'auto';
+            var forcedTheme = themeMode === 'light_only' ? 'light' : themeMode === 'dark_only' ? 'dark' : '';
+            if (forcedTheme) {
+                setTheme(forcedTheme);
+                if (themeToggle) {
+                    themeToggle.style.display = 'none';
+                }
+                return;
+            }
+
             var stored = null;
             try {
                 stored = window.localStorage.getItem('airport_fid_theme');
@@ -615,7 +627,7 @@
                 setTheme(stored);
                 return;
             }
-            setTheme('dark');
+            setTheme(AirportFID.defaultTheme === 'light' ? 'light' : 'dark');
         }
 
         function showLoading() {

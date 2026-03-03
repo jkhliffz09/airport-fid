@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.10
+ * Version: 0.2.11
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.10';
+const AIRPORT_FID_VERSION = '0.2.11';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 
 function airport_fid_install() {
@@ -136,6 +136,29 @@ function airport_fid_default_settings() {
         'max_flights' => 24,
         'cache_ttl_minutes' => 30,
         'cache_refresh_day' => 'wednesday',
+        'header_font_size' => 18,
+        'field_font_size' => 14,
+        'button_font_size' => 12,
+        'result_main_font_size' => 16,
+        'result_sub_font_size' => 13,
+        'expanded_label_font_size' => 11,
+        'expanded_value_font_size' => 13,
+        'background_dark' => '#121212',
+        'background_light' => '#f5f5f5',
+        'row_dark_odd' => '#0f1216',
+        'row_dark_even' => '#171717',
+        'row_light_odd' => '#ffffff',
+        'row_light_even' => '#f5f5f5',
+        'accent_color' => '#00bcd4',
+        'text_dark' => '#ffffff',
+        'text_light' => '#0a0a0a',
+        'logo_max_width' => 74,
+        'logo_max_height' => 36,
+        'first_col_width' => 84,
+        'chevron_size' => 18,
+        'enable_animation' => 1,
+        'default_theme' => 'dark',
+        'theme_mode' => 'auto',
     );
 }
 
@@ -369,6 +392,41 @@ function airport_fid_sanitize_settings($settings) {
     $allowed_days = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
     $day_value = isset($settings['cache_refresh_day']) ? strtolower((string) $settings['cache_refresh_day']) : $defaults['cache_refresh_day'];
     $clean['cache_refresh_day'] = in_array($day_value, $allowed_days, true) ? $day_value : $defaults['cache_refresh_day'];
+    $clean['header_font_size'] = isset($settings['header_font_size']) ? max(12, min(40, (int) $settings['header_font_size'])) : $defaults['header_font_size'];
+    $clean['field_font_size'] = isset($settings['field_font_size']) ? max(10, min(28, (int) $settings['field_font_size'])) : $defaults['field_font_size'];
+    $clean['button_font_size'] = isset($settings['button_font_size']) ? max(10, min(24, (int) $settings['button_font_size'])) : $defaults['button_font_size'];
+    $clean['result_main_font_size'] = isset($settings['result_main_font_size']) ? max(12, min(28, (int) $settings['result_main_font_size'])) : $defaults['result_main_font_size'];
+    $clean['result_sub_font_size'] = isset($settings['result_sub_font_size']) ? max(10, min(22, (int) $settings['result_sub_font_size'])) : $defaults['result_sub_font_size'];
+    $clean['expanded_label_font_size'] = isset($settings['expanded_label_font_size']) ? max(9, min(22, (int) $settings['expanded_label_font_size'])) : $defaults['expanded_label_font_size'];
+    $clean['expanded_value_font_size'] = isset($settings['expanded_value_font_size']) ? max(10, min(24, (int) $settings['expanded_value_font_size'])) : $defaults['expanded_value_font_size'];
+    $clean['logo_max_width'] = isset($settings['logo_max_width']) ? max(24, min(220, (int) $settings['logo_max_width'])) : $defaults['logo_max_width'];
+    $clean['logo_max_height'] = isset($settings['logo_max_height']) ? max(16, min(120, (int) $settings['logo_max_height'])) : $defaults['logo_max_height'];
+    $clean['first_col_width'] = isset($settings['first_col_width']) ? max(56, min(220, (int) $settings['first_col_width'])) : $defaults['first_col_width'];
+    $clean['chevron_size'] = isset($settings['chevron_size']) ? max(10, min(48, (int) $settings['chevron_size'])) : $defaults['chevron_size'];
+    $clean['enable_animation'] = !empty($settings['enable_animation']) ? 1 : 0;
+
+    $color_keys = array(
+        'background_dark',
+        'background_light',
+        'row_dark_odd',
+        'row_dark_even',
+        'row_light_odd',
+        'row_light_even',
+        'accent_color',
+        'text_dark',
+        'text_light',
+    );
+    foreach ($color_keys as $key) {
+        $value = isset($settings[$key]) ? sanitize_hex_color($settings[$key]) : $defaults[$key];
+        $clean[$key] = $value ? $value : $defaults[$key];
+    }
+
+    $allowed_theme_modes = array('auto', 'light_only', 'dark_only');
+    $mode = isset($settings['theme_mode']) ? strtolower((string) $settings['theme_mode']) : $defaults['theme_mode'];
+    $clean['theme_mode'] = in_array($mode, $allowed_theme_modes, true) ? $mode : $defaults['theme_mode'];
+    $allowed_default_themes = array('light', 'dark');
+    $theme = isset($settings['default_theme']) ? strtolower((string) $settings['default_theme']) : $defaults['default_theme'];
+    $clean['default_theme'] = in_array($theme, $allowed_default_themes, true) ? $theme : $defaults['default_theme'];
 
     return array_merge($defaults, $clean);
 }
@@ -385,14 +443,113 @@ function airport_fid_register_menu() {
 add_action('admin_menu', 'airport_fid_register_menu');
 
 function airport_fid_render_settings_page() {
-    echo '<div class="wrap">';
-    echo '<h1>Airport FID Board</h1>';
+    $settings = airport_fid_get_settings();
+    echo '<div class="airport-fid-admin">';
+    echo '<h1>Airport FID Board Settings</h1>';
     echo '<form method="post" action="options.php">';
     settings_fields('airport_fid_settings_group');
-    do_settings_sections('airport-fid-settings');
-    submit_button();
+
+    echo '<div class="airport-fid-admin-tabs">';
+    echo '<button type="button" class="airport-fid-admin-tab is-active" data-tab="general">General Settings</button>';
+    echo '<button type="button" class="airport-fid-admin-tab" data-tab="typography">Typography</button>';
+    echo '<button type="button" class="airport-fid-admin-tab" data-tab="layout">Layout</button>';
+    echo '</div>';
+
+    echo '<section class="airport-fid-admin-panel is-active" data-panel="general">';
+    echo '<h2>General Settings</h2>';
+    echo '<div class="airport-fid-admin-grid">';
+    airport_fid_admin_text_field('FlightLookup API Key', 'api_key', $settings['api_key']);
+    airport_fid_admin_text_field('Default Airport (IATA)', 'default_airport', $settings['default_airport'], array('maxlength' => '3'));
+    airport_fid_admin_checkbox_field('Use Geolocation by Default', 'use_geolocation_default', (int) $settings['use_geolocation_default']);
+    airport_fid_admin_number_field('Max Destinations (0 = unlimited)', 'max_destinations', (int) $settings['max_destinations'], 0, 500);
+    airport_fid_admin_number_field('Max Flights (0 = unlimited)', 'max_flights', (int) $settings['max_flights'], 0, 1000);
+    airport_fid_admin_number_field('Cache TTL (minutes)', 'cache_ttl_minutes', (int) $settings['cache_ttl_minutes'], 1, 1440);
+    airport_fid_admin_select_field('Cache Refresh Day', 'cache_refresh_day', $settings['cache_refresh_day'], array(
+        'sunday' => 'Sunday',
+        'monday' => 'Monday',
+        'tuesday' => 'Tuesday',
+        'wednesday' => 'Wednesday',
+        'thursday' => 'Thursday',
+        'friday' => 'Friday',
+        'saturday' => 'Saturday',
+    ));
+    airport_fid_admin_text_field('GitHub Repo URL', 'github_repo', $settings['github_repo']);
+    airport_fid_admin_text_field('GitHub Token (optional)', 'github_token', $settings['github_token']);
+    echo '</div>';
+    echo '</section>';
+
+    echo '<section class="airport-fid-admin-panel" data-panel="typography">';
+    echo '<h2>Typography</h2>';
+    echo '<div class="airport-fid-admin-grid">';
+    airport_fid_admin_number_field('Header Font Size', 'header_font_size', (int) $settings['header_font_size'], 12, 40);
+    airport_fid_admin_number_field('Field Font Size', 'field_font_size', (int) $settings['field_font_size'], 10, 28);
+    airport_fid_admin_number_field('Button Font Size', 'button_font_size', (int) $settings['button_font_size'], 10, 24);
+    airport_fid_admin_number_field('Main Row Font Size', 'result_main_font_size', (int) $settings['result_main_font_size'], 12, 28);
+    airport_fid_admin_number_field('Subtext Font Size', 'result_sub_font_size', (int) $settings['result_sub_font_size'], 10, 22);
+    airport_fid_admin_number_field('Expanded Label Font Size', 'expanded_label_font_size', (int) $settings['expanded_label_font_size'], 9, 22);
+    airport_fid_admin_number_field('Expanded Value Font Size', 'expanded_value_font_size', (int) $settings['expanded_value_font_size'], 10, 24);
+    echo '</div>';
+    echo '</section>';
+
+    echo '<section class="airport-fid-admin-panel" data-panel="layout">';
+    echo '<h2>Layout</h2>';
+    echo '<div class="airport-fid-admin-grid">';
+    airport_fid_admin_color_field('Accent Color', 'accent_color', $settings['accent_color']);
+    airport_fid_admin_color_field('Text (Dark Mode)', 'text_dark', $settings['text_dark']);
+    airport_fid_admin_color_field('Text (Light Mode)', 'text_light', $settings['text_light']);
+    airport_fid_admin_color_field('Background (Dark)', 'background_dark', $settings['background_dark']);
+    airport_fid_admin_color_field('Background (Light)', 'background_light', $settings['background_light']);
+    airport_fid_admin_color_field('Dark Row Odd', 'row_dark_odd', $settings['row_dark_odd']);
+    airport_fid_admin_color_field('Dark Row Even', 'row_dark_even', $settings['row_dark_even']);
+    airport_fid_admin_color_field('Light Row Odd', 'row_light_odd', $settings['row_light_odd']);
+    airport_fid_admin_color_field('Light Row Even', 'row_light_even', $settings['row_light_even']);
+    airport_fid_admin_number_field('Logo Max Width', 'logo_max_width', (int) $settings['logo_max_width'], 24, 220);
+    airport_fid_admin_number_field('Logo Max Height', 'logo_max_height', (int) $settings['logo_max_height'], 16, 120);
+    airport_fid_admin_number_field('First Column Width', 'first_col_width', (int) $settings['first_col_width'], 56, 220);
+    airport_fid_admin_number_field('Chevron Size', 'chevron_size', (int) $settings['chevron_size'], 10, 48);
+    airport_fid_admin_checkbox_field('Enable Flip Animation', 'enable_animation', (int) $settings['enable_animation']);
+    airport_fid_admin_select_field('Default Theme', 'default_theme', $settings['default_theme'], array('dark' => 'Dark', 'light' => 'Light'));
+    airport_fid_admin_select_field('Theme Mode', 'theme_mode', $settings['theme_mode'], array(
+        'auto' => 'Allow toggle',
+        'light_only' => 'Light only',
+        'dark_only' => 'Dark only',
+    ));
+    echo '</div>';
+    echo '</section>';
+
+    echo '<div class="airport-fid-admin-actions">';
+    submit_button('Save Settings', 'primary', 'submit', false);
+    echo '</div>';
     echo '</form>';
     echo '</div>';
+}
+
+function airport_fid_admin_text_field($label, $key, $value, $attrs = array()) {
+    echo '<label class="airport-fid-admin-field"><span>' . esc_html($label) . '</span><input type="text" name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']" value="' . esc_attr($value) . '"';
+    foreach ($attrs as $attr_key => $attr_value) {
+        echo ' ' . esc_attr($attr_key) . '="' . esc_attr($attr_value) . '"';
+    }
+    echo ' /></label>';
+}
+
+function airport_fid_admin_number_field($label, $key, $value, $min, $max) {
+    echo '<label class="airport-fid-admin-field"><span>' . esc_html($label) . '</span><input type="number" name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']" value="' . esc_attr($value) . '" min="' . esc_attr($min) . '" max="' . esc_attr($max) . '" /></label>';
+}
+
+function airport_fid_admin_color_field($label, $key, $value) {
+    echo '<label class="airport-fid-admin-field"><span>' . esc_html($label) . '</span><input type="color" name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']" value="' . esc_attr($value) . '" /></label>';
+}
+
+function airport_fid_admin_checkbox_field($label, $key, $checked_value) {
+    echo '<label class="airport-fid-admin-field airport-fid-admin-checkbox"><input type="checkbox" name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']" value="1" ' . checked(1, $checked_value, false) . ' /><span>' . esc_html($label) . '</span></label>';
+}
+
+function airport_fid_admin_select_field($label, $key, $value, $options) {
+    echo '<label class="airport-fid-admin-field"><span>' . esc_html($label) . '</span><select name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']">';
+    foreach ($options as $option_value => $option_label) {
+        echo '<option value="' . esc_attr($option_value) . '"' . selected($value, $option_value, false) . '>' . esc_html($option_label) . '</option>';
+    }
+    echo '</select></label>';
 }
 
 function airport_fid_register_assets() {
@@ -411,6 +568,53 @@ function airport_fid_register_assets() {
     );
 }
 add_action('wp_enqueue_scripts', 'airport_fid_register_assets');
+
+function airport_fid_register_admin_assets($hook) {
+    if ($hook !== 'settings_page_airport-fid-settings') {
+        return;
+    }
+    wp_enqueue_style(
+        'airport-fid-admin-style',
+        plugins_url('assets/css/admin-settings.css', __FILE__),
+        array(),
+        AIRPORT_FID_VERSION
+    );
+    wp_enqueue_script(
+        'airport-fid-admin-script',
+        plugins_url('assets/js/admin-settings.js', __FILE__),
+        array(),
+        AIRPORT_FID_VERSION,
+        true
+    );
+}
+add_action('admin_enqueue_scripts', 'airport_fid_register_admin_assets');
+
+function airport_fid_frontend_inline_css($settings) {
+    $css = '.airport-fid-board{';
+    $css .= '--fid-accent:' . esc_attr($settings['accent_color']) . ';';
+    $css .= '--fid-text-dark:' . esc_attr($settings['text_dark']) . ';';
+    $css .= '--fid-text-light:' . esc_attr($settings['text_light']) . ';';
+    $css .= '--fid-bg-dark:' . esc_attr($settings['background_dark']) . ';';
+    $css .= '--fid-bg-light:' . esc_attr($settings['background_light']) . ';';
+    $css .= '--fid-row-dark-odd:' . esc_attr($settings['row_dark_odd']) . ';';
+    $css .= '--fid-row-dark-even:' . esc_attr($settings['row_dark_even']) . ';';
+    $css .= '--fid-row-light-odd:' . esc_attr($settings['row_light_odd']) . ';';
+    $css .= '--fid-row-light-even:' . esc_attr($settings['row_light_even']) . ';';
+    $css .= '--fid-header-size:' . (int) $settings['header_font_size'] . 'px;';
+    $css .= '--fid-field-size:' . (int) $settings['field_font_size'] . 'px;';
+    $css .= '--fid-button-size:' . (int) $settings['button_font_size'] . 'px;';
+    $css .= '--fid-row-main-size:' . (int) $settings['result_main_font_size'] . 'px;';
+    $css .= '--fid-row-sub-size:' . (int) $settings['result_sub_font_size'] . 'px;';
+    $css .= '--fid-expanded-label-size:' . (int) $settings['expanded_label_font_size'] . 'px;';
+    $css .= '--fid-expanded-value-size:' . (int) $settings['expanded_value_font_size'] . 'px;';
+    $css .= '--fid-logo-max-width:' . (int) $settings['logo_max_width'] . 'px;';
+    $css .= '--fid-logo-max-height:' . (int) $settings['logo_max_height'] . 'px;';
+    $css .= '--fid-first-col-width:' . (int) $settings['first_col_width'] . 'px;';
+    $css .= '--fid-chevron-size:' . (int) $settings['chevron_size'] . 'px;';
+    $css .= '}';
+
+    return $css;
+}
 
 function airport_fid_init_updater() {
     $settings = airport_fid_get_settings();
@@ -487,6 +691,7 @@ function airport_fid_shortcode($atts) {
 
     wp_enqueue_style('airport-fid-style');
     wp_enqueue_script('airport-fid-script');
+    wp_add_inline_style('airport-fid-style', airport_fid_frontend_inline_css($settings));
 
     $config = array(
         'restUrl' => esc_url_raw(rest_url('airport-fid/v1')),
@@ -495,6 +700,9 @@ function airport_fid_shortcode($atts) {
         'useGeolocation' => $atts['use_geolocation'] === '1',
         'limit' => (int) $atts['limit'],
         'nonce' => wp_create_nonce('wp_rest'),
+        'enableAnimation' => (int) $settings['enable_animation'] === 1,
+        'defaultTheme' => $settings['default_theme'],
+        'themeMode' => $settings['theme_mode'],
     );
 
     wp_localize_script('airport-fid-script', 'AirportFID', $config);
