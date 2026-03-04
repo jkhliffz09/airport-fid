@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.17
+Stable tag: 0.2.18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
+= 0.2.18 =
+* Fixed generated featured image text rendering when TTF/FreeType fonts are unavailable.
+* Added `Settings` link in plugin row actions (`Settings | Deactivate`).
+
 = 0.2.17 =
 * Added dynamic featured image generation for generated airport pages.
 * Added automatic featured image attach/update during airport page sync.
@@ -125,6 +129,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.18 =
+Featured image text rendering fallback and plugin row Settings link.
 
 = 0.2.17 =
 Dynamic featured image generation for generated airport schedule pages.

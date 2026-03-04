@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.17
+ * Version: 0.2.18
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.17';
+const AIRPORT_FID_VERSION = '0.2.18';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
@@ -527,6 +527,13 @@ function airport_fid_register_menu() {
     );
 }
 add_action('admin_menu', 'airport_fid_register_menu');
+
+function airport_fid_plugin_action_links($links) {
+    $settings_url = admin_url('options-general.php?page=airport-fid-settings');
+    array_unshift($links, '<a href="' . esc_url($settings_url) . '">Settings</a>');
+    return $links;
+}
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'airport_fid_plugin_action_links');
 
 function airport_fid_render_settings_page() {
     $settings = airport_fid_get_settings();
@@ -1254,7 +1261,8 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
     }
 
     $font = airport_fid_get_banner_font();
-    if ($font !== '') {
+    $can_ttf = ($font !== '' && function_exists('imagettftext'));
+    if ($can_ttf) {
         imagettftext($img, 16, 0, 20, 28, $cyan, $font, 'PASSRIDER.COM');
         imagettftext($img, 16, 0, $width - 58, 28, $amber, $font, strtoupper($airport));
 
@@ -1283,8 +1291,24 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
         imagettftext($img, 13, 0, 962, 88, $muted, $font, 'GATE');
     } else {
         imagestring($img, 5, 20, 14, 'PASSRIDER.COM', $cyan);
-        imagestring($img, 5, $width - 50, 14, strtoupper($airport), $amber);
-        imagestring($img, 5, 30, 80, strtoupper($airport), $white);
+        imagestring($img, 5, $width - 44, 14, strtoupper($airport), $amber);
+        imagestring($img, 5, 30, 76, strtoupper($airport), $white);
+        imagestring($img, 5, 30, 132, 'FLIGHT SCHEDULE', $white);
+        imagestring($img, 5, 30, 162, '& DEPARTURE BOARD', $amber);
+        $airport_name_u = strtoupper((string) $airport_name);
+        $airport_name_u = preg_replace('/\s+AIRPORT$/', '', $airport_name_u);
+        $airport_name_u = wordwrap($airport_name_u, 26, "\n", true);
+        $name_lines = explode("\n", (string) $airport_name_u);
+        $line_y = 214;
+        foreach ($name_lines as $line) {
+            imagestring($img, 5, 30, $line_y, trim($line), $muted);
+            $line_y += 24;
+        }
+        imagestring($img, 4, 620, 76, 'DESTINATION', $muted);
+        imagestring($img, 4, 768, 76, 'DEP', $muted);
+        imagestring($img, 4, 826, 76, 'AL', $muted);
+        imagestring($img, 4, 878, 76, 'STATUS', $muted);
+        imagestring($img, 4, 962, 76, 'GATE', $muted);
     }
 
     $rows = airport_fid_get_top_flights_for_banner($dataset['flights'] ?? array(), 10);
@@ -1292,7 +1316,7 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
     foreach ($rows as $index => $row) {
         $shade = ($index % 2 === 0) ? imagecolorallocatealpha($img, 19, 41, 74, 45) : imagecolorallocatealpha($img, 12, 27, 53, 35);
         imagefilledrectangle($img, 620, $row_y - 22, 1120, $row_y + 18, $shade);
-        if ($font !== '') {
+        if ($can_ttf) {
             $status_color = ($row['status'] === 'ON TIME') ? $green : $muted;
             imagettftext($img, 17, 0, 628, $row_y + 8, $white, $font, $row['destination']);
             imagettftext($img, 17, 0, 768, $row_y + 8, $amber, $font, $row['dep']);
@@ -1300,7 +1324,12 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
             imagettftext($img, 17, 0, 878, $row_y + 8, $status_color, $font, $row['status']);
             imagettftext($img, 17, 0, 962, $row_y + 8, $muted, $font, $row['gate']);
         } else {
-            imagestring($img, 4, 628, $row_y - 12, $row['destination'], $white);
+            $status_color = ($row['status'] === 'ON TIME') ? $green : $muted;
+            imagestring($img, 4, 628, $row_y - 12, substr((string) $row['destination'], 0, 18), $white);
+            imagestring($img, 4, 768, $row_y - 12, (string) $row['dep'], $amber);
+            imagestring($img, 4, 826, $row_y - 12, (string) $row['al'], $cyan);
+            imagestring($img, 4, 878, $row_y - 12, substr((string) $row['status'], 0, 9), $status_color);
+            imagestring($img, 4, 962, $row_y - 12, (string) $row['gate'], $muted);
         }
         $row_y += 48;
     }
@@ -1330,11 +1359,11 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
     $stat_x = 80;
     foreach ($stats as $i => $label) {
         $parts = explode("\n", $label);
-        if ($font !== '') {
+        if ($can_ttf) {
             imagettftext($img, 30, 0, $stat_x, $height - 42, $amber, $font, $parts[0]);
             imagettftext($img, 12, 0, $stat_x, $height - 22, $muted, $font, $parts[1]);
         } else {
-            imagestring($img, 4, $stat_x, $height - 58, $parts[0], $amber);
+            imagestring($img, 5, $stat_x, $height - 58, $parts[0], $amber);
             imagestring($img, 2, $stat_x, $height - 30, $parts[1], $muted);
         }
         if ($i < count($stats) - 1) {
