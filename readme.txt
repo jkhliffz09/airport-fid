@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.13
+Stable tag: 0.2.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,10 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
+= 0.2.14 =
+* Moved Cache Items into a dedicated section below settings.
+* Added inline JSON editing and per-item cache update in admin.
+
 = 0.2.13 =
 * Added Cache Items admin tab to view cached request records.
 
@@ -107,6 +111,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.14 =
+Cache items moved below settings with inline JSON editing.
 
 = 0.2.13 =
 Cache items admin section added.

@@ -14,6 +14,25 @@
     letter-spacing: 0.04em;
 }
 
+.airport-fid-admin-notice {
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin: 0 0 14px;
+    font-size: 13px;
+}
+
+.airport-fid-admin-notice.is-success {
+    background: rgba(0, 188, 212, 0.16);
+    border: 1px solid rgba(0, 188, 212, 0.5);
+    color: #a8eff7;
+}
+
+.airport-fid-admin-notice.is-error {
+    background: rgba(244, 67, 54, 0.15);
+    border: 1px solid rgba(244, 67, 54, 0.5);
+    color: #ffd2ce;
+}
+
 .airport-fid-admin-tabs {
     display: flex;
     gap: 8px;
@@ -108,6 +127,17 @@
     margin-top: 18px;
 }
 
+.airport-fid-admin-cache-section {
+    margin-top: 22px;
+    border-top: 1px solid #22384d;
+    padding-top: 16px;
+}
+
+.airport-fid-admin-cache-section h2 {
+    color: #ffffff;
+    margin: 0 0 10px;
+}
+
 .airport-fid-admin .button-primary {
     background: #00bcd4;
     border-color: #00bcd4;
@@ -147,6 +177,29 @@
 .airport-fid-admin-table td {
     color: #e7eef7;
     font-size: 13px;
+    vertical-align: top;
+}
+
+.airport-fid-admin-json-cell {
+    min-width: 360px;
+}
+
+.airport-fid-admin-json-form textarea {
+    width: 100%;
+    min-height: 180px;
+    border: 1px solid #29465f;
+    border-radius: 8px;
+    background: #0f1d2a;
+    color: #e7eef7;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 10px;
+    resize: vertical;
+}
+
+.airport-fid-admin-json-form .button {
+    margin-top: 8px;
 }
 
 .airport-fid-admin-empty {

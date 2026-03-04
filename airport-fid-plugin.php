@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.13
+ * Version: 0.2.14
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.13';
+const AIRPORT_FID_VERSION = '0.2.14';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 
 function airport_fid_install() {
@@ -446,6 +446,11 @@ function airport_fid_render_settings_page() {
     $settings = airport_fid_get_settings();
     echo '<div class="airport-fid-admin">';
     echo '<h1>Airport FID Board Settings</h1>';
+    if (isset($_GET['cache_updated']) && $_GET['cache_updated'] === '1') {
+        echo '<div class="airport-fid-admin-notice is-success">Cache item updated.</div>';
+    } elseif (isset($_GET['cache_error']) && $_GET['cache_error'] === 'invalid_json') {
+        echo '<div class="airport-fid-admin-notice is-error">Invalid JSON. Please fix the payload format and try again.</div>';
+    }
     echo '<form method="post" action="options.php">';
     settings_fields('airport_fid_settings_group');
 
@@ -453,7 +458,6 @@ function airport_fid_render_settings_page() {
     echo '<button type="button" class="airport-fid-admin-tab is-active" data-tab="general">General Settings</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="typography">Typography</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="layout">Layout</button>';
-    echo '<button type="button" class="airport-fid-admin-tab" data-tab="cache">Cache Items</button>';
     echo '</div>';
 
     echo '<section class="airport-fid-admin-panel is-active" data-panel="general">';
@@ -477,11 +481,6 @@ function airport_fid_render_settings_page() {
     airport_fid_admin_text_field('GitHub Repo URL', 'github_repo', $settings['github_repo']);
     airport_fid_admin_text_field('GitHub Token (optional)', 'github_token', $settings['github_token']);
     echo '</div>';
-    echo '</section>';
-
-    echo '<section class="airport-fid-admin-panel" data-panel="cache">';
-    echo '<h2>Cached Request Items</h2>';
-    airport_fid_render_cache_items_table();
     echo '</section>';
 
     echo '<section class="airport-fid-admin-panel" data-panel="typography">';
@@ -527,13 +526,17 @@ function airport_fid_render_settings_page() {
     submit_button('Save Settings', 'primary', 'submit', false);
     echo '</div>';
     echo '</form>';
+    echo '<section class="airport-fid-admin-cache-section">';
+    echo '<h2>Cached Request Items</h2>';
+    airport_fid_render_cache_items_table();
+    echo '</section>';
     echo '</div>';
 }
 
 function airport_fid_render_cache_items_table() {
     global $wpdb;
     $table = airport_fid_get_cache_table();
-    $rows = $wpdb->get_results("SELECT airport, flight_date, sort, payload, updated_at FROM {$table} ORDER BY updated_at DESC LIMIT 200", ARRAY_A);
+    $rows = $wpdb->get_results("SELECT id, airport, flight_date, sort, payload, updated_at FROM {$table} ORDER BY updated_at DESC LIMIT 200", ARRAY_A);
 
     if (empty($rows)) {
         echo '<p class="airport-fid-admin-empty">No cached items found.</p>';
@@ -548,6 +551,7 @@ function airport_fid_render_cache_items_table() {
     echo '<th>Sort</th>';
     echo '<th>Flights</th>';
     echo '<th>Updated</th>';
+    echo '<th>JSON Payload</th>';
     echo '</tr></thead><tbody>';
 
     foreach ($rows as $row) {
@@ -570,12 +574,64 @@ function airport_fid_render_cache_items_table() {
         echo '<td>' . esc_html($row['sort']) . '</td>';
         echo '<td>' . esc_html((string) $flights_count) . '</td>';
         echo '<td>' . esc_html($row['updated_at']) . '</td>';
+        echo '<td class="airport-fid-admin-json-cell">';
+        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="airport-fid-admin-json-form">';
+        echo '<input type="hidden" name="action" value="airport_fid_update_cache_item" />';
+        echo '<input type="hidden" name="cache_id" value="' . esc_attr((string) $row['id']) . '" />';
+        wp_nonce_field('airport_fid_update_cache_item_' . (string) $row['id'], 'airport_fid_cache_nonce');
+        $pretty_json = json_encode(json_decode((string) $row['payload'], true), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        if ($pretty_json === false || $pretty_json === 'null') {
+            $pretty_json = (string) $row['payload'];
+        }
+        echo '<textarea name="payload" rows="8">' . esc_textarea($pretty_json) . '</textarea>';
+        echo '<button type="submit" class="button button-primary">Update JSON</button>';
+        echo '</form>';
+        echo '</td>';
         echo '</tr>';
     }
 
     echo '</tbody></table>';
     echo '</div>';
 }
+
+function airport_fid_update_cache_item() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized request.');
+    }
+
+    $cache_id = isset($_POST['cache_id']) ? (int) $_POST['cache_id'] : 0;
+    $payload_raw = isset($_POST['payload']) ? wp_unslash((string) $_POST['payload']) : '';
+    if ($cache_id <= 0) {
+        wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings'));
+        exit;
+    }
+    if (!isset($_POST['airport_fid_cache_nonce']) || !wp_verify_nonce(sanitize_text_field((string) $_POST['airport_fid_cache_nonce']), 'airport_fid_update_cache_item_' . $cache_id)) {
+        wp_die('Invalid security token.');
+    }
+
+    $decoded = json_decode($payload_raw, true);
+    if (!is_array($decoded)) {
+        wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&cache_error=invalid_json'));
+        exit;
+    }
+
+    global $wpdb;
+    $table = airport_fid_get_cache_table();
+    $wpdb->update(
+        $table,
+        array(
+            'payload' => wp_json_encode($decoded),
+            'updated_at' => current_time('mysql'),
+        ),
+        array('id' => $cache_id),
+        array('%s', '%s'),
+        array('%d')
+    );
+
+    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&cache_updated=1'));
+    exit;
+}
+add_action('admin_post_airport_fid_update_cache_item', 'airport_fid_update_cache_item');
 
 function airport_fid_admin_text_field($label, $key, $value, $attrs = array()) {
     echo '<label class="airport-fid-admin-field"><span>' . esc_html($label) . '</span><input type="text" name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']" value="' . esc_attr($value) . '"';
