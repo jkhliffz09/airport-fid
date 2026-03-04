@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.15
+ * Version: 0.2.16
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,8 +13,11 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.15';
+const AIRPORT_FID_VERSION = '0.2.16';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
+const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
+const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
+const AIRPORT_FID_PAGE_SYNC_HOOK = 'airport_fid_generate_airport_pages_event';
 
 function airport_fid_install() {
     global $wpdb;
@@ -36,7 +39,20 @@ function airport_fid_install() {
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($sql);
 }
-register_activation_hook(__FILE__, 'airport_fid_install');
+
+function airport_fid_activation_setup() {
+    airport_fid_install();
+    airport_fid_schedule_airport_pages_sync(true);
+}
+register_activation_hook(__FILE__, 'airport_fid_activation_setup');
+
+function airport_fid_deactivation_cleanup() {
+    $timestamp = wp_next_scheduled(AIRPORT_FID_PAGE_SYNC_HOOK);
+    if ($timestamp) {
+        wp_unschedule_event($timestamp, AIRPORT_FID_PAGE_SYNC_HOOK);
+    }
+}
+register_deactivation_hook(__FILE__, 'airport_fid_deactivation_cleanup');
 
 function airport_fid_maybe_install() {
     global $wpdb;
@@ -47,6 +63,73 @@ function airport_fid_maybe_install() {
     }
 }
 add_action('plugins_loaded', 'airport_fid_maybe_install');
+
+function airport_fid_add_cron_schedules($schedules) {
+    if (!isset($schedules['airport_fid_weekly'])) {
+        $schedules['airport_fid_weekly'] = array(
+            'interval' => WEEK_IN_SECONDS,
+            'display' => 'Once Weekly (Airport FID)',
+        );
+    }
+    return $schedules;
+}
+add_filter('cron_schedules', 'airport_fid_add_cron_schedules');
+
+function airport_fid_next_day_timestamp($day_name) {
+    $day_name = strtolower((string) $day_name);
+    $day_map = array(
+        'sunday' => 0,
+        'monday' => 1,
+        'tuesday' => 2,
+        'wednesday' => 3,
+        'thursday' => 4,
+        'friday' => 5,
+        'saturday' => 6,
+    );
+    $target = isset($day_map[$day_name]) ? $day_map[$day_name] : 3;
+
+    $tz = wp_timezone();
+    $now = new DateTimeImmutable('now', $tz);
+    $today_start = $now->setTime(0, 0, 0);
+    $weekday = (int) $today_start->format('w');
+    $days_ahead = ($target - $weekday + 7) % 7;
+    $next = $today_start->modify('+' . $days_ahead . ' days')->setTime(3, 0, 0);
+    if ($next <= $now) {
+        $next = $next->modify('+7 days');
+    }
+    return $next->getTimestamp();
+}
+
+function airport_fid_schedule_airport_pages_sync($force = false) {
+    $settings = airport_fid_get_settings();
+    if ((int) ($settings['airport_pages_enabled'] ?? 1) !== 1) {
+        airport_fid_deactivation_cleanup();
+        return;
+    }
+
+    $next = airport_fid_next_day_timestamp($settings['cache_refresh_day'] ?? 'wednesday');
+    $current = wp_next_scheduled(AIRPORT_FID_PAGE_SYNC_HOOK);
+    if ($force && $current) {
+        wp_unschedule_event($current, AIRPORT_FID_PAGE_SYNC_HOOK);
+        $current = false;
+    }
+
+    if (!$current) {
+        wp_schedule_event($next, 'airport_fid_weekly', AIRPORT_FID_PAGE_SYNC_HOOK);
+    }
+}
+add_action('init', 'airport_fid_schedule_airport_pages_sync');
+
+function airport_fid_after_settings_update($old, $new) {
+    $old_day = isset($old['cache_refresh_day']) ? (string) $old['cache_refresh_day'] : 'wednesday';
+    $new_day = isset($new['cache_refresh_day']) ? (string) $new['cache_refresh_day'] : 'wednesday';
+    $old_enabled = isset($old['airport_pages_enabled']) ? (int) $old['airport_pages_enabled'] : 1;
+    $new_enabled = isset($new['airport_pages_enabled']) ? (int) $new['airport_pages_enabled'] : 1;
+    if ($old_day !== $new_day || $old_enabled !== $new_enabled) {
+        airport_fid_schedule_airport_pages_sync(true);
+    }
+}
+add_action('update_option_' . AIRPORT_FID_OPTION_KEY, 'airport_fid_after_settings_update', 10, 2);
 
 function airport_fid_get_cache_table() {
     global $wpdb;
@@ -136,6 +219,7 @@ function airport_fid_default_settings() {
         'max_flights' => 24,
         'cache_ttl_minutes' => 30,
         'cache_refresh_day' => 'wednesday',
+        'airport_pages_enabled' => 1,
         'header_font_size' => 18,
         'field_font_size' => 14,
         'button_font_size' => 12,
@@ -392,6 +476,7 @@ function airport_fid_sanitize_settings($settings) {
     $allowed_days = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
     $day_value = isset($settings['cache_refresh_day']) ? strtolower((string) $settings['cache_refresh_day']) : $defaults['cache_refresh_day'];
     $clean['cache_refresh_day'] = in_array($day_value, $allowed_days, true) ? $day_value : $defaults['cache_refresh_day'];
+    $clean['airport_pages_enabled'] = !empty($settings['airport_pages_enabled']) ? 1 : 0;
     $clean['header_font_size'] = isset($settings['header_font_size']) ? max(12, min(40, (int) $settings['header_font_size'])) : $defaults['header_font_size'];
     $clean['field_font_size'] = isset($settings['field_font_size']) ? max(10, min(28, (int) $settings['field_font_size'])) : $defaults['field_font_size'];
     $clean['button_font_size'] = isset($settings['button_font_size']) ? max(10, min(24, (int) $settings['button_font_size'])) : $defaults['button_font_size'];
@@ -450,6 +535,12 @@ function airport_fid_render_settings_page() {
         echo '<div class="airport-fid-admin-notice is-success">Cache item updated.</div>';
     } elseif (isset($_GET['cache_error']) && $_GET['cache_error'] === 'invalid_json') {
         echo '<div class="airport-fid-admin-notice is-error">Invalid JSON. Please fix the payload format and try again.</div>';
+    } elseif (isset($_GET['pages_sync']) && $_GET['pages_sync'] === '1') {
+        $created = isset($_GET['pages_created']) ? (int) $_GET['pages_created'] : 0;
+        $updated = isset($_GET['pages_updated']) ? (int) $_GET['pages_updated'] : 0;
+        echo '<div class="airport-fid-admin-notice is-success">Airport pages sync completed. Created: ' . esc_html((string) $created) . ', Updated: ' . esc_html((string) $updated) . '.</div>';
+    } elseif (isset($_GET['pages_sync']) && $_GET['pages_sync'] === '0') {
+        echo '<div class="airport-fid-admin-notice is-error">Airport pages sync failed.</div>';
     }
     echo '<form method="post" action="options.php">';
     settings_fields('airport_fid_settings_group');
@@ -478,6 +569,7 @@ function airport_fid_render_settings_page() {
         'friday' => 'Friday',
         'saturday' => 'Saturday',
     ));
+    airport_fid_admin_checkbox_field('Enable Weekly Airport Page Sync', 'airport_pages_enabled', (int) $settings['airport_pages_enabled']);
     airport_fid_admin_text_field('GitHub Repo URL', 'github_repo', $settings['github_repo']);
     airport_fid_admin_text_field('GitHub Token (optional)', 'github_token', $settings['github_token']);
     echo '</div>';
@@ -529,6 +621,15 @@ function airport_fid_render_settings_page() {
     echo '<section class="airport-fid-admin-cache-section">';
     echo '<h2>Cached Request Items</h2>';
     airport_fid_render_cache_items_table();
+    echo '</section>';
+    echo '<section class="airport-fid-admin-cache-section">';
+    echo '<h2>Airport Pages</h2>';
+    echo '<p>Generate or update one page per cached airport using the dynamic airport schedule template.</p>';
+    echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+    echo '<input type="hidden" name="action" value="airport_fid_generate_airport_pages" />';
+    wp_nonce_field('airport_fid_generate_airport_pages', 'airport_fid_pages_nonce');
+    submit_button('Generate/Update Airport Pages', 'secondary', 'submit', false);
+    echo '</form>';
     echo '</section>';
     echo '</div>';
 }
@@ -639,6 +740,358 @@ function airport_fid_update_cache_item() {
 }
 add_action('admin_post_airport_fid_update_cache_item', 'airport_fid_update_cache_item');
 
+function airport_fid_handle_generate_airport_pages() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized request.');
+    }
+    if (!isset($_POST['airport_fid_pages_nonce']) || !wp_verify_nonce(sanitize_text_field((string) $_POST['airport_fid_pages_nonce']), 'airport_fid_generate_airport_pages')) {
+        wp_die('Invalid security token.');
+    }
+
+    $result = airport_fid_generate_airport_pages();
+    if (is_wp_error($result)) {
+        wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&pages_sync=0'));
+        exit;
+    }
+
+    $created = isset($result['created']) ? (int) $result['created'] : 0;
+    $updated = isset($result['updated']) ? (int) $result['updated'] : 0;
+    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&pages_sync=1&pages_created=' . $created . '&pages_updated=' . $updated));
+    exit;
+}
+add_action('admin_post_airport_fid_generate_airport_pages', 'airport_fid_handle_generate_airport_pages');
+add_action(AIRPORT_FID_PAGE_SYNC_HOOK, 'airport_fid_generate_airport_pages');
+
+function airport_fid_generate_airport_pages() {
+    $settings = airport_fid_get_settings();
+    if ((int) ($settings['airport_pages_enabled'] ?? 1) !== 1) {
+        return array('created' => 0, 'updated' => 0, 'skipped' => 0);
+    }
+
+    $airports = airport_fid_get_cached_airports();
+    if (empty($airports)) {
+        return array('created' => 0, 'updated' => 0, 'skipped' => 0);
+    }
+
+    $created = 0;
+    $updated = 0;
+    $skipped = 0;
+
+    foreach ($airports as $airport) {
+        $dataset = airport_fid_build_airport_dataset($airport);
+        if (empty($dataset) || empty($dataset['flights'])) {
+            $skipped++;
+            continue;
+        }
+        $result = airport_fid_upsert_airport_page($airport, $dataset);
+        if ($result === 'created') {
+            $created++;
+        } elseif ($result === 'updated') {
+            $updated++;
+        } else {
+            $skipped++;
+        }
+    }
+
+    return array(
+        'created' => $created,
+        'updated' => $updated,
+        'skipped' => $skipped,
+    );
+}
+
+function airport_fid_get_cached_airports() {
+    global $wpdb;
+    $table = airport_fid_get_cache_table();
+    $rows = $wpdb->get_col("SELECT DISTINCT airport FROM {$table} ORDER BY airport ASC");
+    if (!is_array($rows)) {
+        return array();
+    }
+
+    $airports = array();
+    foreach ($rows as $airport) {
+        $airport = strtoupper(trim((string) $airport));
+        if ($airport !== '') {
+            $airports[] = $airport;
+        }
+    }
+    return array_values(array_unique($airports));
+}
+
+function airport_fid_build_airport_dataset($airport) {
+    global $wpdb;
+    $table = airport_fid_get_cache_table();
+    $latest_date = $wpdb->get_var($wpdb->prepare(
+        "SELECT MAX(flight_date) FROM {$table} WHERE airport = %s",
+        $airport
+    ));
+    if (!$latest_date) {
+        return array();
+    }
+
+    $rows = $wpdb->get_results($wpdb->prepare(
+        "SELECT payload, updated_at FROM {$table} WHERE airport = %s AND flight_date = %s ORDER BY updated_at DESC",
+        $airport,
+        $latest_date
+    ), ARRAY_A);
+
+    if (empty($rows)) {
+        return array();
+    }
+
+    $airport_name = '';
+    $latest_updated_at = '';
+    $flight_map = array();
+
+    foreach ($rows as $row) {
+        if ($latest_updated_at === '' || strtotime((string) $row['updated_at']) > strtotime($latest_updated_at)) {
+            $latest_updated_at = (string) $row['updated_at'];
+        }
+        $payload = json_decode((string) $row['payload'], true);
+        if (!is_array($payload)) {
+            continue;
+        }
+        if ($airport_name === '' && !empty($payload['airport_name'])) {
+            $airport_name = (string) $payload['airport_name'];
+        }
+        $flights = isset($payload['flights']) && is_array($payload['flights']) ? $payload['flights'] : array();
+        foreach ($flights as $flight) {
+            if (!is_array($flight)) {
+                continue;
+            }
+            if ($airport_name === '' && !empty($flight['origin_name'])) {
+                $airport_name = (string) $flight['origin_name'];
+            }
+            $key = strtoupper((string) ($flight['flight_number'] ?? ''))
+                . '|' . (string) ((int) ($flight['departure_ts'] ?? 0))
+                . '|' . strtoupper((string) ($flight['destination'] ?? ''))
+                . '|' . (string) ((int) ($flight['arrival_ts'] ?? 0));
+            if (!isset($flight_map[$key])) {
+                $flight_map[$key] = $flight;
+            }
+        }
+    }
+
+    $flights = array_values($flight_map);
+    usort($flights, function ($a, $b) {
+        $a_ts = isset($a['departure_ts']) ? (int) $a['departure_ts'] : 0;
+        $b_ts = isset($b['departure_ts']) ? (int) $b['departure_ts'] : 0;
+        if ($a_ts === $b_ts) {
+            return 0;
+        }
+        return $a_ts < $b_ts ? -1 : 1;
+    });
+
+    return array(
+        'airport' => $airport,
+        'airport_name' => $airport_name ?: $airport,
+        'flight_date' => $latest_date,
+        'updated_at' => $latest_updated_at,
+        'flights' => $flights,
+    );
+}
+
+function airport_fid_upsert_airport_page($airport, $dataset) {
+    $airport = strtoupper((string) $airport);
+    $title = $airport . ' Airport Flight Schedules';
+    $slug = strtolower($airport) . '-airport-flight-schedules';
+    $content = airport_fid_render_airport_page_content($dataset);
+
+    $existing = airport_fid_get_airport_page_by_code($airport);
+    if (!$existing) {
+        $existing = get_page_by_path($slug, OBJECT, 'page');
+    }
+
+    $postarr = array(
+        'post_title' => $title,
+        'post_name' => $slug,
+        'post_type' => 'page',
+        'post_content' => $content,
+        'post_status' => 'publish',
+    );
+
+    if ($existing && isset($existing->ID)) {
+        $postarr['ID'] = (int) $existing->ID;
+        $postarr['post_status'] = $existing->post_status ?: 'publish';
+        $post_id = wp_update_post($postarr, true);
+        if (is_wp_error($post_id)) {
+            return 'skipped';
+        }
+        update_post_meta($post_id, AIRPORT_FID_PAGE_META_FLAG, '1');
+        update_post_meta($post_id, AIRPORT_FID_PAGE_META_AIRPORT, $airport);
+        update_post_meta($post_id, '_airport_fid_generated_at', current_time('mysql'));
+        return 'updated';
+    }
+
+    $post_id = wp_insert_post($postarr, true);
+    if (is_wp_error($post_id) || !$post_id) {
+        return 'skipped';
+    }
+
+    update_post_meta($post_id, AIRPORT_FID_PAGE_META_FLAG, '1');
+    update_post_meta($post_id, AIRPORT_FID_PAGE_META_AIRPORT, $airport);
+    update_post_meta($post_id, '_airport_fid_generated_at', current_time('mysql'));
+    return 'created';
+}
+
+function airport_fid_get_airport_page_by_code($airport) {
+    $query = new WP_Query(array(
+        'post_type' => 'page',
+        'post_status' => array('publish', 'draft', 'private'),
+        'posts_per_page' => 1,
+        'meta_query' => array(
+            array(
+                'key' => AIRPORT_FID_PAGE_META_AIRPORT,
+                'value' => strtoupper((string) $airport),
+            ),
+        ),
+        'fields' => 'all',
+        'no_found_rows' => true,
+    ));
+
+    if ($query->have_posts()) {
+        return $query->posts[0];
+    }
+    return null;
+}
+
+function airport_fid_format_human_date_from_ymd($ymd) {
+    if (!preg_match('/^\d{8}$/', (string) $ymd)) {
+        return '';
+    }
+    try {
+        $dt = new DateTimeImmutable(substr($ymd, 0, 4) . '-' . substr($ymd, 4, 2) . '-' . substr($ymd, 6, 2));
+        return $dt->format('M j, Y');
+    } catch (Exception $e) {
+        return $ymd;
+    }
+}
+
+function airport_fid_render_airport_page_content($dataset) {
+    $airport = strtoupper((string) ($dataset['airport'] ?? ''));
+    $airport_name = (string) ($dataset['airport_name'] ?? $airport);
+    $flights = isset($dataset['flights']) && is_array($dataset['flights']) ? $dataset['flights'] : array();
+    $flight_date = (string) ($dataset['flight_date'] ?? '');
+    $flight_date_human = airport_fid_format_human_date_from_ymd($flight_date);
+
+    $airline_counts = array();
+    $destination_counts = array();
+    $destination_airlines = array();
+
+    foreach ($flights as $flight) {
+        if (!is_array($flight)) {
+            continue;
+        }
+        $airline_code = strtoupper(trim((string) ($flight['airline_code'] ?? '')));
+        $airline_name = trim((string) ($flight['airline'] ?? ''));
+        $airline_key = $airline_code !== '' ? $airline_code : $airline_name;
+        if ($airline_key !== '') {
+            if (!isset($airline_counts[$airline_key])) {
+                $airline_counts[$airline_key] = array(
+                    'code' => $airline_code,
+                    'name' => $airline_name ?: $airline_code,
+                    'count' => 0,
+                );
+            }
+            $airline_counts[$airline_key]['count']++;
+        }
+
+        $dest_code = strtoupper(trim((string) ($flight['destination'] ?? '')));
+        $dest_name = trim((string) ($flight['destination_name'] ?? $dest_code));
+        if ($dest_code !== '') {
+            if (!isset($destination_counts[$dest_code])) {
+                $destination_counts[$dest_code] = array(
+                    'code' => $dest_code,
+                    'name' => $dest_name ?: $dest_code,
+                    'count' => 0,
+                );
+                $destination_airlines[$dest_code] = array();
+            }
+            $destination_counts[$dest_code]['count']++;
+            if ($airline_key !== '') {
+                $destination_airlines[$dest_code][$airline_key] = true;
+            }
+        }
+    }
+
+    uasort($airline_counts, function ($a, $b) {
+        if ((int) $a['count'] === (int) $b['count']) {
+            return strcmp((string) $a['name'], (string) $b['name']);
+        }
+        return ((int) $a['count'] > (int) $b['count']) ? -1 : 1;
+    });
+    uasort($destination_counts, function ($a, $b) {
+        if ((int) $a['count'] === (int) $b['count']) {
+            return strcmp((string) $a['name'], (string) $b['name']);
+        }
+        return ((int) $a['count'] > (int) $b['count']) ? -1 : 1;
+    });
+
+    $stats_flights = count($flights);
+    $stats_airlines = count($airline_counts);
+    $stats_destinations = count($destination_counts);
+
+    $airline_html = '';
+    $airline_slice = array_slice($airline_counts, 0, 40);
+    foreach ($airline_slice as $airline) {
+        $iata = trim((string) $airline['code']);
+        $name = trim((string) $airline['name']);
+        $airline_html .= '<div class="pr-chip"><span class="pr-iata">' . esc_html($iata !== '' ? $iata : '--') . '</span>' . esc_html($name) . '</div>';
+    }
+
+    $routes_html = '';
+    $route_slice = array_slice($destination_counts, 0, 20);
+    foreach ($route_slice as $dest) {
+        $code = (string) $dest['code'];
+        $name = (string) $dest['name'];
+        $count = (int) $dest['count'];
+        $airlines = array();
+        if (isset($destination_airlines[$code]) && is_array($destination_airlines[$code])) {
+            $airlines = array_keys($destination_airlines[$code]);
+        }
+        sort($airlines, SORT_STRING);
+        $routes_html .= '<tr>';
+        $routes_html .= '<td><div class="pr-dest">' . esc_html($name) . '</div></td>';
+        $routes_html .= '<td class="pr-code">' . esc_html($code) . '</td>';
+        $routes_html .= '<td>' . esc_html((string) $count) . '</td>';
+        $routes_html .= '<td>' . esc_html(implode(', ', $airlines)) . '</td>';
+        $routes_html .= '</tr>';
+    }
+
+    $schedule_shortcode = '[fid_board airport="' . esc_attr($airport) . '" use_geolocation="0"]';
+    $updated_line = $flight_date_human !== '' ? $flight_date_human : 'latest cache';
+
+    $content = '';
+    $content .= '<div class="pr-airport">';
+    $content .= '<div class="pr-hero">';
+    $content .= '<div class="pr-breadcrumb"><a href="/airport-flight-schedules/">Airport Schedules</a> &rsaquo; ' . esc_html($airport) . '</div>';
+    $content .= '<h1 class="pr-title">' . esc_html($airport) . ' &mdash; ' . esc_html($airport_name) . ' <span class="pr-accent">Flight Schedule</span> &amp; Departure Board</h1>';
+    $content .= '<p class="pr-subtitle">Flight schedules, departures, airlines, and top routes for ' . esc_html($airport_name) . ' (' . esc_html($airport) . ').</p>';
+    $content .= '<div class="pr-meta"><span>&#9992; ' . esc_html((string) $stats_airlines) . ' scheduled airlines</span><span>&#128197; Data: cache date ' . esc_html($updated_line) . '</span></div>';
+    $content .= '<div class="pr-stat-row">';
+    $content .= '<div class="pr-stat"><span class="pr-stat-num">' . esc_html(number_format_i18n($stats_flights)) . '</span><span class="pr-stat-label">Flights</span></div>';
+    $content .= '<div class="pr-stat"><span class="pr-stat-num">' . esc_html(number_format_i18n($stats_airlines)) . '</span><span class="pr-stat-label">Airlines</span></div>';
+    $content .= '<div class="pr-stat"><span class="pr-stat-num">' . esc_html(number_format_i18n($stats_destinations)) . '</span><span class="pr-stat-label">Destinations</span></div>';
+    $content .= '</div></div>';
+
+    $content .= '<div class="pr-prose">';
+    $content .= '<h2>About ' . esc_html($airport) . ' Airport Flight Schedules</h2>';
+    $content .= '<p>This page is auto-generated from Airport FID cached requests and refreshed weekly. It summarizes flights for ' . esc_html($airport_name) . ' and provides a live departure board below.</p>';
+    $content .= '</div>';
+
+    $content .= '<div class="pr-section-label">Airlines Serving ' . esc_html($airport) . '</div>';
+    $content .= '<div class="pr-chip-row">' . $airline_html . '</div>';
+
+    $content .= '<div class="pr-section-label">Top Routes from ' . esc_html($airport) . '</div>';
+    $content .= '<div class="pr-table-wrap"><table class="pr-table"><thead><tr><th>Destination</th><th>Code</th><th>Flights</th><th>Airlines</th></tr></thead><tbody>' . $routes_html . '</tbody></table></div>';
+
+    $content .= '<div class="pr-cta-block"><h3>Live Flight Board</h3><p>Use the live FID board to search and sort schedules for this airport.</p></div>';
+    $content .= $schedule_shortcode;
+    $content .= '</div>';
+
+    return $content;
+}
+
 function airport_fid_admin_text_field($label, $key, $value, $attrs = array()) {
     echo '<label class="airport-fid-admin-field"><span>' . esc_html($label) . '</span><input type="text" name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']" value="' . esc_attr($value) . '"';
     foreach ($attrs as $attr_key => $attr_value) {
@@ -674,6 +1127,12 @@ function airport_fid_register_assets() {
         array(),
         AIRPORT_FID_VERSION
     );
+    wp_register_style(
+        'airport-fid-airport-page-style',
+        plugins_url('assets/css/airport-page.css', __FILE__),
+        array(),
+        AIRPORT_FID_VERSION
+    );
     wp_register_script(
         'airport-fid-script',
         plugins_url('assets/js/fid.js', __FILE__),
@@ -683,6 +1142,22 @@ function airport_fid_register_assets() {
     );
 }
 add_action('wp_enqueue_scripts', 'airport_fid_register_assets');
+
+function airport_fid_enqueue_airport_page_style() {
+    if (!is_singular('page')) {
+        return;
+    }
+    $post_id = get_queried_object_id();
+    if (!$post_id) {
+        return;
+    }
+    $is_generated = get_post_meta($post_id, AIRPORT_FID_PAGE_META_FLAG, true);
+    if ((string) $is_generated !== '1') {
+        return;
+    }
+    wp_enqueue_style('airport-fid-airport-page-style');
+}
+add_action('wp_enqueue_scripts', 'airport_fid_enqueue_airport_page_style', 20);
 
 function airport_fid_register_admin_assets($hook) {
     if ($hook !== 'settings_page_airport-fid-settings') {

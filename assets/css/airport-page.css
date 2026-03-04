@@ -1,0 +1,556 @@
+/* ============================================================
+   Passrider Airport Pages — Custom CSS
+   Add via: Appearance > Customize > Additional CSS
+   OR: WPCode > Add Snippet > CSS Snippet
+   Scoped to .pr-airport so nothing bleeds into X Theme
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap');
+
+/* ── Variables & base ── */
+.pr-airport {
+  --navy:        #0d1b2e;
+  --navy-mid:    #152640;
+  --blue:        #1e6bbf;
+  --blue-bright: #3b9ddd;
+  --amber:       #f5a623;
+  --white:       #f0f4ff;
+  --muted:       #8899aa;
+  --border:      rgba(59,157,221,0.18);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #c8d8e8;
+}
+
+/* ── Hero block ── */
+.pr-airport .pr-hero {
+  background: var(--navy) !important;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px 36px !important;
+  margin-bottom: 28px;
+  box-sizing: border-box;
+}
+
+.pr-airport .pr-breadcrumb {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 11px !important;
+  color: var(--muted) !important;
+  margin-bottom: 14px !important;
+  letter-spacing: 0.5px;
+}
+.pr-airport .pr-breadcrumb a {
+  color: var(--blue-bright) !important;
+  text-decoration: none !important;
+}
+
+.pr-airport .pr-title {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 38px !important;
+  line-height: 1.1 !important;
+  color: var(--white) !important;
+  margin: 0 0 12px 0 !important;
+  letter-spacing: 0.5px;
+}
+.pr-airport .pr-title .pr-accent { color: var(--amber) !important; }
+
+.pr-airport .pr-subtitle {
+  font-size: 15px !important;
+  color: var(--muted) !important;
+  font-weight: 300;
+  max-width: 640px;
+  margin-bottom: 20px !important;
+}
+
+.pr-airport .pr-meta {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -ms-flex-wrap: wrap !important;
+  flex-wrap: wrap !important;
+  gap: 20px;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 11px !important;
+  color: var(--muted) !important;
+  letter-spacing: 0.5px;
+}
+
+/* ── Stat boxes ── */
+.pr-airport .pr-stat-row {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -ms-flex-wrap: wrap !important;
+  flex-wrap: wrap !important;
+  gap: 12px;
+  margin-top: 20px !important;
+  padding-top: 20px !important;
+  border-top: 1px solid var(--border) !important;
+}
+.pr-airport .pr-stat {
+  background: var(--navy-mid) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px;
+  padding: 10px 18px !important;
+  text-align: center !important;
+  min-width: 110px;
+  box-sizing: border-box;
+}
+.pr-airport .pr-stat-num {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: var(--amber) !important;
+  line-height: 1;
+  display: block !important;
+}
+.pr-airport .pr-stat-label {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 10px !important;
+  color: var(--muted) !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px !important;
+  display: block !important;
+}
+
+/* ── Section labels ── */
+.pr-airport .pr-section-label {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #334 !important;
+  margin: 32px 0 14px 0 !important;
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -webkit-box-align: center !important;
+  -ms-flex-align: center !important;
+  align-items: center !important;
+  gap: 10px;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+}
+.pr-airport .pr-section-label::after {
+  content: '' !important;
+  -webkit-box-flex: 1 !important;
+  -ms-flex: 1 !important;
+  flex: 1 !important;
+  height: 1px !important;
+  background: #dde !important;
+  display: block !important;
+}
+
+/* ── Prose block ── */
+.pr-airport .pr-prose {
+  background: var(--navy) !important;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 26px 30px !important;
+  margin-bottom: 20px !important;
+  color: #c8d8e8 !important;
+  line-height: 1.8;
+  box-sizing: border-box;
+}
+.pr-airport .pr-prose h2 {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: var(--white) !important;
+  margin: 20px 0 8px 0 !important;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+}
+.pr-airport .pr-prose h2:first-child { margin-top: 0 !important; }
+.pr-airport .pr-prose p { color: #c8d8e8 !important; margin-bottom: 14px !important; }
+.pr-airport .pr-prose p:last-child { margin-bottom: 0 !important; }
+.pr-airport .pr-prose strong { color: var(--white) !important; font-weight: 600; }
+
+/* ── Airlines note ── */
+.pr-airport .pr-airlines-note {
+  font-size: 13px !important;
+  color: #555 !important;
+  font-style: italic;
+  margin-bottom: 12px !important;
+}
+
+/* ── Airline chips ── */
+.pr-airport .pr-chip-row {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -ms-flex-wrap: wrap !important;
+  flex-wrap: wrap !important;
+  gap: 8px;
+  margin-bottom: 8px !important;
+}
+.pr-airport .pr-chip {
+  background: var(--navy-mid) !important;
+  border: 1px solid rgba(59,157,221,0.3) !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+  color: #e8f0f8 !important;
+  display: -webkit-inline-box !important;
+  display: -ms-inline-flexbox !important;
+  display: inline-flex !important;
+  -webkit-box-align: center !important;
+  -ms-flex-align: center !important;
+  align-items: center !important;
+  gap: 8px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.pr-airport .pr-chip .pr-iata {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 10px !important;
+  color: var(--amber) !important;
+  font-weight: 700 !important;
+  margin-right: 4px;
+}
+
+/* ── Source line ── */
+.pr-airport .pr-source {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 10px !important;
+  color: #777 !important;
+  margin-top: 6px !important;
+  letter-spacing: 0.3px;
+}
+
+/* ── Routes table ── */
+.pr-airport .pr-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 8px !important;
+  background: var(--navy) !important;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.pr-airport .pr-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 13px !important;
+  background: transparent !important;
+}
+.pr-airport .pr-table th {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #8899aa !important;
+  padding: 12px 16px !important;
+  text-align: left !important;
+  background: #0d1b2e !important;
+  border-bottom: 1px solid rgba(59,157,221,0.2) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+.pr-airport .pr-table td {
+  padding: 11px 16px !important;
+  border-bottom: 1px solid rgba(59,157,221,0.08) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  color: #b8cfe0 !important;
+  vertical-align: middle !important;
+  background: transparent !important;
+}
+.pr-airport .pr-table tr:last-child td { border-bottom: none !important; }
+.pr-airport .pr-table tr:hover td { background: rgba(59,157,221,0.05) !important; }
+.pr-airport .pr-table .pr-dest {
+  color: #e8f2ff !important;
+  font-weight: 600;
+  font-size: 14px !important;
+}
+.pr-airport .pr-table .pr-code {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 12px !important;
+  color: var(--amber) !important;
+  font-weight: 700 !important;
+}
+
+/* ── Nonrev tip ── */
+.pr-airport .pr-tip {
+  border-left: 4px solid var(--amber) !important;
+  background: var(--navy) !important;
+  border-radius: 0 10px 10px 0;
+  padding: 20px 24px !important;
+  margin: 24px 0 !important;
+  color: #c0d4e8 !important;
+  border-top: 1px solid rgba(245,166,35,0.2) !important;
+  border-right: 1px solid rgba(245,166,35,0.2) !important;
+  border-bottom: 1px solid rgba(245,166,35,0.2) !important;
+  box-sizing: border-box;
+}
+.pr-airport .pr-tip p { color: #c0d4e8 !important; }
+.pr-airport .pr-tip-label {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: var(--amber) !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px !important;
+  display: block !important;
+}
+
+/* ── CTA block ── */
+.pr-airport .pr-cta-block {
+  background: var(--navy) !important;
+  border: 2px solid var(--blue-bright) !important;
+  border-radius: 10px;
+  padding: 28px 30px !important;
+  margin: 28px 0 !important;
+  text-align: center !important;
+  box-sizing: border-box;
+}
+.pr-airport .pr-cta-block h3 {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: var(--white) !important;
+  margin-bottom: 8px !important;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+}
+.pr-airport .pr-cta-block p {
+  color: var(--muted) !important;
+  font-size: 14px !important;
+  margin-bottom: 18px !important;
+}
+.pr-airport .pr-btn-row {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -ms-flex-wrap: wrap !important;
+  flex-wrap: wrap !important;
+  gap: 12px;
+  -webkit-box-pack: center !important;
+  -ms-flex-pack: center !important;
+  justify-content: center !important;
+}
+.pr-airport .pr-btn {
+  display: -webkit-inline-box !important;
+  display: -ms-inline-flexbox !important;
+  display: inline-flex !important;
+  -webkit-box-align: center !important;
+  -ms-flex-align: center !important;
+  align-items: center !important;
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 12px 28px !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  line-height: 1;
+}
+.pr-airport .pr-btn:hover { opacity: 0.85; text-decoration: none !important; }
+.pr-airport .pr-btn-primary {
+  background: var(--amber) !important;
+  color: #0d1b2e !important;
+  border: none !important;
+}
+.pr-airport .pr-btn-secondary {
+  background: transparent !important;
+  color: var(--blue-bright) !important;
+  border: 2px solid var(--blue-bright) !important;
+}
+
+/* ── Nearby airports grid ── */
+.pr-airport .pr-nearby-grid {
+  display: -ms-grid !important;
+  display: grid !important;
+  -ms-grid-columns: 1fr 1fr 1fr 1fr !important;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important;
+  gap: 10px;
+  margin-bottom: 8px !important;
+}
+.pr-airport .pr-nearby {
+  background: var(--navy-mid) !important;
+  border: 1px solid rgba(59,157,221,0.2) !important;
+  border-radius: 8px;
+  padding: 14px 16px !important;
+  box-sizing: border-box;
+}
+.pr-airport .pr-nearby-code {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: var(--blue-bright) !important;
+  line-height: 1;
+  margin-bottom: 5px !important;
+  display: block !important;
+}
+.pr-airport .pr-nearby-name {
+  font-size: 13px !important;
+  color: #e0ecf8 !important;
+  font-weight: 500;
+  margin-bottom: 3px !important;
+  display: block !important;
+}
+.pr-airport .pr-nearby-dist {
+  font-size: 11px !important;
+  color: #6688aa !important;
+  font-family: 'Space Mono', monospace !important;
+  display: block !important;
+}
+
+/* ── FAQ block ── */
+.pr-airport .pr-faq {
+  background: var(--navy) !important;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 24px 16px !important;
+  margin-bottom: 20px !important;
+  box-sizing: border-box;
+}
+.pr-airport .pr-faq-item {
+  border-bottom: 1px solid rgba(59,157,221,0.12) !important;
+  border-top: none !important;
+  padding: 18px 0 !important;
+}
+.pr-airport .pr-faq-item:last-child { border-bottom: none !important; }
+.pr-airport .pr-faq-q {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--amber) !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 0.3px;
+  display: block !important;
+}
+.pr-airport .pr-faq-a {
+  font-size: 14px !important;
+  color: #b8cfe0 !important;
+  line-height: 1.75;
+  display: block !important;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .pr-airport .pr-hero { padding: 20px !important; }
+  .pr-airport .pr-title { font-size: 26px !important; }
+  .pr-airport .pr-prose { padding: 18px 20px !important; }
+  .pr-airport .pr-btn-row { -webkit-box-orient: vertical !important; -webkit-box-direction: normal !important; -ms-flex-direction: column !important; flex-direction: column !important; -webkit-box-align: center !important; -ms-flex-align: center !important; align-items: center !important; }
+  .pr-airport .pr-nearby-grid { -ms-grid-columns: 1fr 1fr !important; grid-template-columns: 1fr 1fr !important; }
+}
+
+/* ============================================================
+   ADD THIS TO YOUR EXISTING WPCode CSS snippet
+   (append below the passrider-airport-pages.css content)
+   ============================================================ */
+
+/* Hub table layout — table is immune to WP p-tag injection */
+.pr-airport .pr-hub-table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 14px !important;
+  margin: 0 -14px 24px -14px !important;
+}
+.pr-airport .pr-hub-td {
+  width: 50% !important;
+  vertical-align: top !important;
+  padding: 0 !important;
+}
+.pr-airport .pr-hub-td-empty {
+  background: transparent !important;
+}
+.pr-airport .pr-hub-card {
+  display: block !important;
+  background: #0d1b2e !important;
+  border: 1px solid rgba(59,157,221,0.2) !important;
+  border-radius: 10px !important;
+  padding: 24px 26px !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+.pr-airport .pr-hub-card:hover {
+  border-color: #f5a623 !important;
+  text-decoration: none !important;
+}
+.pr-airport .pr-hub-code {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 36px !important;
+  font-weight: 700 !important;
+  color: #3b9ddd !important;
+  line-height: 1 !important;
+  margin-bottom: 6px !important;
+  display: block !important;
+}
+.pr-airport .pr-hub-name {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #f0f4ff !important;
+  margin-bottom: 4px !important;
+  display: block !important;
+}
+.pr-airport .pr-hub-meta {
+  font-size: 12px !important;
+  color: #6688aa !important;
+  margin-bottom: 14px !important;
+  line-height: 1.5 !important;
+  display: block !important;
+}
+.pr-airport .pr-hub-stats {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 11px !important;
+  color: #8899aa !important;
+  margin-bottom: 10px !important;
+  display: block !important;
+  line-height: 1.8 !important;
+}
+.pr-airport .pr-hub-num {
+  color: #f5a623 !important;
+  font-weight: 700 !important;
+  font-style: normal !important;
+}
+.pr-airport .pr-hub-carriers {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 11px !important;
+  color: #3b9ddd !important;
+  margin-bottom: 18px !important;
+  letter-spacing: 0.5px !important;
+  display: block !important;
+}
+.pr-airport .pr-hub-cta {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #f5a623 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  display: block !important;
+}
+
+@media (max-width: 600px) {
+  .pr-airport .pr-hub-table,
+  .pr-airport .pr-hub-table tbody,
+  .pr-airport .pr-hub-table tr,
+  .pr-airport .pr-hub-td {
+    display: block !important;
+    width: 100% !important;
+  }
+  .pr-airport .pr-hub-table {
+    margin: 0 0 24px 0 !important;
+  }
+  .pr-airport .pr-hub-td {
+    margin-bottom: 12px !important;
+  }
+  .pr-airport .pr-hub-td-empty {
+    display: none !important;
+  }
+}
