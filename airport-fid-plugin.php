@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.12
+ * Version: 0.2.13
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.12';
+const AIRPORT_FID_VERSION = '0.2.13';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 
 function airport_fid_install() {
@@ -453,6 +453,7 @@ function airport_fid_render_settings_page() {
     echo '<button type="button" class="airport-fid-admin-tab is-active" data-tab="general">General Settings</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="typography">Typography</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="layout">Layout</button>';
+    echo '<button type="button" class="airport-fid-admin-tab" data-tab="cache">Cache Items</button>';
     echo '</div>';
 
     echo '<section class="airport-fid-admin-panel is-active" data-panel="general">';
@@ -476,6 +477,11 @@ function airport_fid_render_settings_page() {
     airport_fid_admin_text_field('GitHub Repo URL', 'github_repo', $settings['github_repo']);
     airport_fid_admin_text_field('GitHub Token (optional)', 'github_token', $settings['github_token']);
     echo '</div>';
+    echo '</section>';
+
+    echo '<section class="airport-fid-admin-panel" data-panel="cache">';
+    echo '<h2>Cached Request Items</h2>';
+    airport_fid_render_cache_items_table();
     echo '</section>';
 
     echo '<section class="airport-fid-admin-panel" data-panel="typography">';
@@ -521,6 +527,53 @@ function airport_fid_render_settings_page() {
     submit_button('Save Settings', 'primary', 'submit', false);
     echo '</div>';
     echo '</form>';
+    echo '</div>';
+}
+
+function airport_fid_render_cache_items_table() {
+    global $wpdb;
+    $table = airport_fid_get_cache_table();
+    $rows = $wpdb->get_results("SELECT airport, flight_date, sort, payload, updated_at FROM {$table} ORDER BY updated_at DESC LIMIT 200", ARRAY_A);
+
+    if (empty($rows)) {
+        echo '<p class="airport-fid-admin-empty">No cached items found.</p>';
+        return;
+    }
+
+    echo '<div class="airport-fid-admin-table-wrap">';
+    echo '<table class="airport-fid-admin-table">';
+    echo '<thead><tr>';
+    echo '<th>Airport</th>';
+    echo '<th>Date</th>';
+    echo '<th>Sort</th>';
+    echo '<th>Flights</th>';
+    echo '<th>Updated</th>';
+    echo '</tr></thead><tbody>';
+
+    foreach ($rows as $row) {
+        $flights_count = 0;
+        if (!empty($row['payload'])) {
+            $decoded = json_decode($row['payload'], true);
+            if (is_array($decoded) && isset($decoded['flights']) && is_array($decoded['flights'])) {
+                $flights_count = count($decoded['flights']);
+            }
+        }
+
+        $date_display = $row['flight_date'];
+        if (preg_match('/^\d{8}$/', $date_display)) {
+            $date_display = substr($date_display, 0, 4) . '-' . substr($date_display, 4, 2) . '-' . substr($date_display, 6, 2);
+        }
+
+        echo '<tr>';
+        echo '<td>' . esc_html($row['airport']) . '</td>';
+        echo '<td>' . esc_html($date_display) . '</td>';
+        echo '<td>' . esc_html($row['sort']) . '</td>';
+        echo '<td>' . esc_html((string) $flights_count) . '</td>';
+        echo '<td>' . esc_html($row['updated_at']) . '</td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody></table>';
     echo '</div>';
 }
 
