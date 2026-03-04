@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.16
+ * Version: 0.2.17
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,11 +13,12 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.16';
+const AIRPORT_FID_VERSION = '0.2.17';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
 const AIRPORT_FID_PAGE_SYNC_HOOK = 'airport_fid_generate_airport_pages_event';
+const AIRPORT_FID_PAGE_META_FEATURED = '_airport_fid_featured_attachment_id';
 
 function airport_fid_install() {
     global $wpdb;
@@ -784,9 +785,9 @@ function airport_fid_generate_airport_pages() {
             continue;
         }
         $result = airport_fid_upsert_airport_page($airport, $dataset);
-        if ($result === 'created') {
+        if (is_array($result) && isset($result['state']) && $result['state'] === 'created') {
             $created++;
-        } elseif ($result === 'updated') {
+        } elseif (is_array($result) && isset($result['state']) && $result['state'] === 'updated') {
             $updated++;
         } else {
             $skipped++;
@@ -915,23 +916,25 @@ function airport_fid_upsert_airport_page($airport, $dataset) {
         $postarr['post_status'] = $existing->post_status ?: 'publish';
         $post_id = wp_update_post($postarr, true);
         if (is_wp_error($post_id)) {
-            return 'skipped';
+            return array('state' => 'skipped', 'post_id' => 0);
         }
         update_post_meta($post_id, AIRPORT_FID_PAGE_META_FLAG, '1');
         update_post_meta($post_id, AIRPORT_FID_PAGE_META_AIRPORT, $airport);
         update_post_meta($post_id, '_airport_fid_generated_at', current_time('mysql'));
-        return 'updated';
+        airport_fid_generate_and_attach_featured_image($post_id, $dataset);
+        return array('state' => 'updated', 'post_id' => (int) $post_id);
     }
 
     $post_id = wp_insert_post($postarr, true);
     if (is_wp_error($post_id) || !$post_id) {
-        return 'skipped';
+        return array('state' => 'skipped', 'post_id' => 0);
     }
 
     update_post_meta($post_id, AIRPORT_FID_PAGE_META_FLAG, '1');
     update_post_meta($post_id, AIRPORT_FID_PAGE_META_AIRPORT, $airport);
     update_post_meta($post_id, '_airport_fid_generated_at', current_time('mysql'));
-    return 'created';
+    airport_fid_generate_and_attach_featured_image($post_id, $dataset);
+    return array('state' => 'created', 'post_id' => (int) $post_id);
 }
 
 function airport_fid_get_airport_page_by_code($airport) {
@@ -1058,7 +1061,6 @@ function airport_fid_render_airport_page_content($dataset) {
         $routes_html .= '</tr>';
     }
 
-    $schedule_shortcode = '[fid_board airport="' . esc_attr($airport) . '" use_geolocation="0"]';
     $updated_line = $flight_date_human !== '' ? $flight_date_human : 'latest cache';
 
     $content = '';
@@ -1085,11 +1087,265 @@ function airport_fid_render_airport_page_content($dataset) {
     $content .= '<div class="pr-section-label">Top Routes from ' . esc_html($airport) . '</div>';
     $content .= '<div class="pr-table-wrap"><table class="pr-table"><thead><tr><th>Destination</th><th>Code</th><th>Flights</th><th>Airlines</th></tr></thead><tbody>' . $routes_html . '</tbody></table></div>';
 
-    $content .= '<div class="pr-cta-block"><h3>Live Flight Board</h3><p>Use the live FID board to search and sort schedules for this airport.</p></div>';
-    $content .= $schedule_shortcode;
+    $content .= '<div class="pr-cta-block">';
+    $content .= '<h3>Search Flights &amp; Schedules at ' . esc_html($airport) . '</h3>';
+    $content .= '<p>Search all ' . esc_html(number_format_i18n($stats_flights)) . ' scheduled departures from ' . esc_html($airport) . ' by airline, route, and date using Passrider&rsquo;s free schedule tool. Or view a live departure board for ' . esc_html($airport_name) . ' via the Airport FIDS.</p>';
+    $content .= '<div class="pr-btn-row">';
+    $content .= '<a class="pr-btn pr-btn-primary" href="https://www.passrider.com/reservations/advanced-search/">Search Flight Schedules &rarr;</a>';
+    $content .= '<a class="pr-btn pr-btn-secondary" href="https://www.passrider.com/fids/">Live Airport FIDS &rarr;</a>';
+    $content .= '</div>';
+    $content .= '</div>';
     $content .= '</div>';
 
     return $content;
+}
+
+function airport_fid_generate_and_attach_featured_image($post_id, $dataset) {
+    if (!function_exists('imagecreatetruecolor') || !function_exists('imagepng')) {
+        return;
+    }
+    if (empty($post_id) || !is_array($dataset)) {
+        return;
+    }
+
+    $airport = strtoupper((string) ($dataset['airport'] ?? ''));
+    $airport_name = (string) ($dataset['airport_name'] ?? $airport);
+    if ($airport === '') {
+        return;
+    }
+
+    $upload = wp_upload_dir();
+    if (!empty($upload['error'])) {
+        return;
+    }
+    $dir = trailingslashit($upload['basedir']) . 'airport-fid';
+    if (!wp_mkdir_p($dir)) {
+        return;
+    }
+
+    $filename = sanitize_title(strtolower($airport) . '-airport-flight-schedules') . '-featured.png';
+    $file_path = trailingslashit($dir) . $filename;
+    $rendered = airport_fid_render_featured_image_png($file_path, $airport, $airport_name, $dataset);
+    if (!$rendered) {
+        return;
+    }
+
+    $mime = 'image/png';
+    $attachment_id = (int) get_post_meta($post_id, AIRPORT_FID_PAGE_META_FEATURED, true);
+    if ($attachment_id > 0 && get_post($attachment_id)) {
+        update_attached_file($attachment_id, $file_path);
+        wp_update_post(array(
+            'ID' => $attachment_id,
+            'post_mime_type' => $mime,
+            'post_title' => $airport . ' Airport Flight Schedules',
+            'post_status' => 'inherit',
+        ));
+    } else {
+        $attachment = array(
+            'post_mime_type' => $mime,
+            'post_title' => $airport . ' Airport Flight Schedules',
+            'post_content' => '',
+            'post_status' => 'inherit',
+        );
+        $attachment_id = wp_insert_attachment($attachment, $file_path, $post_id, true);
+        if (is_wp_error($attachment_id) || !$attachment_id) {
+            return;
+        }
+        update_post_meta($post_id, AIRPORT_FID_PAGE_META_FEATURED, (int) $attachment_id);
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+    $metadata = wp_generate_attachment_metadata($attachment_id, $file_path);
+    if (!is_wp_error($metadata) && !empty($metadata)) {
+        wp_update_attachment_metadata($attachment_id, $metadata);
+    }
+
+    set_post_thumbnail($post_id, $attachment_id);
+}
+
+function airport_fid_get_banner_font() {
+    $candidates = array(
+        ABSPATH . 'wp-includes/fonts/dashicons.ttf',
+        '/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf',
+        '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+        '/Library/Fonts/Arial Bold.ttf',
+        '/Library/Fonts/Arial.ttf',
+    );
+    foreach ($candidates as $path) {
+        if (is_readable($path)) {
+            return $path;
+        }
+    }
+    return '';
+}
+
+function airport_fid_get_top_flights_for_banner($flights, $limit = 10) {
+    $rows = array();
+    if (!is_array($flights)) {
+        return $rows;
+    }
+    foreach ($flights as $flight) {
+        if (!is_array($flight)) {
+            continue;
+        }
+        $dest_code = strtoupper((string) ($flight['destination'] ?? ''));
+        $dest_name = strtoupper((string) ($flight['destination_name'] ?? $dest_code));
+        $dest_name = preg_replace('/\s+AIRPORT$/i', '', $dest_name);
+        $dep = (string) ($flight['departure_time'] ?? '--:--');
+        $airline = strtoupper((string) ($flight['airline_code'] ?? '--'));
+        $status = strtoupper((string) ($flight['status'] ?? 'SCHEDULED'));
+        if ($status === 'IN AIR' || $status === 'ARRIVING') {
+            $status = 'ON TIME';
+        }
+        $terminal = strtoupper((string) ($flight['terminal'] ?? '--'));
+        $gate = '--';
+        if ($terminal !== '' && $terminal !== '--') {
+            if (strpos($terminal, '->') !== false) {
+                $parts = array_map('trim', explode('->', $terminal));
+                $gate = strtoupper(preg_replace('/[^A-Z0-9]/', '', (string) ($parts[0] ?? '')));
+            } else {
+                $gate = strtoupper(preg_replace('/[^A-Z0-9]/', '', $terminal));
+            }
+            if ($gate === '') {
+                $gate = '--';
+            }
+        }
+        $rows[] = array(
+            'destination' => trim($dest_name . ' ' . $dest_code),
+            'dep' => $dep,
+            'al' => $airline,
+            'status' => $status,
+            'gate' => $gate,
+        );
+        if (count($rows) >= $limit) {
+            break;
+        }
+    }
+    return $rows;
+}
+
+function airport_fid_render_featured_image_png($file_path, $airport, $airport_name, $dataset) {
+    $width = 1200;
+    $height = 628;
+    $img = imagecreatetruecolor($width, $height);
+    if (!$img) {
+        return false;
+    }
+
+    $bg = imagecolorallocate($img, 8, 24, 49);
+    $bg2 = imagecolorallocate($img, 10, 34, 67);
+    $grid = imagecolorallocatealpha($img, 51, 117, 191, 104);
+    $white = imagecolorallocate($img, 231, 237, 247);
+    $muted = imagecolorallocate($img, 151, 169, 192);
+    $cyan = imagecolorallocate($img, 61, 177, 234);
+    $amber = imagecolorallocate($img, 245, 166, 35);
+    $green = imagecolorallocate($img, 55, 211, 138);
+
+    imagefilledrectangle($img, 0, 0, $width, $height, $bg);
+    imagefilledrectangle($img, 0, 0, $width, 44, $bg2);
+    imagefilledrectangle($img, 0, 44, 8, $height - 72, $amber);
+    imagefilledrectangle($img, 0, $height - 72, $width, $height, $bg2);
+
+    for ($x = 0; $x < $width; $x += 60) {
+        imageline($img, $x, 44, $x, $height - 72, $grid);
+    }
+    for ($y = 44; $y < $height - 72; $y += 40) {
+        imageline($img, 0, $y, $width, $y, $grid);
+    }
+
+    $font = airport_fid_get_banner_font();
+    if ($font !== '') {
+        imagettftext($img, 16, 0, 20, 28, $cyan, $font, 'PASSRIDER.COM');
+        imagettftext($img, 16, 0, $width - 58, 28, $amber, $font, strtoupper($airport));
+
+        $airport_name_u = strtoupper((string) $airport_name);
+        $airport_name_u = preg_replace('/\s+AIRPORT$/', '', $airport_name_u);
+        if (strlen($airport_name_u) > 28) {
+            $airport_name_u = wordwrap($airport_name_u, 28, "\n", true);
+        }
+
+        imagettftext($img, 82, 0, 30, 185, $white, $font, strtoupper($airport));
+        imageline($img, 30, 186, 178, 186, $amber);
+        imagettftext($img, 54, 0, 30, 390, $white, $font, 'FLIGHT SCHEDULE');
+        imagettftext($img, 54, 0, 30, 460, $amber, $font, '& DEPARTURE BOARD');
+
+        $name_lines = explode("\n", $airport_name_u);
+        $line_y = 258;
+        foreach ($name_lines as $line) {
+            imagettftext($img, 24, 0, 30, $line_y, $muted, $font, $line);
+            $line_y += 46;
+        }
+
+        imagettftext($img, 13, 0, 620, 88, $muted, $font, 'DESTINATION');
+        imagettftext($img, 13, 0, 768, 88, $muted, $font, 'DEP');
+        imagettftext($img, 13, 0, 826, 88, $muted, $font, 'AL');
+        imagettftext($img, 13, 0, 878, 88, $muted, $font, 'STATUS');
+        imagettftext($img, 13, 0, 962, 88, $muted, $font, 'GATE');
+    } else {
+        imagestring($img, 5, 20, 14, 'PASSRIDER.COM', $cyan);
+        imagestring($img, 5, $width - 50, 14, strtoupper($airport), $amber);
+        imagestring($img, 5, 30, 80, strtoupper($airport), $white);
+    }
+
+    $rows = airport_fid_get_top_flights_for_banner($dataset['flights'] ?? array(), 10);
+    $row_y = 104;
+    foreach ($rows as $index => $row) {
+        $shade = ($index % 2 === 0) ? imagecolorallocatealpha($img, 19, 41, 74, 45) : imagecolorallocatealpha($img, 12, 27, 53, 35);
+        imagefilledrectangle($img, 620, $row_y - 22, 1120, $row_y + 18, $shade);
+        if ($font !== '') {
+            $status_color = ($row['status'] === 'ON TIME') ? $green : $muted;
+            imagettftext($img, 17, 0, 628, $row_y + 8, $white, $font, $row['destination']);
+            imagettftext($img, 17, 0, 768, $row_y + 8, $amber, $font, $row['dep']);
+            imagettftext($img, 17, 0, 826, $row_y + 8, $cyan, $font, $row['al']);
+            imagettftext($img, 17, 0, 878, $row_y + 8, $status_color, $font, $row['status']);
+            imagettftext($img, 17, 0, 962, $row_y + 8, $muted, $font, $row['gate']);
+        } else {
+            imagestring($img, 4, 628, $row_y - 12, $row['destination'], $white);
+        }
+        $row_y += 48;
+    }
+
+    $airlines = array();
+    $destinations = array();
+    foreach (($dataset['flights'] ?? array()) as $flight) {
+        if (!is_array($flight)) {
+            continue;
+        }
+        $al_key = strtoupper((string) ($flight['airline_code'] ?? $flight['airline'] ?? ''));
+        if ($al_key !== '') {
+            $airlines[$al_key] = true;
+        }
+        $d = strtoupper((string) ($flight['destination'] ?? ''));
+        if ($d !== '') {
+            $destinations[$d] = true;
+        }
+    }
+
+    $stats = array(
+        number_format_i18n(count($dataset['flights'] ?? array())) . "\nFLIGHTS TODAY",
+        number_format_i18n(count($airlines)) . "\nAIRLINES",
+        number_format_i18n(count($destinations)) . "\nDESTINATIONS",
+        '#1' . "\nBUSIEST AIRPORT",
+    );
+    $stat_x = 80;
+    foreach ($stats as $i => $label) {
+        $parts = explode("\n", $label);
+        if ($font !== '') {
+            imagettftext($img, 30, 0, $stat_x, $height - 42, $amber, $font, $parts[0]);
+            imagettftext($img, 12, 0, $stat_x, $height - 22, $muted, $font, $parts[1]);
+        } else {
+            imagestring($img, 4, $stat_x, $height - 58, $parts[0], $amber);
+            imagestring($img, 2, $stat_x, $height - 30, $parts[1], $muted);
+        }
+        if ($i < count($stats) - 1) {
+            imageline($img, $stat_x + 140, $height - 64, $stat_x + 140, $height - 8, $grid);
+        }
+        $stat_x += 240;
+    }
+
+    $ok = imagepng($img, $file_path);
+    imagedestroy($img);
+    return (bool) $ok;
 }
 
 function airport_fid_admin_text_field($label, $key, $value, $attrs = array()) {

@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.16
+Stable tag: 0.2.17
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,11 @@ FlightLookup XML APIs.
 
 == Changelog ==
 
+= 0.2.17 =
+* Added dynamic featured image generation for generated airport pages.
+* Added automatic featured image attach/update during airport page sync.
+* Replaced generated page live board shortcode block with CTA button block.
+
 = 0.2.16 =
 * Added weekly airport page generator from cached request items.
 * Added per-airport page create/update logic (e.g. `JFK Airport Flight Schedules`).
@@ -120,6 +125,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.17 =
+Dynamic featured image generation for generated airport schedule pages.
 
 = 0.2.16 =
 Auto-generate and weekly update airport schedule pages from cached data.
