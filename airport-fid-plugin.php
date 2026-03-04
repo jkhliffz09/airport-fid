@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.14
+ * Version: 0.2.15
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.14';
+const AIRPORT_FID_VERSION = '0.2.15';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 
 function airport_fid_install() {
@@ -574,6 +574,7 @@ function airport_fid_render_cache_items_table() {
         echo '<td>' . esc_html($row['sort']) . '</td>';
         echo '<td>' . esc_html((string) $flights_count) . '</td>';
         echo '<td>' . esc_html($row['updated_at']) . '</td>';
+        $textarea_id = 'airport-fid-payload-' . (int) $row['id'];
         echo '<td class="airport-fid-admin-json-cell">';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="airport-fid-admin-json-form">';
         echo '<input type="hidden" name="action" value="airport_fid_update_cache_item" />';
@@ -583,8 +584,13 @@ function airport_fid_render_cache_items_table() {
         if ($pretty_json === false || $pretty_json === 'null') {
             $pretty_json = (string) $row['payload'];
         }
-        echo '<textarea name="payload" rows="8">' . esc_textarea($pretty_json) . '</textarea>';
+        echo '<textarea id="' . esc_attr($textarea_id) . '" name="payload" rows="8">' . esc_textarea($pretty_json) . '</textarea>';
+        echo '<div class="airport-fid-admin-json-actions">';
+        echo '<button type="button" class="button airport-fid-export-csv" data-target="' . esc_attr($textarea_id) . '" data-airport="' . esc_attr($row['airport']) . '" data-date="' . esc_attr((string) $row['flight_date']) . '">Export CSV</button>';
+        echo '<button type="button" class="button airport-fid-import-csv" data-target="' . esc_attr($textarea_id) . '" data-input="airport-fid-csv-input-' . esc_attr((string) $row['id']) . '">Import CSV</button>';
+        echo '<input id="airport-fid-csv-input-' . esc_attr((string) $row['id']) . '" class="airport-fid-import-csv-input" type="file" accept=".csv,text/csv" data-target="' . esc_attr($textarea_id) . '" />';
         echo '<button type="submit" class="button button-primary">Update JSON</button>';
+        echo '</div>';
         echo '</form>';
         echo '</td>';
         echo '</tr>';
