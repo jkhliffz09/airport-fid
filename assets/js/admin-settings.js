@@ -170,4 +170,44 @@
             input.value = '';
         });
     });
+
+    var generateForm = document.querySelector('.airport-fid-generate-pages-form');
+    var overlay = document.querySelector('.airport-fid-admin-overlay');
+    var dialogText = document.querySelector('.airport-fid-admin-dialog-text');
+    if (generateForm && overlay && dialogText) {
+        var aiEnabled = generateForm.getAttribute('data-ai-enabled') === '1';
+        var aiProvider = (generateForm.getAttribute('data-ai-provider') || 'AI').toUpperCase();
+        var timerId = null;
+
+        generateForm.addEventListener('submit', function () {
+            var messages = [
+                'Validating cached request items...',
+                'Merging airport data...',
+                'Creating pages for new airports...',
+                'Updating existing airport pages...',
+                'Generating and attaching featured images...',
+                'Finalizing content and metadata...'
+            ];
+            if (aiEnabled) {
+                messages.splice(4, 0, 'Generating About section from ' + aiProvider + '...');
+            }
+
+            overlay.classList.add('is-visible');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('airport-fid-admin-lock');
+
+            var idx = 0;
+            dialogText.textContent = messages[idx];
+            timerId = window.setInterval(function () {
+                idx = (idx + 1) % messages.length;
+                dialogText.textContent = messages[idx];
+            }, 1450);
+
+            window.setTimeout(function () {
+                if (timerId) {
+                    clearInterval(timerId);
+                }
+            }, 240000);
+        });
+    }
 })();

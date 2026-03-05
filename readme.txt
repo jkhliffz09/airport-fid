@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.19
+Stable tag: 0.2.20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.20 =
+* Added animated loading dialog for Generate/Update Airport Pages.
+* Added rotating real-time status messages during airport page generation, including AI about-section progress.
 
 = 0.2.19 =
 * Added AI-generated "About Airport Flight Schedules" section for generated pages.
@@ -135,6 +139,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.20 =
+Animated generation dialog with real-time progress text for airport page sync.
 
 = 0.2.19 =
 AI-generated About section support (OpenAI/Claude) and featured-image text fallback improvements.

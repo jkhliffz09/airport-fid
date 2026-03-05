@@ -222,3 +222,67 @@
     background: #122230;
     color: #b8d1e3;
 }
+
+.airport-fid-admin-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 13, 22, 0.72);
+    backdrop-filter: blur(2px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.airport-fid-admin-overlay.is-visible {
+    display: flex;
+}
+
+.airport-fid-admin-dialog {
+    width: min(520px, 100%);
+    border-radius: 16px;
+    border: 1px solid #2b495f;
+    background: linear-gradient(180deg, #101f2e 0%, #0e1a27 100%);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    padding: 22px 20px;
+    text-align: center;
+    color: #e7eef7;
+}
+
+.airport-fid-admin-dialog h3 {
+    margin: 0 0 8px;
+    color: #ffffff;
+    font-size: 20px;
+}
+
+.airport-fid-admin-dialog-text {
+    margin: 0;
+    color: #b8d1e3;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    min-height: 24px;
+}
+
+.airport-fid-admin-spinner {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 3px solid rgba(0, 188, 212, 0.22);
+    border-top-color: #00bcd4;
+    margin: 0 auto 12px;
+    animation: airport-fid-spin 0.9s linear infinite;
+}
+
+body.airport-fid-admin-lock {
+    overflow: hidden;
+}
+
+@keyframes airport-fid-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
