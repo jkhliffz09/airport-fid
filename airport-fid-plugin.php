@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.18
+ * Version: 0.2.19
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.18';
+const AIRPORT_FID_VERSION = '0.2.19';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
@@ -221,6 +221,12 @@ function airport_fid_default_settings() {
         'cache_ttl_minutes' => 30,
         'cache_refresh_day' => 'wednesday',
         'airport_pages_enabled' => 1,
+        'airport_ai_enabled' => 0,
+        'airport_ai_provider' => 'openai',
+        'airport_ai_openai_key' => '',
+        'airport_ai_openai_model' => 'gpt-4o-mini',
+        'airport_ai_claude_key' => '',
+        'airport_ai_claude_model' => 'claude-3-5-sonnet-latest',
         'header_font_size' => 18,
         'field_font_size' => 14,
         'button_font_size' => 12,
@@ -478,6 +484,13 @@ function airport_fid_sanitize_settings($settings) {
     $day_value = isset($settings['cache_refresh_day']) ? strtolower((string) $settings['cache_refresh_day']) : $defaults['cache_refresh_day'];
     $clean['cache_refresh_day'] = in_array($day_value, $allowed_days, true) ? $day_value : $defaults['cache_refresh_day'];
     $clean['airport_pages_enabled'] = !empty($settings['airport_pages_enabled']) ? 1 : 0;
+    $clean['airport_ai_enabled'] = !empty($settings['airport_ai_enabled']) ? 1 : 0;
+    $provider = isset($settings['airport_ai_provider']) ? strtolower((string) $settings['airport_ai_provider']) : $defaults['airport_ai_provider'];
+    $clean['airport_ai_provider'] = in_array($provider, array('openai', 'claude'), true) ? $provider : $defaults['airport_ai_provider'];
+    $clean['airport_ai_openai_key'] = isset($settings['airport_ai_openai_key']) ? sanitize_text_field((string) $settings['airport_ai_openai_key']) : $defaults['airport_ai_openai_key'];
+    $clean['airport_ai_openai_model'] = isset($settings['airport_ai_openai_model']) ? sanitize_text_field((string) $settings['airport_ai_openai_model']) : $defaults['airport_ai_openai_model'];
+    $clean['airport_ai_claude_key'] = isset($settings['airport_ai_claude_key']) ? sanitize_text_field((string) $settings['airport_ai_claude_key']) : $defaults['airport_ai_claude_key'];
+    $clean['airport_ai_claude_model'] = isset($settings['airport_ai_claude_model']) ? sanitize_text_field((string) $settings['airport_ai_claude_model']) : $defaults['airport_ai_claude_model'];
     $clean['header_font_size'] = isset($settings['header_font_size']) ? max(12, min(40, (int) $settings['header_font_size'])) : $defaults['header_font_size'];
     $clean['field_font_size'] = isset($settings['field_font_size']) ? max(10, min(28, (int) $settings['field_font_size'])) : $defaults['field_font_size'];
     $clean['button_font_size'] = isset($settings['button_font_size']) ? max(10, min(24, (int) $settings['button_font_size'])) : $defaults['button_font_size'];
@@ -578,6 +591,15 @@ function airport_fid_render_settings_page() {
         'saturday' => 'Saturday',
     ));
     airport_fid_admin_checkbox_field('Enable Weekly Airport Page Sync', 'airport_pages_enabled', (int) $settings['airport_pages_enabled']);
+    airport_fid_admin_checkbox_field('Enable AI About Section', 'airport_ai_enabled', (int) $settings['airport_ai_enabled']);
+    airport_fid_admin_select_field('AI Provider', 'airport_ai_provider', $settings['airport_ai_provider'], array(
+        'openai' => 'OpenAI',
+        'claude' => 'Claude',
+    ));
+    airport_fid_admin_text_field('OpenAI API Key', 'airport_ai_openai_key', $settings['airport_ai_openai_key'], array('type' => 'password', 'autocomplete' => 'off'));
+    airport_fid_admin_text_field('OpenAI Model', 'airport_ai_openai_model', $settings['airport_ai_openai_model']);
+    airport_fid_admin_text_field('Claude API Key', 'airport_ai_claude_key', $settings['airport_ai_claude_key'], array('type' => 'password', 'autocomplete' => 'off'));
+    airport_fid_admin_text_field('Claude Model', 'airport_ai_claude_model', $settings['airport_ai_claude_model']);
     airport_fid_admin_text_field('GitHub Repo URL', 'github_repo', $settings['github_repo']);
     airport_fid_admin_text_field('GitHub Token (optional)', 'github_token', $settings['github_token']);
     echo '</div>';
@@ -1069,6 +1091,7 @@ function airport_fid_render_airport_page_content($dataset) {
     }
 
     $updated_line = $flight_date_human !== '' ? $flight_date_human : 'latest cache';
+    $about_html = airport_fid_generate_about_text($dataset, $stats_flights, $stats_airlines, $stats_destinations);
 
     $content = '';
     $content .= '<div class="pr-airport">';
@@ -1085,7 +1108,7 @@ function airport_fid_render_airport_page_content($dataset) {
 
     $content .= '<div class="pr-prose">';
     $content .= '<h2>About ' . esc_html($airport) . ' Airport Flight Schedules</h2>';
-    $content .= '<p>This page is auto-generated from Airport FID cached requests and refreshed weekly. It summarizes flights for ' . esc_html($airport_name) . ' and provides a live departure board below.</p>';
+    $content .= wp_kses_post($about_html);
     $content .= '</div>';
 
     $content .= '<div class="pr-section-label">Airlines Serving ' . esc_html($airport) . '</div>';
@@ -1105,6 +1128,180 @@ function airport_fid_render_airport_page_content($dataset) {
     $content .= '</div>';
 
     return $content;
+}
+
+function airport_fid_generate_about_text($dataset, $stats_flights, $stats_airlines, $stats_destinations) {
+    $airport = strtoupper((string) ($dataset['airport'] ?? ''));
+    $airport_name = (string) ($dataset['airport_name'] ?? $airport);
+    $flight_date = (string) ($dataset['flight_date'] ?? '');
+    $default_html = '<p>This page is auto-generated from Airport FID cached requests and refreshed weekly. It summarizes flights for ' . esc_html($airport_name) . ' and provides schedule insights.</p>';
+
+    $settings = airport_fid_get_settings();
+    if ((int) ($settings['airport_ai_enabled'] ?? 0) !== 1) {
+        return $default_html;
+    }
+
+    $provider = (string) ($settings['airport_ai_provider'] ?? 'openai');
+    $model = $provider === 'claude'
+        ? (string) ($settings['airport_ai_claude_model'] ?? 'claude-3-5-sonnet-latest')
+        : (string) ($settings['airport_ai_openai_model'] ?? 'gpt-4o-mini');
+
+    $cache_key = 'airport_fid_ai_about_' . md5($airport . '|' . $flight_date . '|' . $provider . '|' . $model . '|' . $stats_flights . '|' . $stats_airlines . '|' . $stats_destinations);
+    $cached = get_transient($cache_key);
+    if (is_string($cached) && $cached !== '') {
+        return $cached;
+    }
+
+    $flights = isset($dataset['flights']) && is_array($dataset['flights']) ? $dataset['flights'] : array();
+    $dest_counts = array();
+    $airline_counts = array();
+    foreach ($flights as $flight) {
+        if (!is_array($flight)) {
+            continue;
+        }
+        $dest = strtoupper((string) ($flight['destination'] ?? ''));
+        if ($dest !== '') {
+            if (!isset($dest_counts[$dest])) {
+                $dest_counts[$dest] = 0;
+            }
+            $dest_counts[$dest]++;
+        }
+        $airline = strtoupper((string) ($flight['airline_code'] ?? $flight['airline'] ?? ''));
+        if ($airline !== '') {
+            if (!isset($airline_counts[$airline])) {
+                $airline_counts[$airline] = 0;
+            }
+            $airline_counts[$airline]++;
+        }
+    }
+    arsort($dest_counts);
+    arsort($airline_counts);
+    $top_dest = array_slice(array_keys($dest_counts), 0, 8);
+    $top_airlines = array_slice(array_keys($airline_counts), 0, 6);
+
+    $prompt = "Write 2 concise HTML paragraphs for an airport schedule page.\n"
+        . "Airport code: {$airport}\n"
+        . "Airport name: {$airport_name}\n"
+        . "Flights: {$stats_flights}\n"
+        . "Airlines: {$stats_airlines}\n"
+        . "Destinations: {$stats_destinations}\n"
+        . "Top destinations: " . implode(', ', $top_dest) . "\n"
+        . "Top airlines: " . implode(', ', $top_airlines) . "\n"
+        . "Rules: factual tone, no markdown, no links, return valid HTML only with exactly two <p>...</p> blocks.";
+
+    $generated_html = '';
+    if ($provider === 'claude') {
+        $generated_html = airport_fid_generate_about_with_claude($prompt, $settings);
+    } else {
+        $generated_html = airport_fid_generate_about_with_openai($prompt, $settings);
+    }
+
+    if (!is_string($generated_html) || trim($generated_html) === '') {
+        return $default_html;
+    }
+
+    $clean_html = wp_kses($generated_html, array(
+        'p' => array(),
+        'strong' => array(),
+        'em' => array(),
+        'br' => array(),
+    ));
+    if (trim($clean_html) === '') {
+        return $default_html;
+    }
+    set_transient($cache_key, $clean_html, WEEK_IN_SECONDS);
+    return $clean_html;
+}
+
+function airport_fid_generate_about_with_openai($prompt, $settings) {
+    $api_key = trim((string) ($settings['airport_ai_openai_key'] ?? ''));
+    if ($api_key === '') {
+        return '';
+    }
+    $model = trim((string) ($settings['airport_ai_openai_model'] ?? 'gpt-4o-mini'));
+    if ($model === '') {
+        $model = 'gpt-4o-mini';
+    }
+
+    $response = wp_remote_post('https://api.openai.com/v1/chat/completions', array(
+        'timeout' => 25,
+        'headers' => array(
+            'Authorization' => 'Bearer ' . $api_key,
+            'Content-Type' => 'application/json',
+        ),
+        'body' => wp_json_encode(array(
+            'model' => $model,
+            'messages' => array(
+                array('role' => 'system', 'content' => 'You write concise airport schedule page copy in HTML.'),
+                array('role' => 'user', 'content' => $prompt),
+            ),
+            'temperature' => 0.4,
+        )),
+    ));
+
+    if (is_wp_error($response)) {
+        return '';
+    }
+    $code = wp_remote_retrieve_response_code($response);
+    if ($code < 200 || $code >= 300) {
+        return '';
+    }
+    $body = json_decode((string) wp_remote_retrieve_body($response), true);
+    if (!is_array($body)) {
+        return '';
+    }
+    return (string) ($body['choices'][0]['message']['content'] ?? '');
+}
+
+function airport_fid_generate_about_with_claude($prompt, $settings) {
+    $api_key = trim((string) ($settings['airport_ai_claude_key'] ?? ''));
+    if ($api_key === '') {
+        return '';
+    }
+    $model = trim((string) ($settings['airport_ai_claude_model'] ?? 'claude-3-5-sonnet-latest'));
+    if ($model === '') {
+        $model = 'claude-3-5-sonnet-latest';
+    }
+
+    $response = wp_remote_post('https://api.anthropic.com/v1/messages', array(
+        'timeout' => 25,
+        'headers' => array(
+            'x-api-key' => $api_key,
+            'anthropic-version' => '2023-06-01',
+            'content-type' => 'application/json',
+        ),
+        'body' => wp_json_encode(array(
+            'model' => $model,
+            'max_tokens' => 500,
+            'temperature' => 0.4,
+            'messages' => array(
+                array(
+                    'role' => 'user',
+                    'content' => $prompt,
+                ),
+            ),
+        )),
+    ));
+
+    if (is_wp_error($response)) {
+        return '';
+    }
+    $code = wp_remote_retrieve_response_code($response);
+    if ($code < 200 || $code >= 300) {
+        return '';
+    }
+    $body = json_decode((string) wp_remote_retrieve_body($response), true);
+    if (!is_array($body)) {
+        return '';
+    }
+    if (isset($body['content']) && is_array($body['content'])) {
+        foreach ($body['content'] as $part) {
+            if (is_array($part) && ($part['type'] ?? '') === 'text' && !empty($part['text'])) {
+                return (string) $part['text'];
+            }
+        }
+    }
+    return '';
 }
 
 function airport_fid_generate_and_attach_featured_image($post_id, $dataset) {
@@ -1172,7 +1369,8 @@ function airport_fid_generate_and_attach_featured_image($post_id, $dataset) {
 
 function airport_fid_get_banner_font() {
     $candidates = array(
-        ABSPATH . 'wp-includes/fonts/dashicons.ttf',
+        plugin_dir_path(__FILE__) . 'assets/fonts/BarlowCondensed-Bold.ttf',
+        plugin_dir_path(__FILE__) . 'assets/fonts/Barlow-Bold.ttf',
         '/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf',
         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
         '/Library/Fonts/Arial Bold.ttf',
@@ -1184,6 +1382,24 @@ function airport_fid_get_banner_font() {
         }
     }
     return '';
+}
+
+function airport_fid_draw_banner_text($img, $font, $size, $x, $y, $color, $text, $fallback_font = 4) {
+    $text = (string) $text;
+    $font = (string) $font;
+    if ($text === '') {
+        return false;
+    }
+
+    if ($font !== '' && function_exists('imagettftext')) {
+        $result = @imagettftext($img, (float) $size, 0, (int) $x, (int) $y, $color, $font, $text);
+        if ($result !== false) {
+            return true;
+        }
+    }
+
+    imagestring($img, (int) $fallback_font, (int) $x, max(0, (int) $y - 12), $text, $color);
+    return false;
 }
 
 function airport_fid_get_top_flights_for_banner($flights, $limit = 10) {
@@ -1263,8 +1479,8 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
     $font = airport_fid_get_banner_font();
     $can_ttf = ($font !== '' && function_exists('imagettftext'));
     if ($can_ttf) {
-        imagettftext($img, 16, 0, 20, 28, $cyan, $font, 'PASSRIDER.COM');
-        imagettftext($img, 16, 0, $width - 58, 28, $amber, $font, strtoupper($airport));
+        airport_fid_draw_banner_text($img, $font, 16, 20, 28, $cyan, 'PASSRIDER.COM', 5);
+        airport_fid_draw_banner_text($img, $font, 16, $width - 58, 28, $amber, strtoupper($airport), 5);
 
         $airport_name_u = strtoupper((string) $airport_name);
         $airport_name_u = preg_replace('/\s+AIRPORT$/', '', $airport_name_u);
@@ -1272,23 +1488,23 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
             $airport_name_u = wordwrap($airport_name_u, 28, "\n", true);
         }
 
-        imagettftext($img, 82, 0, 30, 185, $white, $font, strtoupper($airport));
+        airport_fid_draw_banner_text($img, $font, 82, 30, 185, $white, strtoupper($airport), 5);
         imageline($img, 30, 186, 178, 186, $amber);
-        imagettftext($img, 54, 0, 30, 390, $white, $font, 'FLIGHT SCHEDULE');
-        imagettftext($img, 54, 0, 30, 460, $amber, $font, '& DEPARTURE BOARD');
+        airport_fid_draw_banner_text($img, $font, 54, 30, 390, $white, 'FLIGHT SCHEDULE', 5);
+        airport_fid_draw_banner_text($img, $font, 54, 30, 460, $amber, '& DEPARTURE BOARD', 5);
 
         $name_lines = explode("\n", $airport_name_u);
         $line_y = 258;
         foreach ($name_lines as $line) {
-            imagettftext($img, 24, 0, 30, $line_y, $muted, $font, $line);
+            airport_fid_draw_banner_text($img, $font, 24, 30, $line_y, $muted, $line, 5);
             $line_y += 46;
         }
 
-        imagettftext($img, 13, 0, 620, 88, $muted, $font, 'DESTINATION');
-        imagettftext($img, 13, 0, 768, 88, $muted, $font, 'DEP');
-        imagettftext($img, 13, 0, 826, 88, $muted, $font, 'AL');
-        imagettftext($img, 13, 0, 878, 88, $muted, $font, 'STATUS');
-        imagettftext($img, 13, 0, 962, 88, $muted, $font, 'GATE');
+        airport_fid_draw_banner_text($img, $font, 13, 620, 88, $muted, 'DESTINATION', 4);
+        airport_fid_draw_banner_text($img, $font, 13, 768, 88, $muted, 'DEP', 4);
+        airport_fid_draw_banner_text($img, $font, 13, 826, 88, $muted, 'AL', 4);
+        airport_fid_draw_banner_text($img, $font, 13, 878, 88, $muted, 'STATUS', 4);
+        airport_fid_draw_banner_text($img, $font, 13, 962, 88, $muted, 'GATE', 4);
     } else {
         imagestring($img, 5, 20, 14, 'PASSRIDER.COM', $cyan);
         imagestring($img, 5, $width - 44, 14, strtoupper($airport), $amber);
@@ -1318,11 +1534,11 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
         imagefilledrectangle($img, 620, $row_y - 22, 1120, $row_y + 18, $shade);
         if ($can_ttf) {
             $status_color = ($row['status'] === 'ON TIME') ? $green : $muted;
-            imagettftext($img, 17, 0, 628, $row_y + 8, $white, $font, $row['destination']);
-            imagettftext($img, 17, 0, 768, $row_y + 8, $amber, $font, $row['dep']);
-            imagettftext($img, 17, 0, 826, $row_y + 8, $cyan, $font, $row['al']);
-            imagettftext($img, 17, 0, 878, $row_y + 8, $status_color, $font, $row['status']);
-            imagettftext($img, 17, 0, 962, $row_y + 8, $muted, $font, $row['gate']);
+            airport_fid_draw_banner_text($img, $font, 17, 628, $row_y + 8, $white, $row['destination'], 4);
+            airport_fid_draw_banner_text($img, $font, 17, 768, $row_y + 8, $amber, $row['dep'], 4);
+            airport_fid_draw_banner_text($img, $font, 17, 826, $row_y + 8, $cyan, $row['al'], 4);
+            airport_fid_draw_banner_text($img, $font, 17, 878, $row_y + 8, $status_color, $row['status'], 4);
+            airport_fid_draw_banner_text($img, $font, 17, 962, $row_y + 8, $muted, $row['gate'], 4);
         } else {
             $status_color = ($row['status'] === 'ON TIME') ? $green : $muted;
             imagestring($img, 4, 628, $row_y - 12, substr((string) $row['destination'], 0, 18), $white);
@@ -1360,8 +1576,8 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
     foreach ($stats as $i => $label) {
         $parts = explode("\n", $label);
         if ($can_ttf) {
-            imagettftext($img, 30, 0, $stat_x, $height - 42, $amber, $font, $parts[0]);
-            imagettftext($img, 12, 0, $stat_x, $height - 22, $muted, $font, $parts[1]);
+            airport_fid_draw_banner_text($img, $font, 30, $stat_x, $height - 42, $amber, $parts[0], 5);
+            airport_fid_draw_banner_text($img, $font, 12, $stat_x, $height - 22, $muted, $parts[1], 2);
         } else {
             imagestring($img, 5, $stat_x, $height - 58, $parts[0], $amber);
             imagestring($img, 2, $stat_x, $height - 30, $parts[1], $muted);
@@ -1378,7 +1594,9 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
 }
 
 function airport_fid_admin_text_field($label, $key, $value, $attrs = array()) {
-    echo '<label class="airport-fid-admin-field"><span>' . esc_html($label) . '</span><input type="text" name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']" value="' . esc_attr($value) . '"';
+    $type = isset($attrs['type']) ? (string) $attrs['type'] : 'text';
+    unset($attrs['type']);
+    echo '<label class="airport-fid-admin-field"><span>' . esc_html($label) . '</span><input type="' . esc_attr($type) . '" name="' . esc_attr(AIRPORT_FID_OPTION_KEY) . '[' . esc_attr($key) . ']" value="' . esc_attr($value) . '"';
     foreach ($attrs as $attr_key => $attr_value) {
         echo ' ' . esc_attr($attr_key) . '="' . esc_attr($attr_value) . '"';
     }

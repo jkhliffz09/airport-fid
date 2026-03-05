@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.18
+Stable tag: 0.2.19
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,12 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.19 =
+* Added AI-generated "About Airport Flight Schedules" section for generated pages.
+* Added provider switch for OpenAI or Claude with separate API key/model settings.
+* Added weekly caching for generated AI about content with safe fallback text.
+* Fixed featured image text rendering by removing icon-font fallback and adding robust text draw fallback.
 
 = 0.2.18 =
 * Fixed generated featured image text rendering when TTF/FreeType fonts are unavailable.
@@ -129,6 +135,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.19 =
+AI-generated About section support (OpenAI/Claude) and featured-image text fallback improvements.
 
 = 0.2.18 =
 Featured image text rendering fallback and plugin row Settings link.
