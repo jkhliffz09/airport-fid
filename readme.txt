@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.20
+Stable tag: 0.2.21
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.21 =
+* Updated airport page generation to use the latest cached date that actually has flights.
+* Improved featured-image headline prominence for "FLIGHT SCHEDULE & DEPARTURE BOARD".
 
 = 0.2.20 =
 * Added animated loading dialog for Generate/Update Airport Pages.
@@ -139,6 +143,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.21 =
+Airport page generation now prefers latest non-empty cache date and has larger featured-image headline text.
 
 = 0.2.20 =
 Animated generation dialog with real-time progress text for airport page sync.

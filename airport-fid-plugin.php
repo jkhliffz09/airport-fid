@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.20
+ * Version: 0.2.21
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.20';
+const AIRPORT_FID_VERSION = '0.2.21';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
@@ -858,74 +858,85 @@ function airport_fid_get_cached_airports() {
 function airport_fid_build_airport_dataset($airport) {
     global $wpdb;
     $table = airport_fid_get_cache_table();
-    $latest_date = $wpdb->get_var($wpdb->prepare(
-        "SELECT MAX(flight_date) FROM {$table} WHERE airport = %s",
+    $dates = $wpdb->get_col($wpdb->prepare(
+        "SELECT DISTINCT flight_date FROM {$table} WHERE airport = %s ORDER BY flight_date DESC LIMIT 20",
         $airport
     ));
-    if (!$latest_date) {
+    if (!is_array($dates) || empty($dates)) {
         return array();
     }
 
-    $rows = $wpdb->get_results($wpdb->prepare(
-        "SELECT payload, updated_at FROM {$table} WHERE airport = %s AND flight_date = %s ORDER BY updated_at DESC",
-        $airport,
-        $latest_date
-    ), ARRAY_A);
-
-    if (empty($rows)) {
-        return array();
-    }
-
-    $airport_name = '';
-    $latest_updated_at = '';
-    $flight_map = array();
-
-    foreach ($rows as $row) {
-        if ($latest_updated_at === '' || strtotime((string) $row['updated_at']) > strtotime($latest_updated_at)) {
-            $latest_updated_at = (string) $row['updated_at'];
-        }
-        $payload = json_decode((string) $row['payload'], true);
-        if (!is_array($payload)) {
+    $fallback_dataset = array();
+    foreach ($dates as $date) {
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT payload, updated_at FROM {$table} WHERE airport = %s AND flight_date = %s ORDER BY updated_at DESC",
+            $airport,
+            $date
+        ), ARRAY_A);
+        if (empty($rows)) {
             continue;
         }
-        if ($airport_name === '' && !empty($payload['airport_name'])) {
-            $airport_name = (string) $payload['airport_name'];
-        }
-        $flights = isset($payload['flights']) && is_array($payload['flights']) ? $payload['flights'] : array();
-        foreach ($flights as $flight) {
-            if (!is_array($flight)) {
+
+        $airport_name = '';
+        $latest_updated_at = '';
+        $flight_map = array();
+
+        foreach ($rows as $row) {
+            if ($latest_updated_at === '' || strtotime((string) $row['updated_at']) > strtotime($latest_updated_at)) {
+                $latest_updated_at = (string) $row['updated_at'];
+            }
+            $payload = json_decode((string) $row['payload'], true);
+            if (!is_array($payload)) {
                 continue;
             }
-            if ($airport_name === '' && !empty($flight['origin_name'])) {
-                $airport_name = (string) $flight['origin_name'];
+            if ($airport_name === '' && !empty($payload['airport_name'])) {
+                $airport_name = (string) $payload['airport_name'];
             }
-            $key = strtoupper((string) ($flight['flight_number'] ?? ''))
-                . '|' . (string) ((int) ($flight['departure_ts'] ?? 0))
-                . '|' . strtoupper((string) ($flight['destination'] ?? ''))
-                . '|' . (string) ((int) ($flight['arrival_ts'] ?? 0));
-            if (!isset($flight_map[$key])) {
-                $flight_map[$key] = $flight;
+            $flights = isset($payload['flights']) && is_array($payload['flights']) ? $payload['flights'] : array();
+            foreach ($flights as $flight) {
+                if (!is_array($flight)) {
+                    continue;
+                }
+                if ($airport_name === '' && !empty($flight['origin_name'])) {
+                    $airport_name = (string) $flight['origin_name'];
+                }
+                $key = strtoupper((string) ($flight['flight_number'] ?? ''))
+                    . '|' . (string) ((int) ($flight['departure_ts'] ?? 0))
+                    . '|' . strtoupper((string) ($flight['destination'] ?? ''))
+                    . '|' . (string) ((int) ($flight['arrival_ts'] ?? 0));
+                if (!isset($flight_map[$key])) {
+                    $flight_map[$key] = $flight;
+                }
             }
+        }
+
+        $flights = array_values($flight_map);
+        usort($flights, function ($a, $b) {
+            $a_ts = isset($a['departure_ts']) ? (int) $a['departure_ts'] : 0;
+            $b_ts = isset($b['departure_ts']) ? (int) $b['departure_ts'] : 0;
+            if ($a_ts === $b_ts) {
+                return 0;
+            }
+            return $a_ts < $b_ts ? -1 : 1;
+        });
+
+        $dataset = array(
+            'airport' => $airport,
+            'airport_name' => $airport_name ?: $airport,
+            'flight_date' => (string) $date,
+            'updated_at' => $latest_updated_at,
+            'flights' => $flights,
+        );
+
+        if (empty($fallback_dataset)) {
+            $fallback_dataset = $dataset;
+        }
+        if (!empty($flights)) {
+            return $dataset;
         }
     }
 
-    $flights = array_values($flight_map);
-    usort($flights, function ($a, $b) {
-        $a_ts = isset($a['departure_ts']) ? (int) $a['departure_ts'] : 0;
-        $b_ts = isset($b['departure_ts']) ? (int) $b['departure_ts'] : 0;
-        if ($a_ts === $b_ts) {
-            return 0;
-        }
-        return $a_ts < $b_ts ? -1 : 1;
-    });
-
-    return array(
-        'airport' => $airport,
-        'airport_name' => $airport_name ?: $airport,
-        'flight_date' => $latest_date,
-        'updated_at' => $latest_updated_at,
-        'flights' => $flights,
-    );
+    return $fallback_dataset;
 }
 
 function airport_fid_upsert_airport_page($airport, $dataset) {
@@ -1527,8 +1538,8 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
 
         airport_fid_draw_banner_text($img, $font, 82, 30, 185, $white, strtoupper($airport), 5);
         imageline($img, 30, 186, 178, 186, $amber);
-        airport_fid_draw_banner_text($img, $font, 54, 30, 390, $white, 'FLIGHT SCHEDULE', 5);
-        airport_fid_draw_banner_text($img, $font, 54, 30, 460, $amber, '& DEPARTURE BOARD', 5);
+        airport_fid_draw_banner_text($img, $font, 66, 30, 404, $white, 'FLIGHT SCHEDULE', 5);
+        airport_fid_draw_banner_text($img, $font, 66, 30, 486, $amber, '& DEPARTURE BOARD', 5);
 
         $name_lines = explode("\n", $airport_name_u);
         $line_y = 258;
