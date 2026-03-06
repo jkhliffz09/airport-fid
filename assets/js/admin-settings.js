@@ -210,4 +210,11 @@
             }, 240000);
         });
     }
+
+    var queueProgress = document.querySelector('.airport-fid-queue-progress');
+    if (queueProgress && queueProgress.getAttribute('data-running') === '1') {
+        window.setTimeout(function () {
+            window.location.reload();
+        }, 3500);
+    }
 })();

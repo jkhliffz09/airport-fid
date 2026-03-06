@@ -223,6 +223,43 @@
     color: #b8d1e3;
 }
 
+.airport-fid-queue-progress {
+    margin: 0 0 14px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #2a4558;
+    background: #102131;
+}
+
+.airport-fid-queue-progress-head {
+    margin: 0 0 8px;
+    color: #d5e7f6;
+    font-size: 13px;
+}
+
+.airport-fid-queue-progress-bar {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #22384d;
+    border: 1px solid #2b495f;
+}
+
+.airport-fid-queue-progress-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #00bcd4 0%, #47d9eb 100%);
+    transition: width 0.35s ease;
+}
+
+.airport-fid-queue-progress-meta {
+    margin-top: 8px;
+    color: #b8d1e3;
+    font-size: 12px;
+}
+
 .airport-fid-admin-overlay {
     position: fixed;
     inset: 0;

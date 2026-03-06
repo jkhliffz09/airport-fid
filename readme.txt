@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.23
+Stable tag: 0.2.24
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.24 =
+* Added airport-page generation progress bar with percentage and counters.
+* Added current-airport and last-action status details during queue runs.
+* Added settings-page auto-refresh and queue fallback chunk processing to keep progress moving when WP-Cron is delayed.
 
 = 0.2.23 =
 * Fixed airport page queue getting stuck at 0 progress by processing the first airport immediately on manual runs.
@@ -152,6 +157,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.24 =
+Airport page generation now includes a live progress bar and stronger queue fallback processing.
 
 = 0.2.23 =
 Queue progress reliability improvements for manual airport page generation.

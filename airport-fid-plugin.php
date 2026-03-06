@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.23
+ * Version: 0.2.24
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.23';
+const AIRPORT_FID_VERSION = '0.2.24';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
@@ -574,10 +574,21 @@ function airport_fid_render_settings_page() {
     }
     $queue_state = airport_fid_get_page_generation_state();
     if (is_array($queue_state) && !empty($queue_state['running'])) {
-        $total = isset($queue_state['total']) ? (int) $queue_state['total'] : 0;
-        $remaining = isset($queue_state['airports']) && is_array($queue_state['airports']) ? count($queue_state['airports']) : 0;
-        $processed = max(0, $total - $remaining);
-        echo '<div class="airport-fid-admin-notice is-success">Background generation in progress: ' . esc_html((string) $processed) . ' / ' . esc_html((string) $total) . ' airports processed.</div>';
+        $progress = airport_fid_get_queue_progress_data($queue_state);
+        $current_airport = isset($queue_state['current_airport']) ? (string) $queue_state['current_airport'] : '';
+        $last_status = isset($queue_state['last_status']) ? (string) $queue_state['last_status'] : '';
+        echo '<div class="airport-fid-admin-notice is-success">Background generation in progress: ' . esc_html((string) $progress['processed']) . ' / ' . esc_html((string) $progress['total']) . ' airports processed.</div>';
+        echo '<div class="airport-fid-queue-progress" data-running="1">';
+        echo '<div class="airport-fid-queue-progress-head"><strong>Progress:</strong> ' . esc_html((string) $progress['percent']) . '%</div>';
+        echo '<div class="airport-fid-queue-progress-bar"><span style="width:' . esc_attr((string) $progress['percent']) . '%"></span></div>';
+        echo '<div class="airport-fid-queue-progress-meta">Created: ' . esc_html((string) ((int) ($queue_state['created'] ?? 0))) . ' | Updated: ' . esc_html((string) ((int) ($queue_state['updated'] ?? 0))) . ' | Skipped: ' . esc_html((string) ((int) ($queue_state['skipped'] ?? 0))) . '</div>';
+        if ($current_airport !== '') {
+            echo '<div class="airport-fid-queue-progress-meta">Current: ' . esc_html($current_airport) . '</div>';
+        }
+        if ($last_status !== '') {
+            echo '<div class="airport-fid-queue-progress-meta">Last action: ' . esc_html($last_status) . '</div>';
+        }
+        echo '</div>';
     } else {
         $last = get_option(AIRPORT_FID_PAGE_LAST_RESULT_OPTION, array());
         if (is_array($last) && !empty($last['finished_at'])) {
@@ -585,6 +596,14 @@ function airport_fid_render_settings_page() {
             $updated = isset($last['updated']) ? (int) $last['updated'] : 0;
             $skipped = isset($last['skipped']) ? (int) $last['skipped'] : 0;
             echo '<div class="airport-fid-admin-notice is-success">Last background run: Created ' . esc_html((string) $created) . ', Updated ' . esc_html((string) $updated) . ', Skipped ' . esc_html((string) $skipped) . '.</div>';
+            $total = (int) ($last['total'] ?? ($created + $updated + $skipped));
+            $processed = min($total, $created + $updated + $skipped);
+            $percent = $total > 0 ? (int) round(($processed / $total) * 100) : 100;
+            echo '<div class="airport-fid-queue-progress" data-running="0">';
+            echo '<div class="airport-fid-queue-progress-head"><strong>Last Run Progress:</strong> ' . esc_html((string) $percent) . '%</div>';
+            echo '<div class="airport-fid-queue-progress-bar"><span style="width:' . esc_attr((string) $percent) . '%"></span></div>';
+            echo '<div class="airport-fid-queue-progress-meta">Created: ' . esc_html((string) $created) . ' | Updated: ' . esc_html((string) $updated) . ' | Skipped: ' . esc_html((string) $skipped) . '</div>';
+            echo '</div>';
         }
     }
     echo '<form method="post" action="options.php">';
@@ -693,6 +712,24 @@ function airport_fid_render_settings_page() {
     echo '</div>';
     echo '</div>';
     echo '</div>';
+}
+
+function airport_fid_get_queue_progress_data($state) {
+    $total = isset($state['total']) ? (int) $state['total'] : 0;
+    $remaining = isset($state['airports']) && is_array($state['airports']) ? count($state['airports']) : 0;
+    $processed = max(0, $total - $remaining);
+    $percent = 0;
+    if ($total > 0) {
+        $percent = (int) round(($processed / $total) * 100);
+    } elseif (empty($state['running'])) {
+        $percent = 100;
+    }
+    return array(
+        'total' => $total,
+        'remaining' => $remaining,
+        'processed' => $processed,
+        'percent' => min(100, max(0, $percent)),
+    );
 }
 
 function airport_fid_render_cache_items_table() {
@@ -864,6 +901,31 @@ function airport_fid_maybe_recover_page_generation_worker() {
 }
 add_action('admin_init', 'airport_fid_maybe_recover_page_generation_worker');
 
+function airport_fid_process_queue_on_settings_page() {
+    if (!is_admin()) {
+        return;
+    }
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    if (!isset($_GET['page']) || sanitize_text_field((string) $_GET['page']) !== 'airport-fid-settings') {
+        return;
+    }
+
+    $state = airport_fid_get_page_generation_state();
+    if (empty($state['running']) || empty($state['airports']) || !is_array($state['airports'])) {
+        return;
+    }
+
+    $last_tick = isset($state['last_tick']) ? (int) $state['last_tick'] : 0;
+    $now = time();
+    if ($last_tick > 0 && ($now - $last_tick) < 2) {
+        return;
+    }
+    airport_fid_process_airport_pages_generation_queue(1);
+}
+add_action('admin_init', 'airport_fid_process_queue_on_settings_page', 20);
+
 function airport_fid_start_airport_pages_generation($source = 'manual') {
     $settings = airport_fid_get_settings();
     if ((int) ($settings['airport_pages_enabled'] ?? 1) !== 1) {
@@ -884,11 +946,14 @@ function airport_fid_start_airport_pages_generation($source = 'manual') {
         'running' => 1,
         'source' => (string) $source,
         'started_at' => current_time('mysql'),
+        'last_tick' => time(),
         'created' => 0,
         'updated' => 0,
         'skipped' => 0,
         'total' => count($airports),
         'airports' => array_values($airports),
+        'current_airport' => '',
+        'last_status' => 'Queue initialized',
     );
     airport_fid_set_page_generation_state($state);
     if ($source === 'manual') {
@@ -914,17 +979,22 @@ function airport_fid_process_airport_pages_generation_queue($batch_limit = null)
     $start = microtime(true);
     while ($processed < $batch_size && !empty($state['airports'])) {
         $airport = array_shift($state['airports']);
+        $state['current_airport'] = (string) $airport;
         $dataset = airport_fid_build_airport_dataset($airport);
         if (empty($dataset) || empty($dataset['flights'])) {
             $state['skipped'] = (int) ($state['skipped'] ?? 0) + 1;
+            $state['last_status'] = (string) $airport . ': skipped (no flights found)';
         } else {
             $result = airport_fid_upsert_airport_page($airport, $dataset);
             if (is_array($result) && isset($result['state']) && $result['state'] === 'created') {
                 $state['created'] = (int) ($state['created'] ?? 0) + 1;
+                $state['last_status'] = (string) $airport . ': page created';
             } elseif (is_array($result) && isset($result['state']) && $result['state'] === 'updated') {
                 $state['updated'] = (int) ($state['updated'] ?? 0) + 1;
+                $state['last_status'] = (string) $airport . ': page updated';
             } else {
                 $state['skipped'] = (int) ($state['skipped'] ?? 0) + 1;
+                $state['last_status'] = (string) $airport . ': skipped (save failed)';
             }
         }
         $processed++;
@@ -932,6 +1002,7 @@ function airport_fid_process_airport_pages_generation_queue($batch_limit = null)
             break;
         }
     }
+    $state['last_tick'] = time();
 
     if (empty($state['airports'])) {
         $state['running'] = 0;
