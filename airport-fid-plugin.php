@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.22
+ * Version: 0.2.23
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.22';
+const AIRPORT_FID_VERSION = '0.2.23';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
@@ -843,6 +843,27 @@ function airport_fid_schedule_page_generation_worker($delay = 5) {
     }
 }
 
+function airport_fid_maybe_recover_page_generation_worker() {
+    if (!is_admin()) {
+        return;
+    }
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    $state = airport_fid_get_page_generation_state();
+    if (empty($state['running']) || empty($state['airports']) || !is_array($state['airports'])) {
+        return;
+    }
+    if (wp_next_scheduled(AIRPORT_FID_PAGE_WORKER_HOOK)) {
+        return;
+    }
+    airport_fid_schedule_page_generation_worker(1);
+    if (function_exists('spawn_cron')) {
+        @spawn_cron(time());
+    }
+}
+add_action('admin_init', 'airport_fid_maybe_recover_page_generation_worker');
+
 function airport_fid_start_airport_pages_generation($source = 'manual') {
     $settings = airport_fid_get_settings();
     if ((int) ($settings['airport_pages_enabled'] ?? 1) !== 1) {
@@ -870,6 +891,10 @@ function airport_fid_start_airport_pages_generation($source = 'manual') {
         'airports' => array_values($airports),
     );
     airport_fid_set_page_generation_state($state);
+    if ($source === 'manual') {
+        // Process one airport immediately to avoid getting stuck at 0 progress if WP-Cron is delayed.
+        airport_fid_process_airport_pages_generation_queue(1);
+    }
     airport_fid_schedule_page_generation_worker(2);
     if (function_exists('spawn_cron')) {
         @spawn_cron(time());
@@ -878,13 +903,13 @@ function airport_fid_start_airport_pages_generation($source = 'manual') {
     return array('queued' => true, 'already_running' => false, 'total' => count($airports));
 }
 
-function airport_fid_process_airport_pages_generation_queue() {
+function airport_fid_process_airport_pages_generation_queue($batch_limit = null) {
     $state = airport_fid_get_page_generation_state();
     if (empty($state['running']) || empty($state['airports']) || !is_array($state['airports'])) {
         return;
     }
 
-    $batch_size = 2;
+    $batch_size = $batch_limit !== null ? max(1, (int) $batch_limit) : 2;
     $processed = 0;
     $start = microtime(true);
     while ($processed < $batch_size && !empty($state['airports'])) {
