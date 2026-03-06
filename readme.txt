@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.21
+Stable tag: 0.2.22
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.22 =
+* Moved airport page generation to a background queue with batch worker processing to reduce timeout risk.
+* Added generation queue status notices in admin (queued, progress, last run summary).
+* Tuned featured-image headline typography for stronger left-side emphasis.
 
 = 0.2.21 =
 * Updated airport page generation to use the latest cached date that actually has flights.
@@ -143,6 +148,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.22 =
+Background queued airport page generation and stronger featured-image headline styling.
 
 = 0.2.21 =
 Airport page generation now prefers latest non-empty cache date and has larger featured-image headline text.

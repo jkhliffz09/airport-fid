@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.21
+ * Version: 0.2.22
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,12 +13,15 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.21';
+const AIRPORT_FID_VERSION = '0.2.22';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
 const AIRPORT_FID_PAGE_SYNC_HOOK = 'airport_fid_generate_airport_pages_event';
 const AIRPORT_FID_PAGE_META_FEATURED = '_airport_fid_featured_attachment_id';
+const AIRPORT_FID_PAGE_WORKER_HOOK = 'airport_fid_generate_airport_pages_worker_event';
+const AIRPORT_FID_PAGE_QUEUE_OPTION = 'airport_fid_page_generation_queue';
+const AIRPORT_FID_PAGE_LAST_RESULT_OPTION = 'airport_fid_page_generation_last_result';
 
 function airport_fid_install() {
     global $wpdb;
@@ -51,6 +54,10 @@ function airport_fid_deactivation_cleanup() {
     $timestamp = wp_next_scheduled(AIRPORT_FID_PAGE_SYNC_HOOK);
     if ($timestamp) {
         wp_unschedule_event($timestamp, AIRPORT_FID_PAGE_SYNC_HOOK);
+    }
+    $worker = wp_next_scheduled(AIRPORT_FID_PAGE_WORKER_HOOK);
+    if ($worker) {
+        wp_unschedule_event($worker, AIRPORT_FID_PAGE_WORKER_HOOK);
     }
 }
 register_deactivation_hook(__FILE__, 'airport_fid_deactivation_cleanup');
@@ -556,12 +563,29 @@ function airport_fid_render_settings_page() {
         echo '<div class="airport-fid-admin-notice is-success">Cache item updated.</div>';
     } elseif (isset($_GET['cache_error']) && $_GET['cache_error'] === 'invalid_json') {
         echo '<div class="airport-fid-admin-notice is-error">Invalid JSON. Please fix the payload format and try again.</div>';
+    } elseif (isset($_GET['pages_sync']) && $_GET['pages_sync'] === 'queued') {
+        echo '<div class="airport-fid-admin-notice is-success">Airport page generation queued. Processing will continue in the background.</div>';
     } elseif (isset($_GET['pages_sync']) && $_GET['pages_sync'] === '1') {
         $created = isset($_GET['pages_created']) ? (int) $_GET['pages_created'] : 0;
         $updated = isset($_GET['pages_updated']) ? (int) $_GET['pages_updated'] : 0;
         echo '<div class="airport-fid-admin-notice is-success">Airport pages sync completed. Created: ' . esc_html((string) $created) . ', Updated: ' . esc_html((string) $updated) . '.</div>';
     } elseif (isset($_GET['pages_sync']) && $_GET['pages_sync'] === '0') {
         echo '<div class="airport-fid-admin-notice is-error">Airport pages sync failed.</div>';
+    }
+    $queue_state = airport_fid_get_page_generation_state();
+    if (is_array($queue_state) && !empty($queue_state['running'])) {
+        $total = isset($queue_state['total']) ? (int) $queue_state['total'] : 0;
+        $remaining = isset($queue_state['airports']) && is_array($queue_state['airports']) ? count($queue_state['airports']) : 0;
+        $processed = max(0, $total - $remaining);
+        echo '<div class="airport-fid-admin-notice is-success">Background generation in progress: ' . esc_html((string) $processed) . ' / ' . esc_html((string) $total) . ' airports processed.</div>';
+    } else {
+        $last = get_option(AIRPORT_FID_PAGE_LAST_RESULT_OPTION, array());
+        if (is_array($last) && !empty($last['finished_at'])) {
+            $created = isset($last['created']) ? (int) $last['created'] : 0;
+            $updated = isset($last['updated']) ? (int) $last['updated'] : 0;
+            $skipped = isset($last['skipped']) ? (int) $last['skipped'] : 0;
+            echo '<div class="airport-fid-admin-notice is-success">Last background run: Created ' . esc_html((string) $created) . ', Updated ' . esc_html((string) $updated) . ', Skipped ' . esc_html((string) $skipped) . '.</div>';
+        }
     }
     echo '<form method="post" action="options.php">';
     settings_fields('airport_fid_settings_group');
@@ -785,55 +809,134 @@ function airport_fid_handle_generate_airport_pages() {
         wp_die('Invalid security token.');
     }
 
-    $result = airport_fid_generate_airport_pages();
-    if (is_wp_error($result)) {
+    $queued = airport_fid_start_airport_pages_generation('manual');
+    if (is_wp_error($queued)) {
         wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&pages_sync=0'));
         exit;
     }
-
-    $created = isset($result['created']) ? (int) $result['created'] : 0;
-    $updated = isset($result['updated']) ? (int) $result['updated'] : 0;
-    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&pages_sync=1&pages_created=' . $created . '&pages_updated=' . $updated));
+    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&pages_sync=queued'));
     exit;
 }
 add_action('admin_post_airport_fid_generate_airport_pages', 'airport_fid_handle_generate_airport_pages');
-add_action(AIRPORT_FID_PAGE_SYNC_HOOK, 'airport_fid_generate_airport_pages');
+add_action(AIRPORT_FID_PAGE_SYNC_HOOK, 'airport_fid_kickoff_scheduled_airport_pages_generation');
+add_action(AIRPORT_FID_PAGE_WORKER_HOOK, 'airport_fid_process_airport_pages_generation_queue');
 
-function airport_fid_generate_airport_pages() {
+function airport_fid_kickoff_scheduled_airport_pages_generation() {
+    airport_fid_start_airport_pages_generation('scheduled');
+}
+
+function airport_fid_get_page_generation_state() {
+    $state = get_option(AIRPORT_FID_PAGE_QUEUE_OPTION, array());
+    return is_array($state) ? $state : array();
+}
+
+function airport_fid_set_page_generation_state($state) {
+    if (!is_array($state)) {
+        $state = array();
+    }
+    update_option(AIRPORT_FID_PAGE_QUEUE_OPTION, $state, false);
+}
+
+function airport_fid_schedule_page_generation_worker($delay = 5) {
+    if (!wp_next_scheduled(AIRPORT_FID_PAGE_WORKER_HOOK)) {
+        wp_schedule_single_event(time() + max(1, (int) $delay), AIRPORT_FID_PAGE_WORKER_HOOK);
+    }
+}
+
+function airport_fid_start_airport_pages_generation($source = 'manual') {
     $settings = airport_fid_get_settings();
     if ((int) ($settings['airport_pages_enabled'] ?? 1) !== 1) {
-        return array('created' => 0, 'updated' => 0, 'skipped' => 0);
+        return new WP_Error('airport_fid_pages_disabled', 'Airport page generation is disabled.');
+    }
+
+    $state = airport_fid_get_page_generation_state();
+    if (!empty($state['running'])) {
+        return array('queued' => true, 'already_running' => true);
     }
 
     $airports = airport_fid_get_cached_airports();
     if (empty($airports)) {
-        return array('created' => 0, 'updated' => 0, 'skipped' => 0);
+        return array('queued' => false, 'empty' => true);
     }
 
-    $created = 0;
-    $updated = 0;
-    $skipped = 0;
+    $state = array(
+        'running' => 1,
+        'source' => (string) $source,
+        'started_at' => current_time('mysql'),
+        'created' => 0,
+        'updated' => 0,
+        'skipped' => 0,
+        'total' => count($airports),
+        'airports' => array_values($airports),
+    );
+    airport_fid_set_page_generation_state($state);
+    airport_fid_schedule_page_generation_worker(2);
+    if (function_exists('spawn_cron')) {
+        @spawn_cron(time());
+    }
 
-    foreach ($airports as $airport) {
+    return array('queued' => true, 'already_running' => false, 'total' => count($airports));
+}
+
+function airport_fid_process_airport_pages_generation_queue() {
+    $state = airport_fid_get_page_generation_state();
+    if (empty($state['running']) || empty($state['airports']) || !is_array($state['airports'])) {
+        return;
+    }
+
+    $batch_size = 2;
+    $processed = 0;
+    $start = microtime(true);
+    while ($processed < $batch_size && !empty($state['airports'])) {
+        $airport = array_shift($state['airports']);
         $dataset = airport_fid_build_airport_dataset($airport);
         if (empty($dataset) || empty($dataset['flights'])) {
-            $skipped++;
-            continue;
-        }
-        $result = airport_fid_upsert_airport_page($airport, $dataset);
-        if (is_array($result) && isset($result['state']) && $result['state'] === 'created') {
-            $created++;
-        } elseif (is_array($result) && isset($result['state']) && $result['state'] === 'updated') {
-            $updated++;
+            $state['skipped'] = (int) ($state['skipped'] ?? 0) + 1;
         } else {
-            $skipped++;
+            $result = airport_fid_upsert_airport_page($airport, $dataset);
+            if (is_array($result) && isset($result['state']) && $result['state'] === 'created') {
+                $state['created'] = (int) ($state['created'] ?? 0) + 1;
+            } elseif (is_array($result) && isset($result['state']) && $result['state'] === 'updated') {
+                $state['updated'] = (int) ($state['updated'] ?? 0) + 1;
+            } else {
+                $state['skipped'] = (int) ($state['skipped'] ?? 0) + 1;
+            }
+        }
+        $processed++;
+        if ((microtime(true) - $start) > 12) {
+            break;
         }
     }
 
+    if (empty($state['airports'])) {
+        $state['running'] = 0;
+        $state['finished_at'] = current_time('mysql');
+        airport_fid_set_page_generation_state($state);
+        update_option(AIRPORT_FID_PAGE_LAST_RESULT_OPTION, array(
+            'created' => (int) ($state['created'] ?? 0),
+            'updated' => (int) ($state['updated'] ?? 0),
+            'skipped' => (int) ($state['skipped'] ?? 0),
+            'total' => (int) ($state['total'] ?? 0),
+            'finished_at' => (string) ($state['finished_at'] ?? current_time('mysql')),
+        ), false);
+        return;
+    }
+
+    airport_fid_set_page_generation_state($state);
+    airport_fid_schedule_page_generation_worker(8);
+}
+
+function airport_fid_generate_airport_pages() {
+    // Backward-compatible wrapper: queue background generation instead of blocking request.
+    $result = airport_fid_start_airport_pages_generation('manual');
+    if (is_wp_error($result)) {
+        return $result;
+    }
     return array(
-        'created' => $created,
-        'updated' => $updated,
-        'skipped' => $skipped,
+        'created' => 0,
+        'updated' => 0,
+        'skipped' => 0,
+        'queued' => true,
     );
 }
 
@@ -1536,16 +1639,16 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
             $airport_name_u = wordwrap($airport_name_u, 28, "\n", true);
         }
 
-        airport_fid_draw_banner_text($img, $font, 82, 30, 185, $white, strtoupper($airport), 5);
+        airport_fid_draw_banner_text($img, $font, 98, 30, 200, $white, strtoupper($airport), 5);
         imageline($img, 30, 186, 178, 186, $amber);
-        airport_fid_draw_banner_text($img, $font, 66, 30, 404, $white, 'FLIGHT SCHEDULE', 5);
-        airport_fid_draw_banner_text($img, $font, 66, 30, 486, $amber, '& DEPARTURE BOARD', 5);
+        airport_fid_draw_banner_text($img, $font, 74, 30, 426, $white, 'FLIGHT SCHEDULE', 5);
+        airport_fid_draw_banner_text($img, $font, 74, 30, 520, $amber, '& DEPARTURE BOARD', 5);
 
         $name_lines = explode("\n", $airport_name_u);
-        $line_y = 258;
+        $line_y = 260;
         foreach ($name_lines as $line) {
-            airport_fid_draw_banner_text($img, $font, 24, 30, $line_y, $muted, $line, 5);
-            $line_y += 46;
+            airport_fid_draw_banner_text($img, $font, 30, 30, $line_y, $muted, $line, 5);
+            $line_y += 52;
         }
 
         airport_fid_draw_banner_text($img, $font, 13, 620, 88, $muted, 'DESTINATION', 4);
@@ -1588,11 +1691,11 @@ function airport_fid_render_featured_image_png($file_path, $airport, $airport_na
         imagefilledrectangle($img, 620, $row_y - 22, 1120, $row_y + 18, $shade);
         if ($can_ttf) {
             $status_color = ($row['status'] === 'ON TIME') ? $green : $muted;
-            airport_fid_draw_banner_text($img, $font, 17, 628, $row_y + 8, $white, $row['destination'], 4);
-            airport_fid_draw_banner_text($img, $font, 17, 768, $row_y + 8, $amber, $row['dep'], 4);
-            airport_fid_draw_banner_text($img, $font, 17, 826, $row_y + 8, $cyan, $row['al'], 4);
-            airport_fid_draw_banner_text($img, $font, 17, 878, $row_y + 8, $status_color, $row['status'], 4);
-            airport_fid_draw_banner_text($img, $font, 17, 962, $row_y + 8, $muted, $row['gate'], 4);
+            airport_fid_draw_banner_text($img, $font, 16, 628, $row_y + 8, $white, $row['destination'], 4);
+            airport_fid_draw_banner_text($img, $font, 16, 768, $row_y + 8, $amber, $row['dep'], 4);
+            airport_fid_draw_banner_text($img, $font, 16, 826, $row_y + 8, $cyan, $row['al'], 4);
+            airport_fid_draw_banner_text($img, $font, 16, 878, $row_y + 8, $status_color, $row['status'], 4);
+            airport_fid_draw_banner_text($img, $font, 16, 962, $row_y + 8, $muted, $row['gate'], 4);
         } else {
             $status_color = ($row['status'] === 'ON TIME') ? $green : $muted;
             imagestring($img, 4, 628, $row_y - 12, substr((string) $row['destination'], 0, 18), $white);
