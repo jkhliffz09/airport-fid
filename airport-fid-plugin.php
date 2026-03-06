@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.24
+ * Version: 0.2.25
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.24';
+const AIRPORT_FID_VERSION = '0.2.25';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
@@ -595,14 +595,13 @@ function airport_fid_render_settings_page() {
             $created = isset($last['created']) ? (int) $last['created'] : 0;
             $updated = isset($last['updated']) ? (int) $last['updated'] : 0;
             $skipped = isset($last['skipped']) ? (int) $last['skipped'] : 0;
-            echo '<div class="airport-fid-admin-notice is-success">Last background run: Created ' . esc_html((string) $created) . ', Updated ' . esc_html((string) $updated) . ', Skipped ' . esc_html((string) $skipped) . '.</div>';
-            $total = (int) ($last['total'] ?? ($created + $updated + $skipped));
-            $processed = min($total, $created + $updated + $skipped);
-            $percent = $total > 0 ? (int) round(($processed / $total) * 100) : 100;
-            echo '<div class="airport-fid-queue-progress" data-running="0">';
-            echo '<div class="airport-fid-queue-progress-head"><strong>Last Run Progress:</strong> ' . esc_html((string) $percent) . '%</div>';
-            echo '<div class="airport-fid-queue-progress-bar"><span style="width:' . esc_attr((string) $percent) . '%"></span></div>';
-            echo '<div class="airport-fid-queue-progress-meta">Created: ' . esc_html((string) $created) . ' | Updated: ' . esc_html((string) $updated) . ' | Skipped: ' . esc_html((string) $skipped) . '</div>';
+            echo '<div class="airport-fid-admin-notice is-success airport-fid-admin-notice-flex">';
+            echo '<span>Last background run: Created ' . esc_html((string) $created) . ', Updated ' . esc_html((string) $updated) . ', Skipped ' . esc_html((string) $skipped) . '.</span>';
+            echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="airport-fid-queue-ok-form">';
+            echo '<input type="hidden" name="action" value="airport_fid_dismiss_page_generation_result" />';
+            wp_nonce_field('airport_fid_dismiss_page_generation_result', 'airport_fid_dismiss_nonce');
+            echo '<button type="submit" class="button airport-fid-queue-ok-button">OK</button>';
+            echo '</form>';
             echo '</div>';
         }
     }
@@ -837,6 +836,20 @@ function airport_fid_update_cache_item() {
     exit;
 }
 add_action('admin_post_airport_fid_update_cache_item', 'airport_fid_update_cache_item');
+
+function airport_fid_dismiss_page_generation_result() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized request.');
+    }
+    if (!isset($_POST['airport_fid_dismiss_nonce']) || !wp_verify_nonce(sanitize_text_field((string) $_POST['airport_fid_dismiss_nonce']), 'airport_fid_dismiss_page_generation_result')) {
+        wp_die('Invalid security token.');
+    }
+
+    delete_option(AIRPORT_FID_PAGE_LAST_RESULT_OPTION);
+    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings'));
+    exit;
+}
+add_action('admin_post_airport_fid_dismiss_page_generation_result', 'airport_fid_dismiss_page_generation_result');
 
 function airport_fid_handle_generate_airport_pages() {
     if (!current_user_can('manage_options')) {

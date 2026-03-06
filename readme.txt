@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.24
+Stable tag: 0.2.25
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.25 =
+* Removed persistent completed progress block after queue completion.
+* Added dismissible completion summary with an OK button to clear last-run status.
 
 = 0.2.24 =
 * Added airport-page generation progress bar with percentage and counters.
@@ -157,6 +161,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.25 =
+Completed queue progress is now dismissible via an OK button and no longer persists indefinitely.
 
 = 0.2.24 =
 Airport page generation now includes a live progress bar and stronger queue fallback processing.

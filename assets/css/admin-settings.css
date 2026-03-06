@@ -260,6 +260,27 @@
     font-size: 12px;
 }
 
+.airport-fid-admin-notice-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.airport-fid-queue-ok-form {
+    margin: 0;
+}
+
+.airport-fid-queue-ok-button {
+    border-radius: 999px;
+    border-color: #00bcd4 !important;
+    color: #042029 !important;
+    background: #00bcd4 !important;
+    font-weight: 700 !important;
+    padding: 2px 14px !important;
+    min-height: 30px !important;
+}
+
 .airport-fid-admin-overlay {
     position: fixed;
     inset: 0;
