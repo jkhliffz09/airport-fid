@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.25
+ * Version: 0.2.26
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.25';
+const AIRPORT_FID_VERSION = '0.2.26';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
@@ -1587,7 +1587,11 @@ function airport_fid_generate_and_attach_featured_image($post_id, $dataset) {
         return;
     }
 
-    $filename = sanitize_title(strtolower($airport) . '-airport-flight-schedules') . '-featured.png';
+    $flight_date = (string) ($dataset['flight_date'] ?? '');
+    $updated_at = (string) ($dataset['updated_at'] ?? '');
+    $flight_count = isset($dataset['flights']) && is_array($dataset['flights']) ? count($dataset['flights']) : 0;
+    $revision = substr(md5($airport . '|' . $flight_date . '|' . $updated_at . '|' . $flight_count), 0, 10);
+    $filename = sanitize_title(strtolower($airport) . '-airport-flight-schedules') . '-featured-' . $revision . '.png';
     $file_path = trailingslashit($dir) . $filename;
     $rendered = airport_fid_render_featured_image_png($file_path, $airport, $airport_name, $dataset);
     if (!$rendered) {

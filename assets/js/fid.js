@@ -38,7 +38,7 @@
         }
     }
 
-    function renderTable(wrapper, flights, showDestination, lastMap) {
+    function renderTable(wrapper, flights, showDestination, lastMap, enableFlipAnimation) {
         clearNode(wrapper);
 
         if (!flights.length) {
@@ -75,7 +75,7 @@
             if (className) {
                 span.classList.add(className);
             }
-            var shouldAnimate = animationsEnabled && animate;
+            var shouldAnimate = animationsEnabled && !!enableFlipAnimation && animate;
             if (shouldAnimate) {
                 span.classList.add('is-animate');
             }
@@ -551,7 +551,16 @@
     }
 
     function initBoard(board) {
-        var useGeo = board.dataset.useGeolocation === '1';
+        function isTruthy(value) {
+            if (value === true || value === 1) {
+                return true;
+            }
+            var text = String(value == null ? '' : value).toLowerCase();
+            return text === '1' || text === 'true' || text === 'yes';
+        }
+
+        var hasBoardGeo = typeof board.dataset.useGeolocation !== 'undefined' && board.dataset.useGeolocation !== '';
+        var useGeo = hasBoardGeo ? isTruthy(board.dataset.useGeolocation) : isTruthy(AirportFID.useGeolocation);
         var showDestination = board.dataset.showDestination === '1';
         var defaultAirport = (board.dataset.airport || AirportFID.defaultAirport || '').toUpperCase();
         var pageSize = 5;
@@ -579,6 +588,7 @@
         var pendingRequests = 0;
         var activeToken = 0;
         var isFetchingMore = false;
+        var suppressBatchAnimation = false;
         var currentLabel = '';
         var labelIsCode = false;
 
@@ -721,9 +731,10 @@
             }
         }
 
-        function renderPage() {
+        function renderPage(forceEnableAnimation) {
             var slice = allFlights.slice(0, visibleCount);
-            lastFlightMap = renderTable(wrapper, slice, showDestination, lastFlightMap);
+            var useAnimation = typeof forceEnableAnimation === 'boolean' ? forceEnableAnimation : !suppressBatchAnimation;
+            lastFlightMap = renderTable(wrapper, slice, showDestination, lastFlightMap, useAnimation);
             updatePagination();
         }
 
@@ -837,7 +848,7 @@
                                     }
                                 }
                                 visibleCount = Math.min(Math.max(visibleCount, pageSize), allFlights.length);
-                                renderPage();
+                                renderPage(false);
                             }
                             hideLoading();
                         })
@@ -851,7 +862,9 @@
                             }
                             if (index >= destinations.length && pendingRequests === 0) {
                                 isFetchingMore = false;
+                                suppressBatchAnimation = false;
                                 sortFlights(allFlights, sortValue || 'departure_time', orderSelect && orderSelect.value);
+                                lastFlightMap = {};
                                 renderPage();
                                 updateStatus('Showing flights for ' + currentLabel + '.');
                                 updatePagination();
@@ -893,6 +906,7 @@
             visibleCount = 0;
             lastFlightMap = {};
             isFetchingMore = false;
+            suppressBatchAnimation = false;
             pendingRequests = 0;
             currentLabel = iata;
             labelIsCode = true;
@@ -956,6 +970,7 @@
                                 return;
                             }
                             isFetchingMore = true;
+                            suppressBatchAnimation = true;
                             updatePagination();
                             fetchTimetableBatch(iata, destinations, dateValue, sortValue, token);
                         })
