@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.30
+ * Version: 0.2.31
  * Author: khliffz
  * Requires at least: 5.8
  * Tested up to: 6.9.1
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.30';
+const AIRPORT_FID_VERSION = '0.2.31';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
@@ -696,6 +696,9 @@ function airport_fid_render_settings_page() {
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="typography">Typography</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="layout">Layout</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="analytics">Analytics</button>';
+    if ((int) ($settings['analytics_hub_enabled'] ?? 0) === 1) {
+        echo '<button type="button" class="airport-fid-admin-tab" data-tab="hub">Hub</button>';
+    }
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="cache">Cached Items</button>';
     echo '</div>';
 
@@ -784,6 +787,11 @@ function airport_fid_render_settings_page() {
     echo '<section class="airport-fid-admin-panel" data-panel="analytics">';
     airport_fid_render_analytics_section();
     echo '</section>';
+    if ((int) ($settings['analytics_hub_enabled'] ?? 0) === 1) {
+        echo '<section class="airport-fid-admin-panel" data-panel="hub">';
+        airport_fid_render_hub_analytics_section();
+        echo '</section>';
+    }
     echo '<section class="airport-fid-admin-panel" data-panel="cache">';
     echo '<section class="airport-fid-admin-cache-section">';
     echo '<h2>Cached Request Items</h2>';
@@ -2168,29 +2176,49 @@ function airport_fid_log_search($data) {
     return $insert_id;
 }
 
-function airport_fid_get_search_analytics() {
+function airport_fid_get_search_analytics($site_url = '') {
     global $wpdb;
     $table = airport_fid_get_search_log_table();
+    $site_url = untrailingslashit((string) $site_url);
+    $where_sql = '';
+    $where_args = array();
+
+    if ($site_url !== '') {
+        $where_sql = ' WHERE site_url = %s';
+        $where_args[] = $site_url;
+    }
+
+    $today_sql = "SELECT COUNT(*) FROM {$table}";
+    if ($where_sql !== '') {
+        $today_sql .= $where_sql . ' AND DATE(created_at) = %s';
+    } else {
+        $today_sql .= ' WHERE DATE(created_at) = %s';
+    }
+
+    $total_sql = "SELECT COUNT(*) FROM {$table}" . $where_sql;
+    $top_airports_sql = "SELECT airport, COUNT(*) AS searches FROM {$table}" . $where_sql . " GROUP BY airport ORDER BY searches DESC, airport ASC LIMIT 5";
+    $top_sources_sql = "SELECT source, COUNT(*) AS searches FROM {$table}" . $where_sql . " GROUP BY source ORDER BY searches DESC, source ASC LIMIT 5";
+    $top_sites_sql = "SELECT COALESCE(NULLIF(site_label, ''), NULLIF(site_url, ''), 'Unknown site') AS site_label, site_url, COUNT(*) AS searches FROM {$table}" . $where_sql . " GROUP BY site_label, site_url ORDER BY searches DESC, site_label ASC LIMIT 5";
+    $recent_sql = "SELECT id, cache_id, airport, flight_date, sort, source, raw_input, selected_airport, site_url, site_label, created_at FROM {$table}" . $where_sql . " ORDER BY created_at DESC LIMIT 100";
 
     $summary = array(
-        'total' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}"),
-        'today' => (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table} WHERE DATE(created_at) = %s",
-            current_time('Y-m-d')
-        )),
-        'top_airports' => $wpdb->get_results("SELECT airport, COUNT(*) AS searches FROM {$table} GROUP BY airport ORDER BY searches DESC, airport ASC LIMIT 5", ARRAY_A),
-        'top_sources' => $wpdb->get_results("SELECT source, COUNT(*) AS searches FROM {$table} GROUP BY source ORDER BY searches DESC, source ASC LIMIT 5", ARRAY_A),
-        'top_sites' => $wpdb->get_results("SELECT COALESCE(NULLIF(site_label, ''), NULLIF(site_url, ''), 'Unknown site') AS site_label, site_url, COUNT(*) AS searches FROM {$table} GROUP BY site_label, site_url ORDER BY searches DESC, site_label ASC LIMIT 5", ARRAY_A),
-        'recent' => $wpdb->get_results("SELECT id, cache_id, airport, flight_date, sort, source, raw_input, selected_airport, site_url, site_label, created_at FROM {$table} ORDER BY created_at DESC LIMIT 100", ARRAY_A),
+        'total' => (int) ($where_sql !== '' ? $wpdb->get_var($wpdb->prepare($total_sql, $where_args)) : $wpdb->get_var($total_sql)),
+        'today' => (int) $wpdb->get_var($wpdb->prepare($today_sql, array_merge($where_args, array(current_time('Y-m-d'))))),
+        'top_airports' => $where_sql !== '' ? $wpdb->get_results($wpdb->prepare($top_airports_sql, $where_args), ARRAY_A) : $wpdb->get_results($top_airports_sql, ARRAY_A),
+        'top_sources' => $where_sql !== '' ? $wpdb->get_results($wpdb->prepare($top_sources_sql, $where_args), ARRAY_A) : $wpdb->get_results($top_sources_sql, ARRAY_A),
+        'top_sites' => $where_sql !== '' ? $wpdb->get_results($wpdb->prepare($top_sites_sql, $where_args), ARRAY_A) : $wpdb->get_results($top_sites_sql, ARRAY_A),
+        'recent' => $where_sql !== '' ? $wpdb->get_results($wpdb->prepare($recent_sql, $where_args), ARRAY_A) : $wpdb->get_results($recent_sql, ARRAY_A),
     );
 
     return $summary;
 }
 
 function airport_fid_render_analytics_section() {
-    $analytics = airport_fid_get_search_analytics();
+    $identity = airport_fid_get_site_identity();
+    $analytics = airport_fid_get_search_analytics($identity['site_url']);
     echo '<section class="airport-fid-admin-cache-section">';
     echo '<h2>Analytics</h2>';
+    echo '<p>Showing search analytics for this website only: <strong>' . esc_html($identity['site_label']) . '</strong>.</p>';
     if (!airport_fid_is_search_backfill_done()) {
         echo '<div class="airport-fid-admin-notice is-success airport-fid-admin-notice-flex">';
         echo '<span>Backfill existing cache rows into Analytics once so earlier cached searches appear in reports.</span>';
@@ -2206,10 +2234,8 @@ function airport_fid_render_analytics_section() {
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['today'])) . '</strong><span>Searches Today</span></div>';
     $top_airport = !empty($analytics['top_airports'][0]['airport']) ? $analytics['top_airports'][0]['airport'] : '--';
     $top_source = !empty($analytics['top_sources'][0]['source']) ? $analytics['top_sources'][0]['source'] : '--';
-    $top_site = !empty($analytics['top_sites'][0]['site_label']) ? $analytics['top_sites'][0]['site_label'] : '--';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html($top_airport) . '</strong><span>Top Airport</span></div>';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(strtoupper($top_source)) . '</strong><span>Top Source</span></div>';
-    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html($top_site) . '</strong><span>Top Site</span></div>';
     echo '</div>';
 
     echo '<div class="airport-fid-admin-grid" style="margin-top:12px;">';
@@ -2239,9 +2265,53 @@ function airport_fid_render_analytics_section() {
     echo '</tbody></table>';
     echo '</div>';
 
+    echo '</div>';
+
+    echo '<div class="airport-fid-admin-table-wrap" style="margin-top:12px;">';
+    echo '<table class="airport-fid-admin-table">';
+    echo '<thead><tr><th>When</th><th>Airport</th><th>Date</th><th>Sort</th><th>Source</th><th>Raw Input</th><th>Selected Airport</th><th>Cache ID</th></tr></thead><tbody>';
+    if (!empty($analytics['recent'])) {
+        foreach ($analytics['recent'] as $row) {
+            $date_display = preg_match('/^\d{8}$/', (string) $row['flight_date'])
+                ? substr((string) $row['flight_date'], 0, 4) . '-' . substr((string) $row['flight_date'], 4, 2) . '-' . substr((string) $row['flight_date'], 6, 2)
+                : (string) $row['flight_date'];
+            echo '<tr>';
+            echo '<td>' . esc_html((string) $row['created_at']) . '</td>';
+            echo '<td>' . esc_html((string) $row['airport']) . '</td>';
+            echo '<td>' . esc_html($date_display) . '</td>';
+            echo '<td>' . esc_html((string) $row['sort']) . '</td>';
+            echo '<td>' . esc_html((string) $row['source']) . '</td>';
+            echo '<td>' . esc_html((string) $row['raw_input']) . '</td>';
+            echo '<td>' . esc_html((string) $row['selected_airport']) . '</td>';
+            echo '<td>' . esc_html((string) ((int) $row['cache_id'])) . '</td>';
+            echo '</tr>';
+        }
+    } else {
+        echo '<tr><td colspan="8">No searches logged yet.</td></tr>';
+    }
+    echo '</tbody></table>';
+    echo '</div>';
+    echo '</section>';
+}
+
+function airport_fid_render_hub_analytics_section() {
+    $analytics = airport_fid_get_search_analytics();
+    echo '<section class="airport-fid-admin-cache-section">';
+    echo '<h2>Hub Analytics</h2>';
+    echo '<p>Showing combined analytics from all connected websites grouped by site.</p>';
+    echo '<div class="airport-fid-analytics-grid">';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['total'])) . '</strong><span>Total Searches</span></div>';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['today'])) . '</strong><span>Searches Today</span></div>';
+    $top_site = !empty($analytics['top_sites'][0]['site_label']) ? $analytics['top_sites'][0]['site_label'] : '--';
+    $top_airport = !empty($analytics['top_airports'][0]['airport']) ? $analytics['top_airports'][0]['airport'] : '--';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html($top_site) . '</strong><span>Top Site</span></div>';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html($top_airport) . '</strong><span>Top Airport</span></div>';
+    echo '</div>';
+
+    echo '<div class="airport-fid-admin-grid" style="margin-top:12px;">';
     echo '<div class="airport-fid-admin-table-wrap">';
     echo '<table class="airport-fid-admin-table">';
-    echo '<thead><tr><th>Top Sites</th><th>Searches</th></tr></thead><tbody>';
+    echo '<thead><tr><th>Website</th><th>Searches</th></tr></thead><tbody>';
     if (!empty($analytics['top_sites'])) {
         foreach ($analytics['top_sites'] as $row) {
             $site_label = (string) ($row['site_label'] ?? '');
@@ -2251,7 +2321,20 @@ function airport_fid_render_analytics_section() {
             echo '<tr><td>' . esc_html($site_label) . '</td><td>' . esc_html(number_format_i18n((int) $row['searches'])) . '</td></tr>';
         }
     } else {
-        echo '<tr><td colspan="2">No site data yet.</td></tr>';
+        echo '<tr><td colspan="2">No hub data yet.</td></tr>';
+    }
+    echo '</tbody></table>';
+    echo '</div>';
+
+    echo '<div class="airport-fid-admin-table-wrap">';
+    echo '<table class="airport-fid-admin-table">';
+    echo '<thead><tr><th>Top Airports</th><th>Searches</th></tr></thead><tbody>';
+    if (!empty($analytics['top_airports'])) {
+        foreach ($analytics['top_airports'] as $row) {
+            echo '<tr><td>' . esc_html((string) $row['airport']) . '</td><td>' . esc_html(number_format_i18n((int) $row['searches'])) . '</td></tr>';
+        }
+    } else {
+        echo '<tr><td colspan="2">No hub airport data yet.</td></tr>';
     }
     echo '</tbody></table>';
     echo '</div>';
@@ -2259,7 +2342,7 @@ function airport_fid_render_analytics_section() {
 
     echo '<div class="airport-fid-admin-table-wrap" style="margin-top:12px;">';
     echo '<table class="airport-fid-admin-table">';
-    echo '<thead><tr><th>When</th><th>Site</th><th>Airport</th><th>Date</th><th>Sort</th><th>Source</th><th>Raw Input</th><th>Selected Airport</th><th>Cache ID</th></tr></thead><tbody>';
+    echo '<thead><tr><th>When</th><th>Site</th><th>Airport</th><th>Date</th><th>Sort</th><th>Source</th><th>Raw Input</th><th>Selected Airport</th></tr></thead><tbody>';
     if (!empty($analytics['recent'])) {
         foreach ($analytics['recent'] as $row) {
             $date_display = preg_match('/^\d{8}$/', (string) $row['flight_date'])
@@ -2278,11 +2361,10 @@ function airport_fid_render_analytics_section() {
             echo '<td>' . esc_html((string) $row['source']) . '</td>';
             echo '<td>' . esc_html((string) $row['raw_input']) . '</td>';
             echo '<td>' . esc_html((string) $row['selected_airport']) . '</td>';
-            echo '<td>' . esc_html((string) ((int) $row['cache_id'])) . '</td>';
             echo '</tr>';
         }
     } else {
-        echo '<tr><td colspan="9">No searches logged yet.</td></tr>';
+        echo '<tr><td colspan="8">No hub searches logged yet.</td></tr>';
     }
     echo '</tbody></table>';
     echo '</div>';
