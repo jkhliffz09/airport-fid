@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.33
+ * Version: 0.2.34
  * Author: khliffz
  * Requires at least: 5.8
  * Tested up to: 6.9.1
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.33';
+const AIRPORT_FID_VERSION = '0.2.34';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
@@ -2391,29 +2391,10 @@ function airport_fid_render_analytics_section() {
 }
 
 function airport_fid_render_hub_analytics_section() {
-    $filter_site = isset($_GET['hub_site']) ? untrailingslashit(esc_url_raw((string) wp_unslash($_GET['hub_site']))) : '';
-    $filter_airport = isset($_GET['hub_airport']) ? strtoupper(sanitize_text_field((string) wp_unslash($_GET['hub_airport']))) : '';
-    $filter_date_ui = isset($_GET['hub_date']) ? sanitize_text_field((string) wp_unslash($_GET['hub_date'])) : '';
-    $filter_date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $filter_date_ui) ? str_replace('-', '', $filter_date_ui) : '';
-    $analytics = airport_fid_get_search_analytics('', array(
-        'site' => $filter_site,
-        'airport' => $filter_airport,
-        'date' => $filter_date,
-    ));
+    $analytics = airport_fid_get_search_analytics();
     echo '<section class="airport-fid-admin-cache-section">';
     echo '<h2>Hub Analytics</h2>';
     echo '<p>Showing combined analytics from all connected websites grouped by site.</p>';
-    echo '<form method="get" action="' . esc_url(admin_url('admin.php')) . '" class="airport-fid-admin-filter-bar">';
-    echo '<input type="hidden" name="page" value="airport-fid-settings" />';
-    echo '<input type="hidden" name="tab" value="hub" />';
-    echo '<label class="airport-fid-admin-field"><span>Site</span><input type="url" name="hub_site" placeholder="https://example.com" value="' . esc_attr($filter_site) . '" /></label>';
-    echo '<label class="airport-fid-admin-field"><span>Airport</span><input type="text" name="hub_airport" maxlength="3" placeholder="JFK" value="' . esc_attr($filter_airport) . '" /></label>';
-    echo '<label class="airport-fid-admin-field"><span>Date</span><input type="date" name="hub_date" value="' . esc_attr($filter_date_ui) . '" /></label>';
-    echo '<div class="airport-fid-admin-filter-actions">';
-    echo '<button type="submit" class="button button-primary">Apply Filters</button>';
-    echo '<a class="button" href="' . esc_url(admin_url('admin.php?page=airport-fid-settings&tab=hub')) . '">Reset</a>';
-    echo '</div>';
-    echo '</form>';
     echo '<div class="airport-fid-analytics-grid">';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['total'])) . '</strong><span>Total Searches</span></div>';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['today'])) . '</strong><span>Searches Today</span></div>';
@@ -2455,8 +2436,14 @@ function airport_fid_render_hub_analytics_section() {
     echo '</div>';
     echo '</div>';
 
-    echo '<div class="airport-fid-admin-table-wrap" style="margin-top:12px;">';
-    echo '<table class="airport-fid-admin-table">';
+    echo '<div class="airport-fid-admin-filter-bar airport-fid-hub-table-filters" style="margin-top:12px;">';
+    echo '<label class="airport-fid-admin-field"><span>Site</span><select class="airport-fid-hub-filter-site"><option value="">All</option></select></label>';
+    echo '<label class="airport-fid-admin-field"><span>Airport</span><select class="airport-fid-hub-filter-airport"><option value="">All</option></select></label>';
+    echo '<label class="airport-fid-admin-field"><span>Date</span><input type="date" class="airport-fid-hub-filter-date" /></label>';
+    echo '<div class="airport-fid-admin-filter-actions"><button type="button" class="button airport-fid-hub-filter-reset">Reset</button></div>';
+    echo '</div>';
+    echo '<div class="airport-fid-admin-table-wrap airport-fid-hub-results-wrap" style="margin-top:12px;">';
+    echo '<table class="airport-fid-admin-table airport-fid-hub-results-table">';
     echo '<thead><tr><th>When</th><th>Site</th><th>Airport</th><th>Date</th><th>Sort</th><th>Source</th><th>Raw Input</th><th>Selected Airport</th></tr></thead><tbody>';
     if (!empty($analytics['recent'])) {
         foreach ($analytics['recent'] as $row) {
@@ -2467,7 +2454,7 @@ function airport_fid_render_hub_analytics_section() {
             if ($site_label === '') {
                 $site_label = (string) ($row['site_url'] ?? 'Unknown site');
             }
-            echo '<tr>';
+            echo '<tr data-site="' . esc_attr($site_label) . '" data-airport="' . esc_attr((string) $row['airport']) . '" data-date="' . esc_attr($date_display) . '">';
             echo '<td>' . esc_html((string) $row['created_at']) . '</td>';
             echo '<td>' . esc_html($site_label) . '</td>';
             echo '<td>' . esc_html((string) $row['airport']) . '</td>';
@@ -2483,6 +2470,7 @@ function airport_fid_render_hub_analytics_section() {
     }
     echo '</tbody></table>';
     echo '</div>';
+    echo '<div class="airport-fid-hub-pagination" data-page-size="25"></div>';
     echo '</section>';
 }
 

@@ -149,6 +149,20 @@
     flex-wrap: wrap;
 }
 
+.airport-fid-hub-pagination {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.airport-fid-hub-pagination-info {
+    color: #b7cfdf;
+    font-size: 12px;
+    margin-right: auto;
+}
+
 .airport-fid-admin-checkbox {
     flex-direction: row;
     align-items: center;

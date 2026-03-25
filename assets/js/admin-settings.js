@@ -223,4 +223,140 @@
             window.location.reload();
         }, 3500);
     }
+
+    var hubTable = document.querySelector('.airport-fid-hub-results-table');
+    var hubPagination = document.querySelector('.airport-fid-hub-pagination');
+    if (hubTable && hubPagination) {
+        var hubRows = Array.prototype.slice.call(hubTable.querySelectorAll('tbody tr'));
+        var siteSelect = document.querySelector('.airport-fid-hub-filter-site');
+        var airportSelect = document.querySelector('.airport-fid-hub-filter-airport');
+        var dateInput = document.querySelector('.airport-fid-hub-filter-date');
+        var resetButton = document.querySelector('.airport-fid-hub-filter-reset');
+        var pageSize = parseInt(hubPagination.getAttribute('data-page-size') || '25', 10);
+        var currentPage = 1;
+
+        function uniqueValues(key) {
+            var values = [];
+            hubRows.forEach(function (row) {
+                var value = row.getAttribute(key) || '';
+                if (value && values.indexOf(value) === -1) {
+                    values.push(value);
+                }
+            });
+            return values.sort();
+        }
+
+        function fillSelect(select, values) {
+            if (!select) return;
+            values.forEach(function (value) {
+                var option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+        }
+
+        function getFilteredRows() {
+            var siteValue = siteSelect ? siteSelect.value : '';
+            var airportValue = airportSelect ? airportSelect.value : '';
+            var dateValue = dateInput ? dateInput.value : '';
+
+            return hubRows.filter(function (row) {
+                var rowSite = row.getAttribute('data-site') || '';
+                var rowAirport = row.getAttribute('data-airport') || '';
+                var rowDate = row.getAttribute('data-date') || '';
+                if (siteValue && rowSite !== siteValue) return false;
+                if (airportValue && rowAirport !== airportValue) return false;
+                if (dateValue && rowDate !== dateValue) return false;
+                return true;
+            });
+        }
+
+        function renderPagination(totalPages) {
+            hubPagination.innerHTML = '';
+            if (totalPages <= 1) {
+                return;
+            }
+
+            var info = document.createElement('span');
+            info.className = 'airport-fid-hub-pagination-info';
+            info.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+            hubPagination.appendChild(info);
+
+            var prev = document.createElement('button');
+            prev.type = 'button';
+            prev.className = 'button';
+            prev.textContent = 'Previous';
+            prev.disabled = currentPage <= 1;
+            prev.addEventListener('click', function () {
+                if (currentPage > 1) {
+                    currentPage -= 1;
+                    updateHubTable();
+                }
+            });
+            hubPagination.appendChild(prev);
+
+            var next = document.createElement('button');
+            next.type = 'button';
+            next.className = 'button';
+            next.textContent = 'Next';
+            next.disabled = currentPage >= totalPages;
+            next.addEventListener('click', function () {
+                if (currentPage < totalPages) {
+                    currentPage += 1;
+                    updateHubTable();
+                }
+            });
+            hubPagination.appendChild(next);
+        }
+
+        function updateHubTable() {
+            var filtered = getFilteredRows();
+            var totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            var start = (currentPage - 1) * pageSize;
+            var end = start + pageSize;
+
+            hubRows.forEach(function (row) {
+                row.style.display = 'none';
+            });
+
+            filtered.slice(start, end).forEach(function (row) {
+                row.style.display = '';
+            });
+
+            renderPagination(totalPages);
+            if (!filtered.length) {
+                var info = document.createElement('span');
+                info.className = 'airport-fid-hub-pagination-info';
+                info.textContent = 'No matching rows.';
+                hubPagination.insertBefore(info, hubPagination.firstChild);
+            }
+        }
+
+        fillSelect(siteSelect, uniqueValues('data-site'));
+        fillSelect(airportSelect, uniqueValues('data-airport'));
+
+        [siteSelect, airportSelect, dateInput].forEach(function (control) {
+            if (!control) return;
+            control.addEventListener('change', function () {
+                currentPage = 1;
+                updateHubTable();
+            });
+        });
+
+        if (resetButton) {
+            resetButton.addEventListener('click', function () {
+                if (siteSelect) siteSelect.value = '';
+                if (airportSelect) airportSelect.value = '';
+                if (dateInput) dateInput.value = '';
+                currentPage = 1;
+                updateHubTable();
+            });
+        }
+
+        updateHubTable();
+    }
 })();
