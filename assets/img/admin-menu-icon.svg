@@ -1,30 +1,6 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="96" fill="black" fill-opacity="0"/>
-  <path d="M83 112C83 88.8 101.8 70 125 70H387C410.2 70 429 88.8 429 112V333H83V112Z" fill="#A046D6"/>
-  <path d="M100 125C100 107.9 113.9 94 131 94H381C398.1 94 412 107.9 412 125V316H100V125Z" fill="#F7F7FB"/>
-  <path d="M83 333H429V390C429 413.2 410.2 432 387 432H125C101.8 432 83 413.2 83 390V333Z" fill="#CDB5EB"/>
-  <path d="M55 103C55 76.5 76.5 55 103 55H409C435.5 55 457 76.5 457 103V409C457 435.5 435.5 457 409 457H103C76.5 457 55 435.5 55 409V103Z" stroke="#8F32D2" stroke-width="18"/>
-  <rect x="230" y="391" width="52" height="18" rx="9" fill="#8F32D2"/>
-  <path d="M200 457H312V475H200V457Z" fill="#8F32D2"/>
-  <rect x="126" y="190" width="35" height="18" rx="9" fill="#21A7F2"/>
-  <rect x="126" y="226" width="35" height="18" rx="9" fill="#21A7F2"/>
-  <rect x="126" y="262" width="35" height="18" rx="9" fill="#21A7F2"/>
-  <rect x="188" y="190" width="35" height="18" rx="9" fill="#FDB228"/>
-  <rect x="188" y="226" width="35" height="18" rx="9" fill="#FDB228"/>
-  <rect x="188" y="262" width="35" height="18" rx="9" fill="#FDB228"/>
-  <rect x="250" y="190" width="35" height="18" rx="9" fill="#21A7F2"/>
-  <rect x="250" y="226" width="35" height="18" rx="9" fill="#21A7F2"/>
-  <rect x="250" y="262" width="35" height="18" rx="9" fill="#21A7F2"/>
-  <rect x="296" y="105" width="130" height="18" rx="9" fill="#21A7F2"/>
-  <rect x="296" y="140" width="95" height="18" rx="9" fill="#21A7F2"/>
-  <circle cx="404" cy="149" r="9" fill="#21A7F2"/>
-  <circle cx="435" cy="149" r="9" fill="#21A7F2"/>
-  <rect x="296" y="175" width="130" height="18" rx="9" fill="#21A7F2"/>
-  <rect x="296" y="210" width="76" height="18" rx="9" fill="#21A7F2"/>
-  <circle cx="361" cy="269" r="31" fill="#FF4265"/>
-  <circle cx="361" cy="269" r="13" fill="#FFB0B7"/>
-  <circle cx="430" cy="269" r="31" fill="#8F32D2"/>
-  <circle cx="430" cy="269" r="13" fill="#DCC6F2"/>
-  <path d="M136 111L179 154H154C149.6 154 146 157.6 146 162C146 166.4 149.6 170 154 170H241C245.4 170 249 166.4 249 162C249 157.6 245.4 154 241 154H202L159 111C155.9 107.9 150.9 107.9 147.8 111C144.7 114.1 144.7 119.1 147.8 122.2L136 111Z" fill="#FF4265"/>
-  <path d="M136 154L179 197C182.1 200.1 187.1 200.1 190.2 197C193.3 193.9 193.3 188.9 190.2 185.8L147.4 143L136 154Z" fill="#FF4265"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+  <path fill="#a7aaad" d="M2.5 3.5A1.5 1.5 0 0 1 4 2h12a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 16 14H4a1.5 1.5 0 0 1-1.5-1.5v-9ZM4 4a.5.5 0 0 0-.5.5v7.75c0 .41.34.75.75.75H15.75a.75.75 0 0 0 .75-.75V4.5A.5.5 0 0 0 16 4H4Z"/>
+  <path fill="#a7aaad" d="M6.1 16.5h7.8a.75.75 0 0 1 0 1.5H6.1a.75.75 0 0 1 0-1.5Zm2.15-2.6h3.5c.41 0 .75.34.75.75v1.85h-5v-1.85c0-.41.34-.75.75-.75Z"/>
+  <path fill="#a7aaad" d="M6.15 6.15a.75.75 0 0 1 1.06 0L8.5 7.44l2.29-2.29a.75.75 0 0 1 1.06 1.06L9.56 8.5l2.29 2.29a.75.75 0 1 1-1.06 1.06L8.5 9.56l-1.29 1.29a.75.75 0 0 1-1.06-1.06L7.44 8.5 6.15 7.21a.75.75 0 0 1 0-1.06Z"/>
+  <path fill="#a7aaad" d="M12.9 6h1.6a.5.5 0 1 1 0 1h-1.6a.5.5 0 1 1 0-1Zm0 2h1.6a.5.5 0 1 1 0 1h-1.6a.5.5 0 1 1 0-1Zm0 2h1.6a.5.5 0 1 1 0 1h-1.6a.5.5 0 1 1 0-1Z"/>
 </svg>

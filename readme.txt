@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.28
+Stable tag: 0.2.29
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@ Airport FID Board displays live flight information in a classic Frankfurt-style 
 
 1. Upload the plugin to `/wp-content/plugins/`.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. Go to Settings → Airport FID Board and add your FlightLookup API key.
+3. Go to Airport FID Board in the admin menu and add your FlightLookup API key.
 
 == Usage ==
 
@@ -65,6 +65,10 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.29 =
+* Fixed the oversized admin sidebar icon with a proper WordPress-sized SVG.
+* Added `Tested up to: 6.9.1` to plugin metadata for current WordPress compatibility signaling.
 
 = 0.2.28 =
 * Moved Airport FID Board out of WordPress Settings into its own top-level admin menu.
@@ -176,6 +180,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.29 =
+Fixes the admin menu icon sizing and updates plugin metadata for WordPress 6.9.1.
 
 = 0.2.28 =
 Moves the plugin to its own admin menu and adds dedicated Analytics and Cached Items tabs.
