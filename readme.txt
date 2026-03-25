@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.26
+Stable tag: 0.2.27
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.27 =
+* Added Analytics search logging tied to cache rows through `cache_id` instead of duplicating payload data.
+* Added Analytics dashboard cards, top-airport/source summaries, and recent search history in settings.
+* Added one-time cache backfill to include existing cached requests in Analytics, then hide the backfill button after success.
 
 = 0.2.26 =
 * Fixed repeated flip animation during batch route fetch by animating only once after final sorted results are ready.
@@ -166,6 +171,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.27 =
+Adds Analytics search logging plus a one-time backfill tool for existing cache records.
 
 = 0.2.26 =
 Batch fetch animation now triggers once at final render, plus improved geolocation parsing and featured-image cache busting.

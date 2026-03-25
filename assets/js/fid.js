@@ -591,6 +591,8 @@
         var suppressBatchAnimation = false;
         var currentLabel = '';
         var labelIsCode = false;
+        var currentSearchSource = useGeo ? 'geolocation' : 'default';
+        var currentRawInput = defaultAirport;
 
         function updateStatus(message) {
             if (statusEl) {
@@ -682,7 +684,10 @@
                         input.value = item.code;
                     }
                     clearSuggestions();
-                    loadBoard(item.code);
+                    loadBoard(item.code, {
+                        source: 'autocomplete',
+                        rawInput: item.name + ' (' + item.code + ')',
+                    });
                 });
                 suggestBox.appendChild(buttonEl);
             });
@@ -729,6 +734,20 @@
                 loadMoreButton.style.display = 'inline-flex';
                 pageNotice.textContent = isFetchingMore ? 'Fetching more results...' : '';
             }
+        }
+
+        function logSearch(cacheId, airport, dateValue, sortValue) {
+            postJson(AirportFID.restUrl + '/search-log', {
+                cache_id: cacheId || 0,
+                airport: airport,
+                date: dateValue || getLocalDateString(),
+                sort: sortValue || 'departure_time',
+                source: currentSearchSource || 'manual',
+                raw_input: currentRawInput || '',
+                selected_airport: currentLabel || airport,
+            }).catch(function () {
+                // ignore analytics errors
+            });
         }
 
         function renderPage(forceEnableAnimation) {
@@ -874,8 +893,10 @@
                                     sort: sortValue || 'departure_time',
                                     airport_name: currentLabel,
                                     flights: allFlights,
+                                }).then(function (result) {
+                                    logSearch((result && result.cache_id) || 0, iata, dateValue, sortValue);
                                 }).catch(function () {
-                                    // ignore cache save errors
+                                    logSearch(0, iata, dateValue, sortValue);
                                 });
                                 return;
                             }
@@ -889,7 +910,8 @@
             scheduleNext();
         }
 
-        function loadBoard(airport) {
+        function loadBoard(airport, options) {
+            options = options || {};
             var cleaned = normalizeAirport(airport);
             var match = cleaned.match(/[A-Z]{3}$/);
             var iata = match ? match[0] : cleaned;
@@ -897,6 +919,8 @@
                 updateStatus('Enter a valid 3-letter IATA code.');
                 return;
             }
+            currentSearchSource = options.source || currentSearchSource || 'manual';
+            currentRawInput = options.rawInput != null ? String(options.rawInput) : (input ? input.value : iata);
 
             updateStatus('Loading flights for ' + iata + '...');
             showLoading();
@@ -938,6 +962,7 @@
                         visibleCount = Math.min(pageSize, allFlights.length);
                         renderPage();
                         if (!cacheData.stale) {
+                            logSearch(0, iata, dateValue, sortValue);
                             updateStatus('Showing flights for ' + currentLabel + '.');
                             hideLoading();
                             return { skipRefresh: true };
@@ -986,7 +1011,10 @@
             input.addEventListener('keydown', function (event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    loadBoard(input.value);
+                    loadBoard(input.value, {
+                        source: 'manual',
+                        rawInput: input.value,
+                    });
                 }
             });
             input.addEventListener('input', function () {
@@ -1006,7 +1034,10 @@
         if (button) {
             button.addEventListener('click', function () {
                 if (input) {
-                    loadBoard(input.value);
+                    loadBoard(input.value, {
+                        source: 'manual',
+                        rawInput: input.value,
+                    });
                 }
             });
         }
@@ -1014,7 +1045,10 @@
         if (dateInput) {
             dateInput.value = toInputDate(getLocalDateString());
             dateInput.addEventListener('change', function () {
-                loadBoard(input ? input.value : defaultAirport);
+                loadBoard(input ? input.value : defaultAirport, {
+                    source: currentSearchSource || 'manual',
+                    rawInput: input ? input.value : defaultAirport,
+                });
             });
         }
 
@@ -1070,7 +1104,10 @@
         function locateNearestAirport() {
             if (!navigator.geolocation) {
                 updateStatus('Geolocation not available.');
-                loadBoard(defaultAirport);
+                loadBoard(defaultAirport, {
+                    source: 'default',
+                    rawInput: defaultAirport,
+                });
                 return;
             }
 
@@ -1094,17 +1131,26 @@
                             if (input) {
                                 input.value = airport;
                             }
-                            loadBoard(airport);
+                            loadBoard(airport, {
+                                source: 'geolocation',
+                                rawInput: lat + ',' + lon,
+                            });
                         })
                         .catch(function () {
-                            loadBoard(defaultAirport);
+                            loadBoard(defaultAirport, {
+                                source: 'default',
+                                rawInput: defaultAirport,
+                            });
                         });
                 },
                 function (error) {
                     if (error && error.code === 1 && geoButton) {
                         geoButton.style.display = 'none';
                     }
-                    loadBoard(defaultAirport);
+                    loadBoard(defaultAirport, {
+                        source: 'default',
+                        rawInput: defaultAirport,
+                    });
                 },
                 {
                     timeout: 8000,
@@ -1125,7 +1171,10 @@
         if (useGeo) {
             locateNearestAirport();
         } else {
-            loadBoard(defaultAirport);
+            loadBoard(defaultAirport, {
+                source: 'default',
+                rawInput: defaultAirport,
+            });
         }
     }
 

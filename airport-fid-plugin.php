@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.26
+ * Version: 0.2.27
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,8 +13,9 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.26';
+const AIRPORT_FID_VERSION = '0.2.27';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
+const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
 const AIRPORT_FID_PAGE_META_AIRPORT = '_airport_fid_airport_code';
 const AIRPORT_FID_PAGE_SYNC_HOOK = 'airport_fid_generate_airport_pages_event';
@@ -22,10 +23,12 @@ const AIRPORT_FID_PAGE_META_FEATURED = '_airport_fid_featured_attachment_id';
 const AIRPORT_FID_PAGE_WORKER_HOOK = 'airport_fid_generate_airport_pages_worker_event';
 const AIRPORT_FID_PAGE_QUEUE_OPTION = 'airport_fid_page_generation_queue';
 const AIRPORT_FID_PAGE_LAST_RESULT_OPTION = 'airport_fid_page_generation_last_result';
+const AIRPORT_FID_SEARCH_BACKFILL_DONE_OPTION = 'airport_fid_search_backfill_done';
 
 function airport_fid_install() {
     global $wpdb;
     $table = $wpdb->prefix . AIRPORT_FID_CACHE_TABLE;
+    $search_table = $wpdb->prefix . AIRPORT_FID_SEARCH_LOG_TABLE;
     $charset = $wpdb->get_charset_collate();
 
     $sql = "CREATE TABLE {$table} (
@@ -38,6 +41,23 @@ function airport_fid_install() {
         PRIMARY KEY  (id),
         UNIQUE KEY airport_date_sort (airport, flight_date, sort),
         KEY updated_at (updated_at)
+    ) {$charset};
+
+    CREATE TABLE {$search_table} (
+        id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        cache_id bigint(20) unsigned DEFAULT NULL,
+        airport char(3) NOT NULL,
+        flight_date char(8) NOT NULL,
+        sort varchar(20) NOT NULL,
+        source varchar(20) NOT NULL,
+        raw_input varchar(120) DEFAULT '',
+        selected_airport varchar(120) DEFAULT '',
+        created_at datetime NOT NULL,
+        PRIMARY KEY  (id),
+        KEY cache_id (cache_id),
+        KEY airport_date (airport, flight_date),
+        KEY source (source),
+        KEY created_at (created_at)
     ) {$charset};";
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -65,8 +85,10 @@ register_deactivation_hook(__FILE__, 'airport_fid_deactivation_cleanup');
 function airport_fid_maybe_install() {
     global $wpdb;
     $table = $wpdb->prefix . AIRPORT_FID_CACHE_TABLE;
+    $search_table = $wpdb->prefix . AIRPORT_FID_SEARCH_LOG_TABLE;
     $exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
-    if ($exists !== $table) {
+    $search_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $search_table));
+    if ($exists !== $table || $search_exists !== $search_table) {
         airport_fid_install();
     }
 }
@@ -144,6 +166,15 @@ function airport_fid_get_cache_table() {
     return $wpdb->prefix . AIRPORT_FID_CACHE_TABLE;
 }
 
+function airport_fid_get_search_log_table() {
+    global $wpdb;
+    return $wpdb->prefix . AIRPORT_FID_SEARCH_LOG_TABLE;
+}
+
+function airport_fid_is_search_backfill_done() {
+    return (string) get_option(AIRPORT_FID_SEARCH_BACKFILL_DONE_OPTION, '0') === '1';
+}
+
 function airport_fid_get_last_refresh_day() {
     $settings = airport_fid_get_settings();
     $refresh_day = isset($settings['cache_refresh_day']) && $settings['cache_refresh_day']
@@ -204,6 +235,18 @@ function airport_fid_get_cache($airport, $date, $sort) {
     );
 }
 
+function airport_fid_get_cache_id($airport, $date, $sort) {
+    global $wpdb;
+    $table = airport_fid_get_cache_table();
+    $cache_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT id FROM {$table} WHERE airport = %s AND flight_date = %s AND sort = %s LIMIT 1",
+        $airport,
+        $date,
+        $sort
+    ));
+    return $cache_id ? (int) $cache_id : 0;
+}
+
 function airport_fid_set_cache($airport, $date, $sort, $payload) {
     global $wpdb;
     $table = airport_fid_get_cache_table();
@@ -214,6 +257,7 @@ function airport_fid_set_cache($airport, $date, $sort, $payload) {
         'payload' => wp_json_encode($payload),
         'updated_at' => current_time('mysql'),
     ), array('%s', '%s', '%s', '%s', '%s'));
+    return airport_fid_get_cache_id($airport, $date, $sort);
 }
 
 function airport_fid_default_settings() {
@@ -561,6 +605,12 @@ function airport_fid_render_settings_page() {
     echo '<h1>Airport FID Board Settings</h1>';
     if (isset($_GET['cache_updated']) && $_GET['cache_updated'] === '1') {
         echo '<div class="airport-fid-admin-notice is-success">Cache item updated.</div>';
+    } elseif (isset($_GET['search_backfill']) && $_GET['search_backfill'] === '1') {
+        $backfilled = isset($_GET['backfilled']) ? max(0, (int) $_GET['backfilled']) : 0;
+        $skipped = isset($_GET['skipped']) ? max(0, (int) $_GET['skipped']) : 0;
+        echo '<div class="airport-fid-admin-notice is-success">Analytics backfill completed. Added: ' . esc_html((string) $backfilled) . ', Skipped existing: ' . esc_html((string) $skipped) . '.</div>';
+    } elseif (isset($_GET['search_backfill']) && $_GET['search_backfill'] === '0') {
+        echo '<div class="airport-fid-admin-notice is-error">Analytics backfill failed.</div>';
     } elseif (isset($_GET['cache_error']) && $_GET['cache_error'] === 'invalid_json') {
         echo '<div class="airport-fid-admin-notice is-error">Invalid JSON. Please fix the payload format and try again.</div>';
     } elseif (isset($_GET['pages_sync']) && $_GET['pages_sync'] === 'queued') {
@@ -690,6 +740,7 @@ function airport_fid_render_settings_page() {
     submit_button('Save Settings', 'primary', 'submit', false);
     echo '</div>';
     echo '</form>';
+    airport_fid_render_analytics_section();
     echo '<section class="airport-fid-admin-cache-section">';
     echo '<h2>Cached Request Items</h2>';
     airport_fid_render_cache_items_table();
@@ -836,6 +887,76 @@ function airport_fid_update_cache_item() {
     exit;
 }
 add_action('admin_post_airport_fid_update_cache_item', 'airport_fid_update_cache_item');
+
+function airport_fid_backfill_search_log() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized request.');
+    }
+    if (!isset($_POST['airport_fid_backfill_nonce']) || !wp_verify_nonce(sanitize_text_field((string) $_POST['airport_fid_backfill_nonce']), 'airport_fid_backfill_search_log')) {
+        wp_die('Invalid security token.');
+    }
+
+    if (airport_fid_is_search_backfill_done()) {
+        wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings'));
+        exit;
+    }
+
+    global $wpdb;
+    $cache_table = airport_fid_get_cache_table();
+    $search_table = airport_fid_get_search_log_table();
+    $rows = $wpdb->get_results("SELECT id, airport, flight_date, sort, payload, updated_at FROM {$cache_table} ORDER BY updated_at ASC, id ASC", ARRAY_A);
+
+    $backfilled = 0;
+    $skipped = 0;
+
+    foreach ($rows as $row) {
+        $cache_id = isset($row['id']) ? (int) $row['id'] : 0;
+        if ($cache_id <= 0) {
+            continue;
+        }
+
+        $exists = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$search_table} WHERE cache_id = %d AND source = %s",
+            $cache_id,
+            'cache_backfill'
+        ));
+        if ($exists > 0) {
+            $skipped++;
+            continue;
+        }
+
+        $selected_airport = '';
+        if (!empty($row['payload'])) {
+            $payload = json_decode((string) $row['payload'], true);
+            if (is_array($payload)) {
+                $selected_airport = sanitize_text_field((string) ($payload['airport_name'] ?? ''));
+            }
+        }
+
+        $inserted = $wpdb->insert($search_table, array(
+            'cache_id' => $cache_id,
+            'airport' => strtoupper(sanitize_text_field((string) ($row['airport'] ?? ''))),
+            'flight_date' => sanitize_text_field((string) ($row['flight_date'] ?? '')),
+            'sort' => sanitize_text_field((string) ($row['sort'] ?? 'departure_time')),
+            'source' => 'cache_backfill',
+            'raw_input' => strtoupper(sanitize_text_field((string) ($row['airport'] ?? ''))),
+            'selected_airport' => $selected_airport,
+            'created_at' => !empty($row['updated_at']) ? sanitize_text_field((string) $row['updated_at']) : current_time('mysql'),
+        ), array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s'));
+
+        if ($inserted === false) {
+            wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&search_backfill=0'));
+            exit;
+        }
+
+        $backfilled++;
+    }
+
+    update_option(AIRPORT_FID_SEARCH_BACKFILL_DONE_OPTION, '1', false);
+    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&search_backfill=1&backfilled=' . $backfilled . '&skipped=' . $skipped));
+    exit;
+}
+add_action('admin_post_airport_fid_backfill_search_log', 'airport_fid_backfill_search_log');
 
 function airport_fid_dismiss_page_generation_result() {
     if (!current_user_can('manage_options')) {
@@ -1893,6 +2014,135 @@ function airport_fid_admin_select_field($label, $key, $value, $options) {
     echo '</select></label>';
 }
 
+function airport_fid_log_search($data) {
+    global $wpdb;
+    $table = airport_fid_get_search_log_table();
+
+    $airport = strtoupper(sanitize_text_field((string) ($data['airport'] ?? '')));
+    $flight_date = sanitize_text_field((string) ($data['date'] ?? ''));
+    $sort = sanitize_text_field((string) ($data['sort'] ?? 'departure_time'));
+    $source = sanitize_text_field((string) ($data['source'] ?? 'manual'));
+    $raw_input = sanitize_text_field((string) ($data['raw_input'] ?? ''));
+    $selected_airport = sanitize_text_field((string) ($data['selected_airport'] ?? ''));
+    $cache_id = isset($data['cache_id']) ? (int) $data['cache_id'] : 0;
+
+    if ($airport === '' || !preg_match('/^\d{8}$/', $flight_date)) {
+        return 0;
+    }
+    if ($cache_id <= 0) {
+        $cache_id = airport_fid_get_cache_id($airport, $flight_date, $sort);
+    }
+
+    $wpdb->insert($table, array(
+        'cache_id' => $cache_id > 0 ? $cache_id : null,
+        'airport' => $airport,
+        'flight_date' => $flight_date,
+        'sort' => $sort,
+        'source' => $source ?: 'manual',
+        'raw_input' => $raw_input,
+        'selected_airport' => $selected_airport,
+        'created_at' => current_time('mysql'),
+    ), array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s'));
+
+    return $wpdb->insert_id ? (int) $wpdb->insert_id : 0;
+}
+
+function airport_fid_get_search_analytics() {
+    global $wpdb;
+    $table = airport_fid_get_search_log_table();
+
+    $summary = array(
+        'total' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}"),
+        'today' => (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE DATE(created_at) = %s",
+            current_time('Y-m-d')
+        )),
+        'top_airports' => $wpdb->get_results("SELECT airport, COUNT(*) AS searches FROM {$table} GROUP BY airport ORDER BY searches DESC, airport ASC LIMIT 5", ARRAY_A),
+        'top_sources' => $wpdb->get_results("SELECT source, COUNT(*) AS searches FROM {$table} GROUP BY source ORDER BY searches DESC, source ASC LIMIT 5", ARRAY_A),
+        'recent' => $wpdb->get_results("SELECT id, cache_id, airport, flight_date, sort, source, raw_input, selected_airport, created_at FROM {$table} ORDER BY created_at DESC LIMIT 100", ARRAY_A),
+    );
+
+    return $summary;
+}
+
+function airport_fid_render_analytics_section() {
+    $analytics = airport_fid_get_search_analytics();
+    echo '<section class="airport-fid-admin-cache-section">';
+    echo '<h2>Analytics</h2>';
+    if (!airport_fid_is_search_backfill_done()) {
+        echo '<div class="airport-fid-admin-notice is-success airport-fid-admin-notice-flex">';
+        echo '<span>Backfill existing cache rows into Analytics once so earlier cached searches appear in reports.</span>';
+        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+        echo '<input type="hidden" name="action" value="airport_fid_backfill_search_log" />';
+        wp_nonce_field('airport_fid_backfill_search_log', 'airport_fid_backfill_nonce');
+        echo '<button type="submit" class="button button-primary">Backfill Analytics From Cache</button>';
+        echo '</form>';
+        echo '</div>';
+    }
+    echo '<div class="airport-fid-analytics-grid">';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['total'])) . '</strong><span>Total Searches</span></div>';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['today'])) . '</strong><span>Searches Today</span></div>';
+    $top_airport = !empty($analytics['top_airports'][0]['airport']) ? $analytics['top_airports'][0]['airport'] : '--';
+    $top_source = !empty($analytics['top_sources'][0]['source']) ? $analytics['top_sources'][0]['source'] : '--';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html($top_airport) . '</strong><span>Top Airport</span></div>';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(strtoupper($top_source)) . '</strong><span>Top Source</span></div>';
+    echo '</div>';
+
+    echo '<div class="airport-fid-admin-grid" style="margin-top:12px;">';
+    echo '<div class="airport-fid-admin-table-wrap">';
+    echo '<table class="airport-fid-admin-table">';
+    echo '<thead><tr><th>Top Airports</th><th>Searches</th></tr></thead><tbody>';
+    if (!empty($analytics['top_airports'])) {
+        foreach ($analytics['top_airports'] as $row) {
+            echo '<tr><td>' . esc_html((string) $row['airport']) . '</td><td>' . esc_html(number_format_i18n((int) $row['searches'])) . '</td></tr>';
+        }
+    } else {
+        echo '<tr><td colspan="2">No search data yet.</td></tr>';
+    }
+    echo '</tbody></table>';
+    echo '</div>';
+
+    echo '<div class="airport-fid-admin-table-wrap">';
+    echo '<table class="airport-fid-admin-table">';
+    echo '<thead><tr><th>Top Sources</th><th>Searches</th></tr></thead><tbody>';
+    if (!empty($analytics['top_sources'])) {
+        foreach ($analytics['top_sources'] as $row) {
+            echo '<tr><td>' . esc_html((string) $row['source']) . '</td><td>' . esc_html(number_format_i18n((int) $row['searches'])) . '</td></tr>';
+        }
+    } else {
+        echo '<tr><td colspan="2">No source data yet.</td></tr>';
+    }
+    echo '</tbody></table>';
+    echo '</div>';
+    echo '</div>';
+
+    echo '<div class="airport-fid-admin-table-wrap" style="margin-top:12px;">';
+    echo '<table class="airport-fid-admin-table">';
+    echo '<thead><tr><th>When</th><th>Airport</th><th>Date</th><th>Sort</th><th>Source</th><th>Raw Input</th><th>Selected Airport</th><th>Cache ID</th></tr></thead><tbody>';
+    if (!empty($analytics['recent'])) {
+        foreach ($analytics['recent'] as $row) {
+            $date_display = preg_match('/^\d{8}$/', (string) $row['flight_date'])
+                ? substr((string) $row['flight_date'], 0, 4) . '-' . substr((string) $row['flight_date'], 4, 2) . '-' . substr((string) $row['flight_date'], 6, 2)
+                : (string) $row['flight_date'];
+            echo '<tr>';
+            echo '<td>' . esc_html((string) $row['created_at']) . '</td>';
+            echo '<td>' . esc_html((string) $row['airport']) . '</td>';
+            echo '<td>' . esc_html($date_display) . '</td>';
+            echo '<td>' . esc_html((string) $row['sort']) . '</td>';
+            echo '<td>' . esc_html((string) $row['source']) . '</td>';
+            echo '<td>' . esc_html((string) $row['raw_input']) . '</td>';
+            echo '<td>' . esc_html((string) $row['selected_airport']) . '</td>';
+            echo '<td>' . esc_html((string) ((int) $row['cache_id'])) . '</td>';
+            echo '</tr>';
+        }
+    } else {
+        echo '<tr><td colspan="8">No searches logged yet.</td></tr>';
+    }
+    echo '</tbody></table>';
+    echo '</div>';
+    echo '</section>';
+}
+
 function airport_fid_register_assets() {
     wp_register_style(
         'airport-fid-style',
@@ -2180,6 +2430,12 @@ function airport_fid_register_routes() {
         'methods' => 'POST',
         'callback' => 'airport_fid_rest_cache_set',
         'permission_callback' => 'airport_fid_can_write_cache',
+    ));
+
+    register_rest_route('airport-fid/v1', '/search-log', array(
+        'methods' => 'POST',
+        'callback' => 'airport_fid_rest_search_log_set',
+        'permission_callback' => '__return_true',
     ));
 
     register_rest_route('airport-fid/v1', '/airports', array(
@@ -2570,9 +2826,36 @@ function airport_fid_rest_cache_set(WP_REST_Request $request) {
         'flights' => $flights,
     );
 
-    airport_fid_set_cache($airport, $date, $sort, $payload);
+    $cache_id = airport_fid_set_cache($airport, $date, $sort, $payload);
 
-    return new WP_REST_Response(array('saved' => true), 200);
+    return new WP_REST_Response(array('saved' => true, 'cache_id' => $cache_id), 200);
+}
+
+function airport_fid_rest_search_log_set(WP_REST_Request $request) {
+    $params = $request->get_json_params();
+    $airport = strtoupper(sanitize_text_field((string) ($params['airport'] ?? '')));
+    $date = sanitize_text_field((string) ($params['date'] ?? ''));
+    $sort = sanitize_text_field((string) ($params['sort'] ?? 'departure_time'));
+    $source = sanitize_text_field((string) ($params['source'] ?? 'manual'));
+    $raw_input = sanitize_text_field((string) ($params['raw_input'] ?? ''));
+    $selected_airport = sanitize_text_field((string) ($params['selected_airport'] ?? ''));
+    $cache_id = isset($params['cache_id']) ? (int) $params['cache_id'] : 0;
+
+    if ($airport === '' || !preg_match('/^\d{8}$/', $date)) {
+        return new WP_REST_Response(array('error' => 'Airport and valid date are required.'), 400);
+    }
+
+    $log_id = airport_fid_log_search(array(
+        'airport' => $airport,
+        'date' => $date,
+        'sort' => $sort,
+        'source' => $source,
+        'raw_input' => $raw_input,
+        'selected_airport' => $selected_airport,
+        'cache_id' => $cache_id,
+    ));
+
+    return new WP_REST_Response(array('saved' => true, 'log_id' => $log_id), 200);
 }
 
 function airport_fid_rest_airports(WP_REST_Request $request) {
