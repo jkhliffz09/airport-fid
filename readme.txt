@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.34
+Stable tag: 0.2.35
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.35 =
+* Made Hub the primary tab when enabled, otherwise Analytics becomes the default tab.
+* Moved General Settings to the last tab.
+* Removed Top Source summaries from Analytics and kept Save Settings only inside General Settings.
 
 = 0.2.34 =
 * Switched Hub filtering to client-side dropdowns and date picker above the data table.
@@ -202,6 +207,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.35 =
+Improves the admin tab order and streamlines the Analytics view.
 
 = 0.2.34 =
 Adds client-side Hub filtering and 25-row pagination for the Hub results table.

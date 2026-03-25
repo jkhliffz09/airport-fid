@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.34
+ * Version: 0.2.35
  * Author: khliffz
  * Requires at least: 5.8
  * Tested up to: 6.9.1
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.34';
+const AIRPORT_FID_VERSION = '0.2.35';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
@@ -675,6 +675,8 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'airport_fid_plug
 
 function airport_fid_render_settings_page() {
     $settings = airport_fid_get_settings();
+    $hub_enabled = (int) ($settings['analytics_hub_enabled'] ?? 0) === 1;
+    $primary_tab = $hub_enabled ? 'hub' : 'analytics';
     echo '<div class="airport-fid-admin">';
     echo '<h1>Airport FID Board Settings</h1>';
     if (isset($_GET['cache_updated']) && $_GET['cache_updated'] === '1') {
@@ -734,54 +736,15 @@ function airport_fid_render_settings_page() {
     settings_fields('airport_fid_settings_group');
 
     echo '<div class="airport-fid-admin-tabs">';
-    echo '<button type="button" class="airport-fid-admin-tab is-active" data-tab="general">General Settings</button>';
+    if ($hub_enabled) {
+        echo '<button type="button" class="airport-fid-admin-tab is-active" data-tab="hub">Hub</button>';
+    }
+    echo '<button type="button" class="airport-fid-admin-tab' . ($primary_tab === 'analytics' ? ' is-active' : '') . '" data-tab="analytics">Analytics</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="typography">Typography</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="layout">Layout</button>';
-    echo '<button type="button" class="airport-fid-admin-tab" data-tab="analytics">Analytics</button>';
-    if ((int) ($settings['analytics_hub_enabled'] ?? 0) === 1) {
-        echo '<button type="button" class="airport-fid-admin-tab" data-tab="hub">Hub</button>';
-    }
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="cache">Cached Items</button>';
+    echo '<button type="button" class="airport-fid-admin-tab" data-tab="general">General Settings</button>';
     echo '</div>';
-
-    echo '<section class="airport-fid-admin-panel is-active" data-panel="general">';
-    echo '<h2>General Settings</h2>';
-    echo '<div class="airport-fid-admin-grid">';
-    airport_fid_admin_text_field('FlightLookup API Key', 'api_key', $settings['api_key']);
-    airport_fid_admin_text_field('Default Airport (IATA)', 'default_airport', $settings['default_airport'], array('maxlength' => '3'));
-    airport_fid_admin_checkbox_field('Use Geolocation by Default', 'use_geolocation_default', (int) $settings['use_geolocation_default']);
-    airport_fid_admin_number_field('Max Destinations (0 = unlimited)', 'max_destinations', (int) $settings['max_destinations'], 0, 500);
-    airport_fid_admin_number_field('Max Flights (0 = unlimited)', 'max_flights', (int) $settings['max_flights'], 0, 1000);
-    airport_fid_admin_number_field('Cache TTL (minutes)', 'cache_ttl_minutes', (int) $settings['cache_ttl_minutes'], 1, 1440);
-    airport_fid_admin_select_field('Cache Refresh Day', 'cache_refresh_day', $settings['cache_refresh_day'], array(
-        'sunday' => 'Sunday',
-        'monday' => 'Monday',
-        'tuesday' => 'Tuesday',
-        'wednesday' => 'Wednesday',
-        'thursday' => 'Thursday',
-        'friday' => 'Friday',
-        'saturday' => 'Saturday',
-    ));
-    airport_fid_admin_checkbox_field('Enable Weekly Airport Page Sync', 'airport_pages_enabled', (int) $settings['airport_pages_enabled']);
-    airport_fid_admin_checkbox_field('Enable AI About Section', 'airport_ai_enabled', (int) $settings['airport_ai_enabled']);
-    airport_fid_admin_select_field('AI Provider', 'airport_ai_provider', $settings['airport_ai_provider'], array(
-        'openai' => 'OpenAI',
-        'claude' => 'Claude',
-    ));
-    airport_fid_admin_text_field('OpenAI API Key', 'airport_ai_openai_key', $settings['airport_ai_openai_key'], array('type' => 'password', 'autocomplete' => 'off'));
-    airport_fid_admin_text_field('OpenAI Model', 'airport_ai_openai_model', $settings['airport_ai_openai_model']);
-    airport_fid_admin_text_field('Claude API Key', 'airport_ai_claude_key', $settings['airport_ai_claude_key'], array('type' => 'password', 'autocomplete' => 'off'));
-    airport_fid_admin_text_field('Claude Model', 'airport_ai_claude_model', $settings['airport_ai_claude_model']);
-    airport_fid_admin_text_field('Analytics Site Label', 'analytics_site_label', $settings['analytics_site_label']);
-    airport_fid_admin_checkbox_field('Enable Remote Analytics Sender', 'analytics_remote_enabled', (int) $settings['analytics_remote_enabled']);
-    airport_fid_admin_text_field('Remote Analytics Hub URL', 'analytics_remote_url', $settings['analytics_remote_url'], array('type' => 'url', 'placeholder' => 'https://example.com'));
-    airport_fid_admin_text_field('Remote Analytics Hub Key', 'analytics_remote_key', $settings['analytics_remote_key'], array('type' => 'password', 'autocomplete' => 'off'));
-    airport_fid_admin_checkbox_field('Enable Analytics Hub Receiver', 'analytics_hub_enabled', (int) $settings['analytics_hub_enabled']);
-    airport_fid_admin_text_field('Analytics Hub Key', 'analytics_hub_key', $settings['analytics_hub_key'], array('type' => 'password', 'autocomplete' => 'off'));
-    airport_fid_admin_text_field('GitHub Repo URL', 'github_repo', $settings['github_repo']);
-    airport_fid_admin_text_field('GitHub Token (optional)', 'github_token', $settings['github_token']);
-    echo '</div>';
-    echo '</section>';
 
     echo '<section class="airport-fid-admin-panel" data-panel="typography">';
     echo '<h2>Typography</h2>';
@@ -822,15 +785,53 @@ function airport_fid_render_settings_page() {
     echo '</div>';
     echo '</section>';
 
-    echo '<div class="airport-fid-admin-actions">';
+    echo '<section class="airport-fid-admin-panel" data-panel="general">';
+    echo '<h2>General Settings</h2>';
+    echo '<div class="airport-fid-admin-grid">';
+    airport_fid_admin_text_field('FlightLookup API Key', 'api_key', $settings['api_key']);
+    airport_fid_admin_text_field('Default Airport (IATA)', 'default_airport', $settings['default_airport'], array('maxlength' => '3'));
+    airport_fid_admin_checkbox_field('Use Geolocation by Default', 'use_geolocation_default', (int) $settings['use_geolocation_default']);
+    airport_fid_admin_number_field('Max Destinations (0 = unlimited)', 'max_destinations', (int) $settings['max_destinations'], 0, 500);
+    airport_fid_admin_number_field('Max Flights (0 = unlimited)', 'max_flights', (int) $settings['max_flights'], 0, 1000);
+    airport_fid_admin_number_field('Cache TTL (minutes)', 'cache_ttl_minutes', (int) $settings['cache_ttl_minutes'], 1, 1440);
+    airport_fid_admin_select_field('Cache Refresh Day', 'cache_refresh_day', $settings['cache_refresh_day'], array(
+        'sunday' => 'Sunday',
+        'monday' => 'Monday',
+        'tuesday' => 'Tuesday',
+        'wednesday' => 'Wednesday',
+        'thursday' => 'Thursday',
+        'friday' => 'Friday',
+        'saturday' => 'Saturday',
+    ));
+    airport_fid_admin_checkbox_field('Enable Weekly Airport Page Sync', 'airport_pages_enabled', (int) $settings['airport_pages_enabled']);
+    airport_fid_admin_checkbox_field('Enable AI About Section', 'airport_ai_enabled', (int) $settings['airport_ai_enabled']);
+    airport_fid_admin_select_field('AI Provider', 'airport_ai_provider', $settings['airport_ai_provider'], array(
+        'openai' => 'OpenAI',
+        'claude' => 'Claude',
+    ));
+    airport_fid_admin_text_field('OpenAI API Key', 'airport_ai_openai_key', $settings['airport_ai_openai_key'], array('type' => 'password', 'autocomplete' => 'off'));
+    airport_fid_admin_text_field('OpenAI Model', 'airport_ai_openai_model', $settings['airport_ai_openai_model']);
+    airport_fid_admin_text_field('Claude API Key', 'airport_ai_claude_key', $settings['airport_ai_claude_key'], array('type' => 'password', 'autocomplete' => 'off'));
+    airport_fid_admin_text_field('Claude Model', 'airport_ai_claude_model', $settings['airport_ai_claude_model']);
+    airport_fid_admin_text_field('Analytics Site Label', 'analytics_site_label', $settings['analytics_site_label']);
+    airport_fid_admin_checkbox_field('Enable Remote Analytics Sender', 'analytics_remote_enabled', (int) $settings['analytics_remote_enabled']);
+    airport_fid_admin_text_field('Remote Analytics Hub URL', 'analytics_remote_url', $settings['analytics_remote_url'], array('type' => 'url', 'placeholder' => 'https://example.com'));
+    airport_fid_admin_text_field('Remote Analytics Hub Key', 'analytics_remote_key', $settings['analytics_remote_key'], array('type' => 'password', 'autocomplete' => 'off'));
+    airport_fid_admin_checkbox_field('Enable Analytics Hub Receiver', 'analytics_hub_enabled', (int) $settings['analytics_hub_enabled']);
+    airport_fid_admin_text_field('Analytics Hub Key', 'analytics_hub_key', $settings['analytics_hub_key'], array('type' => 'password', 'autocomplete' => 'off'));
+    airport_fid_admin_text_field('GitHub Repo URL', 'github_repo', $settings['github_repo']);
+    airport_fid_admin_text_field('GitHub Token (optional)', 'github_token', $settings['github_token']);
+    echo '</div>';
+    echo '<div class="airport-fid-admin-actions" data-settings-actions="1">';
     submit_button('Save Settings', 'primary', 'submit', false);
     echo '</div>';
+    echo '</section>';
     echo '</form>';
-    echo '<section class="airport-fid-admin-panel" data-panel="analytics">';
+    echo '<section class="airport-fid-admin-panel' . ($primary_tab === 'analytics' ? ' is-active' : '') . '" data-panel="analytics">';
     airport_fid_render_analytics_section();
     echo '</section>';
-    if ((int) ($settings['analytics_hub_enabled'] ?? 0) === 1) {
-        echo '<section class="airport-fid-admin-panel" data-panel="hub">';
+    if ($hub_enabled) {
+        echo '<section class="airport-fid-admin-panel is-active" data-panel="hub">';
         airport_fid_render_hub_analytics_section();
         echo '</section>';
     }
@@ -2329,9 +2330,7 @@ function airport_fid_render_analytics_section() {
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['total'])) . '</strong><span>Total Searches</span></div>';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['today'])) . '</strong><span>Searches Today</span></div>';
     $top_airport = !empty($analytics['top_airports'][0]['airport']) ? $analytics['top_airports'][0]['airport'] : '--';
-    $top_source = !empty($analytics['top_sources'][0]['source']) ? $analytics['top_sources'][0]['source'] : '--';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html($top_airport) . '</strong><span>Top Airport</span></div>';
-    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(strtoupper($top_source)) . '</strong><span>Top Source</span></div>';
     echo '</div>';
 
     echo '<div class="airport-fid-admin-grid" style="margin-top:12px;">';
@@ -2344,19 +2343,6 @@ function airport_fid_render_analytics_section() {
         }
     } else {
         echo '<tr><td colspan="2">No search data yet.</td></tr>';
-    }
-    echo '</tbody></table>';
-    echo '</div>';
-
-    echo '<div class="airport-fid-admin-table-wrap">';
-    echo '<table class="airport-fid-admin-table">';
-    echo '<thead><tr><th>Top Sources</th><th>Searches</th></tr></thead><tbody>';
-    if (!empty($analytics['top_sources'])) {
-        foreach ($analytics['top_sources'] as $row) {
-            echo '<tr><td>' . esc_html((string) $row['source']) . '</td><td>' . esc_html(number_format_i18n((int) $row['searches'])) . '</td></tr>';
-        }
-    } else {
-        echo '<tr><td colspan="2">No source data yet.</td></tr>';
     }
     echo '</tbody></table>';
     echo '</div>';
