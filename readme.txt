@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.29
+Stable tag: 0.2.30
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.30 =
+* Added hub-and-sender analytics over WP REST for combining search data from multiple sites into one dashboard.
+* Added site-aware analytics fields and dashboard reporting by site label.
+* Switched the admin menu icon to an inline SVG data URI to avoid stale cached icon files.
 
 = 0.2.29 =
 * Fixed the oversized admin sidebar icon with a proper WordPress-sized SVG.
@@ -180,6 +185,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.30 =
+Adds multi-site analytics hub support and fixes stale admin icon caching.
 
 = 0.2.29 =
 Fixes the admin menu icon sizing and updates plugin metadata for WordPress 6.9.1.

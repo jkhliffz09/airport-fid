@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.29
+ * Version: 0.2.30
  * Author: khliffz
  * Requires at least: 5.8
  * Tested up to: 6.9.1
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.29';
+const AIRPORT_FID_VERSION = '0.2.30';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
@@ -53,11 +53,14 @@ function airport_fid_install() {
         source varchar(20) NOT NULL,
         raw_input varchar(120) DEFAULT '',
         selected_airport varchar(120) DEFAULT '',
+        site_url varchar(255) DEFAULT '',
+        site_label varchar(120) DEFAULT '',
         created_at datetime NOT NULL,
         PRIMARY KEY  (id),
         KEY cache_id (cache_id),
         KEY airport_date (airport, flight_date),
         KEY source (source),
+        KEY site_url (site_url),
         KEY created_at (created_at)
     ) {$charset};";
 
@@ -279,6 +282,12 @@ function airport_fid_default_settings() {
         'airport_ai_openai_model' => 'gpt-4o-mini',
         'airport_ai_claude_key' => '',
         'airport_ai_claude_model' => 'claude-sonnet-4-6',
+        'analytics_site_label' => '',
+        'analytics_remote_enabled' => 0,
+        'analytics_remote_url' => '',
+        'analytics_remote_key' => '',
+        'analytics_hub_enabled' => 0,
+        'analytics_hub_key' => '',
         'header_font_size' => 18,
         'field_font_size' => 14,
         'button_font_size' => 12,
@@ -543,6 +552,12 @@ function airport_fid_sanitize_settings($settings) {
     $clean['airport_ai_openai_model'] = isset($settings['airport_ai_openai_model']) ? sanitize_text_field((string) $settings['airport_ai_openai_model']) : $defaults['airport_ai_openai_model'];
     $clean['airport_ai_claude_key'] = isset($settings['airport_ai_claude_key']) ? sanitize_text_field((string) $settings['airport_ai_claude_key']) : $defaults['airport_ai_claude_key'];
     $clean['airport_ai_claude_model'] = isset($settings['airport_ai_claude_model']) ? sanitize_text_field((string) $settings['airport_ai_claude_model']) : $defaults['airport_ai_claude_model'];
+    $clean['analytics_site_label'] = isset($settings['analytics_site_label']) ? sanitize_text_field((string) $settings['analytics_site_label']) : $defaults['analytics_site_label'];
+    $clean['analytics_remote_enabled'] = !empty($settings['analytics_remote_enabled']) ? 1 : 0;
+    $clean['analytics_remote_url'] = isset($settings['analytics_remote_url']) ? esc_url_raw(trim((string) $settings['analytics_remote_url'])) : $defaults['analytics_remote_url'];
+    $clean['analytics_remote_key'] = isset($settings['analytics_remote_key']) ? sanitize_text_field((string) $settings['analytics_remote_key']) : $defaults['analytics_remote_key'];
+    $clean['analytics_hub_enabled'] = !empty($settings['analytics_hub_enabled']) ? 1 : 0;
+    $clean['analytics_hub_key'] = isset($settings['analytics_hub_key']) ? sanitize_text_field((string) $settings['analytics_hub_key']) : $defaults['analytics_hub_key'];
     $clean['header_font_size'] = isset($settings['header_font_size']) ? max(12, min(40, (int) $settings['header_font_size'])) : $defaults['header_font_size'];
     $clean['field_font_size'] = isset($settings['field_font_size']) ? max(10, min(28, (int) $settings['field_font_size'])) : $defaults['field_font_size'];
     $clean['button_font_size'] = isset($settings['button_font_size']) ? max(10, min(24, (int) $settings['button_font_size'])) : $defaults['button_font_size'];
@@ -583,7 +598,7 @@ function airport_fid_sanitize_settings($settings) {
 }
 
 function airport_fid_register_menu() {
-    $icon_url = plugins_url('assets/img/admin-menu-icon.svg', __FILE__);
+    $icon_url = airport_fid_get_admin_menu_icon_data_uri();
     add_menu_page(
         'Airport FID Board',
         'Airport FID Board',
@@ -595,6 +610,20 @@ function airport_fid_register_menu() {
     );
 }
 add_action('admin_menu', 'airport_fid_register_menu');
+
+function airport_fid_get_admin_menu_icon_data_uri() {
+    $icon_path = plugin_dir_path(__FILE__) . 'assets/img/admin-menu-icon.svg';
+    if (!file_exists($icon_path)) {
+        return 'dashicons-schedule';
+    }
+
+    $svg = file_get_contents($icon_path);
+    if ($svg === false || $svg === '') {
+        return 'dashicons-schedule';
+    }
+
+    return 'data:image/svg+xml;base64,' . base64_encode($svg);
+}
 
 function airport_fid_plugin_action_links($links) {
     $settings_url = admin_url('admin.php?page=airport-fid-settings');
@@ -698,6 +727,12 @@ function airport_fid_render_settings_page() {
     airport_fid_admin_text_field('OpenAI Model', 'airport_ai_openai_model', $settings['airport_ai_openai_model']);
     airport_fid_admin_text_field('Claude API Key', 'airport_ai_claude_key', $settings['airport_ai_claude_key'], array('type' => 'password', 'autocomplete' => 'off'));
     airport_fid_admin_text_field('Claude Model', 'airport_ai_claude_model', $settings['airport_ai_claude_model']);
+    airport_fid_admin_text_field('Analytics Site Label', 'analytics_site_label', $settings['analytics_site_label']);
+    airport_fid_admin_checkbox_field('Enable Remote Analytics Sender', 'analytics_remote_enabled', (int) $settings['analytics_remote_enabled']);
+    airport_fid_admin_text_field('Remote Analytics Hub URL', 'analytics_remote_url', $settings['analytics_remote_url'], array('type' => 'url', 'placeholder' => 'https://example.com'));
+    airport_fid_admin_text_field('Remote Analytics Hub Key', 'analytics_remote_key', $settings['analytics_remote_key'], array('type' => 'password', 'autocomplete' => 'off'));
+    airport_fid_admin_checkbox_field('Enable Analytics Hub Receiver', 'analytics_hub_enabled', (int) $settings['analytics_hub_enabled']);
+    airport_fid_admin_text_field('Analytics Hub Key', 'analytics_hub_key', $settings['analytics_hub_key'], array('type' => 'password', 'autocomplete' => 'off'));
     airport_fid_admin_text_field('GitHub Repo URL', 'github_repo', $settings['github_repo']);
     airport_fid_admin_text_field('GitHub Token (optional)', 'github_token', $settings['github_token']);
     echo '</div>';
@@ -943,18 +978,18 @@ function airport_fid_backfill_search_log() {
             }
         }
 
-        $inserted = $wpdb->insert($search_table, array(
+        $log_id = airport_fid_log_search(array(
             'cache_id' => $cache_id,
             'airport' => strtoupper(sanitize_text_field((string) ($row['airport'] ?? ''))),
-            'flight_date' => sanitize_text_field((string) ($row['flight_date'] ?? '')),
+            'date' => sanitize_text_field((string) ($row['flight_date'] ?? '')),
             'sort' => sanitize_text_field((string) ($row['sort'] ?? 'departure_time')),
             'source' => 'cache_backfill',
             'raw_input' => strtoupper(sanitize_text_field((string) ($row['airport'] ?? ''))),
             'selected_airport' => $selected_airport,
             'created_at' => !empty($row['updated_at']) ? sanitize_text_field((string) $row['updated_at']) : current_time('mysql'),
-        ), array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s'));
+        ));
 
-        if ($inserted === false) {
+        if ($log_id <= 0) {
             wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings&search_backfill=0'));
             exit;
         }
@@ -2024,6 +2059,60 @@ function airport_fid_admin_select_field($label, $key, $value, $options) {
     echo '</select></label>';
 }
 
+function airport_fid_get_site_identity() {
+    $settings = airport_fid_get_settings();
+    $site_url = home_url('/');
+    $site_label = trim((string) ($settings['analytics_site_label'] ?? ''));
+    if ($site_label === '') {
+        $site_label = get_bloginfo('name');
+    }
+
+    return array(
+        'site_url' => untrailingslashit((string) $site_url),
+        'site_label' => $site_label !== '' ? $site_label : parse_url((string) $site_url, PHP_URL_HOST),
+    );
+}
+
+function airport_fid_get_remote_analytics_endpoint($base_url) {
+    $base_url = trim((string) $base_url);
+    if ($base_url === '') {
+        return '';
+    }
+    if (strpos($base_url, '/wp-json/') !== false) {
+        return untrailingslashit($base_url);
+    }
+    return untrailingslashit($base_url) . '/wp-json/airport-fid/v1/remote-search-log';
+}
+
+function airport_fid_send_remote_search_log($payload) {
+    $settings = airport_fid_get_settings();
+    if ((int) ($settings['analytics_remote_enabled'] ?? 0) !== 1) {
+        return false;
+    }
+
+    $endpoint = airport_fid_get_remote_analytics_endpoint((string) ($settings['analytics_remote_url'] ?? ''));
+    $key = trim((string) ($settings['analytics_remote_key'] ?? ''));
+    if ($endpoint === '' || $key === '') {
+        return false;
+    }
+
+    $response = wp_remote_post($endpoint, array(
+        'timeout' => 8,
+        'headers' => array(
+            'Content-Type' => 'application/json',
+            'X-Airport-FID-Key' => $key,
+        ),
+        'body' => wp_json_encode($payload),
+    ));
+
+    if (is_wp_error($response)) {
+        return false;
+    }
+
+    $code = (int) wp_remote_retrieve_response_code($response);
+    return $code >= 200 && $code < 300;
+}
+
 function airport_fid_log_search($data) {
     global $wpdb;
     $table = airport_fid_get_search_log_table();
@@ -2035,6 +2124,11 @@ function airport_fid_log_search($data) {
     $raw_input = sanitize_text_field((string) ($data['raw_input'] ?? ''));
     $selected_airport = sanitize_text_field((string) ($data['selected_airport'] ?? ''));
     $cache_id = isset($data['cache_id']) ? (int) $data['cache_id'] : 0;
+    $created_at = sanitize_text_field((string) ($data['created_at'] ?? current_time('mysql')));
+    $skip_remote = !empty($data['skip_remote']);
+    $identity = airport_fid_get_site_identity();
+    $site_url = isset($data['site_url']) ? untrailingslashit(esc_url_raw((string) $data['site_url'])) : $identity['site_url'];
+    $site_label = isset($data['site_label']) ? sanitize_text_field((string) $data['site_label']) : $identity['site_label'];
 
     if ($airport === '' || !preg_match('/^\d{8}$/', $flight_date)) {
         return 0;
@@ -2051,10 +2145,27 @@ function airport_fid_log_search($data) {
         'source' => $source ?: 'manual',
         'raw_input' => $raw_input,
         'selected_airport' => $selected_airport,
-        'created_at' => current_time('mysql'),
-    ), array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s'));
+        'site_url' => $site_url,
+        'site_label' => $site_label,
+        'created_at' => $created_at,
+    ), array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'));
 
-    return $wpdb->insert_id ? (int) $wpdb->insert_id : 0;
+    $insert_id = $wpdb->insert_id ? (int) $wpdb->insert_id : 0;
+    if ($insert_id > 0 && !$skip_remote) {
+        airport_fid_send_remote_search_log(array(
+            'airport' => $airport,
+            'date' => $flight_date,
+            'sort' => $sort,
+            'source' => $source ?: 'manual',
+            'raw_input' => $raw_input,
+            'selected_airport' => $selected_airport,
+            'site_url' => $site_url,
+            'site_label' => $site_label,
+            'created_at' => $created_at,
+        ));
+    }
+
+    return $insert_id;
 }
 
 function airport_fid_get_search_analytics() {
@@ -2069,7 +2180,8 @@ function airport_fid_get_search_analytics() {
         )),
         'top_airports' => $wpdb->get_results("SELECT airport, COUNT(*) AS searches FROM {$table} GROUP BY airport ORDER BY searches DESC, airport ASC LIMIT 5", ARRAY_A),
         'top_sources' => $wpdb->get_results("SELECT source, COUNT(*) AS searches FROM {$table} GROUP BY source ORDER BY searches DESC, source ASC LIMIT 5", ARRAY_A),
-        'recent' => $wpdb->get_results("SELECT id, cache_id, airport, flight_date, sort, source, raw_input, selected_airport, created_at FROM {$table} ORDER BY created_at DESC LIMIT 100", ARRAY_A),
+        'top_sites' => $wpdb->get_results("SELECT COALESCE(NULLIF(site_label, ''), NULLIF(site_url, ''), 'Unknown site') AS site_label, site_url, COUNT(*) AS searches FROM {$table} GROUP BY site_label, site_url ORDER BY searches DESC, site_label ASC LIMIT 5", ARRAY_A),
+        'recent' => $wpdb->get_results("SELECT id, cache_id, airport, flight_date, sort, source, raw_input, selected_airport, site_url, site_label, created_at FROM {$table} ORDER BY created_at DESC LIMIT 100", ARRAY_A),
     );
 
     return $summary;
@@ -2094,8 +2206,10 @@ function airport_fid_render_analytics_section() {
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['today'])) . '</strong><span>Searches Today</span></div>';
     $top_airport = !empty($analytics['top_airports'][0]['airport']) ? $analytics['top_airports'][0]['airport'] : '--';
     $top_source = !empty($analytics['top_sources'][0]['source']) ? $analytics['top_sources'][0]['source'] : '--';
+    $top_site = !empty($analytics['top_sites'][0]['site_label']) ? $analytics['top_sites'][0]['site_label'] : '--';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html($top_airport) . '</strong><span>Top Airport</span></div>';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(strtoupper($top_source)) . '</strong><span>Top Source</span></div>';
+    echo '<div class="airport-fid-analytics-card"><strong>' . esc_html($top_site) . '</strong><span>Top Site</span></div>';
     echo '</div>';
 
     echo '<div class="airport-fid-admin-grid" style="margin-top:12px;">';
@@ -2124,18 +2238,40 @@ function airport_fid_render_analytics_section() {
     }
     echo '</tbody></table>';
     echo '</div>';
+
+    echo '<div class="airport-fid-admin-table-wrap">';
+    echo '<table class="airport-fid-admin-table">';
+    echo '<thead><tr><th>Top Sites</th><th>Searches</th></tr></thead><tbody>';
+    if (!empty($analytics['top_sites'])) {
+        foreach ($analytics['top_sites'] as $row) {
+            $site_label = (string) ($row['site_label'] ?? '');
+            if ($site_label === '') {
+                $site_label = (string) ($row['site_url'] ?? 'Unknown site');
+            }
+            echo '<tr><td>' . esc_html($site_label) . '</td><td>' . esc_html(number_format_i18n((int) $row['searches'])) . '</td></tr>';
+        }
+    } else {
+        echo '<tr><td colspan="2">No site data yet.</td></tr>';
+    }
+    echo '</tbody></table>';
+    echo '</div>';
     echo '</div>';
 
     echo '<div class="airport-fid-admin-table-wrap" style="margin-top:12px;">';
     echo '<table class="airport-fid-admin-table">';
-    echo '<thead><tr><th>When</th><th>Airport</th><th>Date</th><th>Sort</th><th>Source</th><th>Raw Input</th><th>Selected Airport</th><th>Cache ID</th></tr></thead><tbody>';
+    echo '<thead><tr><th>When</th><th>Site</th><th>Airport</th><th>Date</th><th>Sort</th><th>Source</th><th>Raw Input</th><th>Selected Airport</th><th>Cache ID</th></tr></thead><tbody>';
     if (!empty($analytics['recent'])) {
         foreach ($analytics['recent'] as $row) {
             $date_display = preg_match('/^\d{8}$/', (string) $row['flight_date'])
                 ? substr((string) $row['flight_date'], 0, 4) . '-' . substr((string) $row['flight_date'], 4, 2) . '-' . substr((string) $row['flight_date'], 6, 2)
                 : (string) $row['flight_date'];
+            $site_label = (string) ($row['site_label'] ?? '');
+            if ($site_label === '') {
+                $site_label = (string) ($row['site_url'] ?? 'Unknown site');
+            }
             echo '<tr>';
             echo '<td>' . esc_html((string) $row['created_at']) . '</td>';
+            echo '<td>' . esc_html($site_label) . '</td>';
             echo '<td>' . esc_html((string) $row['airport']) . '</td>';
             echo '<td>' . esc_html($date_display) . '</td>';
             echo '<td>' . esc_html((string) $row['sort']) . '</td>';
@@ -2146,7 +2282,7 @@ function airport_fid_render_analytics_section() {
             echo '</tr>';
         }
     } else {
-        echo '<tr><td colspan="8">No searches logged yet.</td></tr>';
+        echo '<tr><td colspan="9">No searches logged yet.</td></tr>';
     }
     echo '</tbody></table>';
     echo '</div>';
@@ -2445,6 +2581,12 @@ function airport_fid_register_routes() {
     register_rest_route('airport-fid/v1', '/search-log', array(
         'methods' => 'POST',
         'callback' => 'airport_fid_rest_search_log_set',
+        'permission_callback' => '__return_true',
+    ));
+
+    register_rest_route('airport-fid/v1', '/remote-search-log', array(
+        'methods' => 'POST',
+        'callback' => 'airport_fid_rest_remote_search_log_set',
         'permission_callback' => '__return_true',
     ));
 
@@ -2863,6 +3005,47 @@ function airport_fid_rest_search_log_set(WP_REST_Request $request) {
         'raw_input' => $raw_input,
         'selected_airport' => $selected_airport,
         'cache_id' => $cache_id,
+    ));
+
+    return new WP_REST_Response(array('saved' => true, 'log_id' => $log_id), 200);
+}
+
+function airport_fid_rest_remote_search_log_set(WP_REST_Request $request) {
+    $settings = airport_fid_get_settings();
+    $header_key = sanitize_text_field((string) $request->get_header('X-Airport-FID-Key'));
+    $hub_enabled = (int) ($settings['analytics_hub_enabled'] ?? 0) === 1;
+    $hub_key = trim((string) ($settings['analytics_hub_key'] ?? ''));
+
+    if (!$hub_enabled || $hub_key === '' || !hash_equals($hub_key, $header_key)) {
+        return new WP_REST_Response(array('error' => 'Unauthorized remote analytics request.'), 403);
+    }
+
+    $params = $request->get_json_params();
+    $airport = strtoupper(sanitize_text_field((string) ($params['airport'] ?? '')));
+    $date = sanitize_text_field((string) ($params['date'] ?? ''));
+    $sort = sanitize_text_field((string) ($params['sort'] ?? 'departure_time'));
+    $source = sanitize_text_field((string) ($params['source'] ?? 'manual'));
+    $raw_input = sanitize_text_field((string) ($params['raw_input'] ?? ''));
+    $selected_airport = sanitize_text_field((string) ($params['selected_airport'] ?? ''));
+    $site_url = esc_url_raw((string) ($params['site_url'] ?? ''));
+    $site_label = sanitize_text_field((string) ($params['site_label'] ?? ''));
+    $created_at = sanitize_text_field((string) ($params['created_at'] ?? current_time('mysql')));
+
+    if ($airport === '' || !preg_match('/^\d{8}$/', $date)) {
+        return new WP_REST_Response(array('error' => 'Airport and valid date are required.'), 400);
+    }
+
+    $log_id = airport_fid_log_search(array(
+        'airport' => $airport,
+        'date' => $date,
+        'sort' => $sort,
+        'source' => $source,
+        'raw_input' => $raw_input,
+        'selected_airport' => $selected_airport,
+        'site_url' => $site_url,
+        'site_label' => $site_label,
+        'created_at' => $created_at,
+        'skip_remote' => true,
     ));
 
     return new WP_REST_Response(array('saved' => true, 'log_id' => $log_id), 200);
