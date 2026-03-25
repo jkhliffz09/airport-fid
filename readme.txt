@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.27
+Stable tag: 0.2.28
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.28 =
+* Moved Airport FID Board out of WordPress Settings into its own top-level admin menu.
+* Added dedicated admin tabs for Analytics and Cached Items.
+* Added a custom sidebar menu icon for the plugin admin page.
 
 = 0.2.27 =
 * Added Analytics search logging tied to cache rows through `cache_id` instead of duplicating payload data.
@@ -171,6 +176,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.28 =
+Moves the plugin to its own admin menu and adds dedicated Analytics and Cached Items tabs.
 
 = 0.2.27 =
 Adds Analytics search logging plus a one-time backfill tool for existing cache records.

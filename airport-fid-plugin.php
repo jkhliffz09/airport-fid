@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.27
+ * Version: 0.2.28
  * Author: khliffz
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.27';
+const AIRPORT_FID_VERSION = '0.2.28';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
@@ -582,18 +582,21 @@ function airport_fid_sanitize_settings($settings) {
 }
 
 function airport_fid_register_menu() {
-    add_options_page(
+    $icon_url = plugins_url('assets/img/admin-menu-icon.svg', __FILE__);
+    add_menu_page(
         'Airport FID Board',
         'Airport FID Board',
         'manage_options',
         'airport-fid-settings',
-        'airport_fid_render_settings_page'
+        'airport_fid_render_settings_page',
+        $icon_url,
+        58
     );
 }
 add_action('admin_menu', 'airport_fid_register_menu');
 
 function airport_fid_plugin_action_links($links) {
-    $settings_url = admin_url('options-general.php?page=airport-fid-settings');
+    $settings_url = admin_url('admin.php?page=airport-fid-settings');
     array_unshift($links, '<a href="' . esc_url($settings_url) . '">Settings</a>');
     return $links;
 }
@@ -662,6 +665,8 @@ function airport_fid_render_settings_page() {
     echo '<button type="button" class="airport-fid-admin-tab is-active" data-tab="general">General Settings</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="typography">Typography</button>';
     echo '<button type="button" class="airport-fid-admin-tab" data-tab="layout">Layout</button>';
+    echo '<button type="button" class="airport-fid-admin-tab" data-tab="analytics">Analytics</button>';
+    echo '<button type="button" class="airport-fid-admin-tab" data-tab="cache">Cached Items</button>';
     echo '</div>';
 
     echo '<section class="airport-fid-admin-panel is-active" data-panel="general">';
@@ -740,7 +745,10 @@ function airport_fid_render_settings_page() {
     submit_button('Save Settings', 'primary', 'submit', false);
     echo '</div>';
     echo '</form>';
+    echo '<section class="airport-fid-admin-panel" data-panel="analytics">';
     airport_fid_render_analytics_section();
+    echo '</section>';
+    echo '<section class="airport-fid-admin-panel" data-panel="cache">';
     echo '<section class="airport-fid-admin-cache-section">';
     echo '<h2>Cached Request Items</h2>';
     airport_fid_render_cache_items_table();
@@ -753,6 +761,7 @@ function airport_fid_render_settings_page() {
     wp_nonce_field('airport_fid_generate_airport_pages', 'airport_fid_pages_nonce');
     submit_button('Generate/Update Airport Pages', 'secondary', 'submit', false);
     echo '</form>';
+    echo '</section>';
     echo '</section>';
     echo '<div class="airport-fid-admin-overlay" aria-hidden="true">';
     echo '<div class="airport-fid-admin-dialog" role="status" aria-live="polite">';
@@ -857,7 +866,7 @@ function airport_fid_update_cache_item() {
     $cache_id = isset($_POST['cache_id']) ? (int) $_POST['cache_id'] : 0;
     $payload_raw = isset($_POST['payload']) ? wp_unslash((string) $_POST['payload']) : '';
     if ($cache_id <= 0) {
-        wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings'));
+        wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings'));
         exit;
     }
     if (!isset($_POST['airport_fid_cache_nonce']) || !wp_verify_nonce(sanitize_text_field((string) $_POST['airport_fid_cache_nonce']), 'airport_fid_update_cache_item_' . $cache_id)) {
@@ -866,7 +875,7 @@ function airport_fid_update_cache_item() {
 
     $decoded = json_decode($payload_raw, true);
     if (!is_array($decoded)) {
-        wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&cache_error=invalid_json'));
+        wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings&cache_error=invalid_json'));
         exit;
     }
 
@@ -883,7 +892,7 @@ function airport_fid_update_cache_item() {
         array('%d')
     );
 
-    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&cache_updated=1'));
+    wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings&cache_updated=1'));
     exit;
 }
 add_action('admin_post_airport_fid_update_cache_item', 'airport_fid_update_cache_item');
@@ -897,7 +906,7 @@ function airport_fid_backfill_search_log() {
     }
 
     if (airport_fid_is_search_backfill_done()) {
-        wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings'));
+        wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings'));
         exit;
     }
 
@@ -945,7 +954,7 @@ function airport_fid_backfill_search_log() {
         ), array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s'));
 
         if ($inserted === false) {
-            wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&search_backfill=0'));
+            wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings&search_backfill=0'));
             exit;
         }
 
@@ -953,7 +962,7 @@ function airport_fid_backfill_search_log() {
     }
 
     update_option(AIRPORT_FID_SEARCH_BACKFILL_DONE_OPTION, '1', false);
-    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&search_backfill=1&backfilled=' . $backfilled . '&skipped=' . $skipped));
+    wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings&search_backfill=1&backfilled=' . $backfilled . '&skipped=' . $skipped));
     exit;
 }
 add_action('admin_post_airport_fid_backfill_search_log', 'airport_fid_backfill_search_log');
@@ -967,7 +976,7 @@ function airport_fid_dismiss_page_generation_result() {
     }
 
     delete_option(AIRPORT_FID_PAGE_LAST_RESULT_OPTION);
-    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings'));
+    wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings'));
     exit;
 }
 add_action('admin_post_airport_fid_dismiss_page_generation_result', 'airport_fid_dismiss_page_generation_result');
@@ -982,10 +991,10 @@ function airport_fid_handle_generate_airport_pages() {
 
     $queued = airport_fid_start_airport_pages_generation('manual');
     if (is_wp_error($queued)) {
-        wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&pages_sync=0'));
+        wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings&pages_sync=0'));
         exit;
     }
-    wp_safe_redirect(admin_url('options-general.php?page=airport-fid-settings&pages_sync=queued'));
+    wp_safe_redirect(admin_url('admin.php?page=airport-fid-settings&pages_sync=queued'));
     exit;
 }
 add_action('admin_post_airport_fid_generate_airport_pages', 'airport_fid_handle_generate_airport_pages');
@@ -2183,7 +2192,7 @@ function airport_fid_enqueue_airport_page_style() {
 add_action('wp_enqueue_scripts', 'airport_fid_enqueue_airport_page_style', 20);
 
 function airport_fid_register_admin_assets($hook) {
-    if ($hook !== 'settings_page_airport-fid-settings') {
+    if ($hook !== 'toplevel_page_airport-fid-settings') {
         return;
     }
     wp_enqueue_style(
