@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.31
+Stable tag: 0.2.32
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.32 =
+* Fixed analytics schema upgrades on existing installs so hub site columns are added automatically.
+* Restored backfill when older cache-derived rows are missing site metadata required for Hub analytics.
+* Updated backfill to refresh existing cache-backfill rows and forward repaired entries to the hub.
 
 = 0.2.31 =
 * Split local Analytics from Hub analytics so each site shows its own data by default.
@@ -189,6 +194,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.32 =
+Fixes hub analytics migration and allows backfill to repair older rows for hub reporting.
 
 = 0.2.31 =
 Separates local Analytics from cross-site Hub reporting in the admin dashboard.
