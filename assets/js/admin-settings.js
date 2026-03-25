@@ -20,6 +20,12 @@
         });
     });
 
+    var params = new URLSearchParams(window.location.search);
+    var activeTab = params.get('tab');
+    if (activeTab) {
+        activate(activeTab);
+    }
+
     function csvEscape(value) {
         var text = value == null ? '' : String(value);
         if (/[",\n]/.test(text)) {

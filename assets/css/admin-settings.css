@@ -134,6 +134,21 @@
     padding: 6px 10px;
 }
 
+.airport-fid-admin-filter-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 0 0 14px;
+    align-items: end;
+}
+
+.airport-fid-admin-filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 .airport-fid-admin-checkbox {
     flex-direction: row;
     align-items: center;

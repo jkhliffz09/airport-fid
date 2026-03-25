@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.32
+ * Version: 0.2.33
  * Author: khliffz
  * Requires at least: 5.8
  * Tested up to: 6.9.1
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.32';
+const AIRPORT_FID_VERSION = '0.2.33';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
@@ -2254,24 +2254,37 @@ function airport_fid_log_search($data) {
     return $insert_id;
 }
 
-function airport_fid_get_search_analytics($site_url = '') {
+function airport_fid_get_search_analytics($site_url = '', $filters = array()) {
     global $wpdb;
     $table = airport_fid_get_search_log_table();
     $site_url = untrailingslashit((string) $site_url);
-    $where_sql = '';
+    $where_sql = ' WHERE 1=1';
     $where_args = array();
 
     if ($site_url !== '') {
-        $where_sql = ' WHERE site_url = %s';
+        $where_sql .= ' AND site_url = %s';
         $where_args[] = $site_url;
     }
 
-    $today_sql = "SELECT COUNT(*) FROM {$table}";
-    if ($where_sql !== '') {
-        $today_sql .= $where_sql . ' AND DATE(created_at) = %s';
-    } else {
-        $today_sql .= ' WHERE DATE(created_at) = %s';
+    $filter_site = untrailingslashit((string) ($filters['site'] ?? ''));
+    $filter_airport = strtoupper(sanitize_text_field((string) ($filters['airport'] ?? '')));
+    $filter_date = sanitize_text_field((string) ($filters['date'] ?? ''));
+
+    if ($filter_site !== '') {
+        $where_sql .= ' AND site_url = %s';
+        $where_args[] = $filter_site;
     }
+    if ($filter_airport !== '') {
+        $where_sql .= ' AND airport = %s';
+        $where_args[] = $filter_airport;
+    }
+    if ($filter_date !== '' && preg_match('/^\d{8}$/', $filter_date)) {
+        $where_sql .= ' AND flight_date = %s';
+        $where_args[] = $filter_date;
+    }
+
+    $today_sql = "SELECT COUNT(*) FROM {$table}";
+    $today_sql .= $where_sql . ' AND DATE(created_at) = %s';
 
     $total_sql = "SELECT COUNT(*) FROM {$table}" . $where_sql;
     $top_airports_sql = "SELECT airport, COUNT(*) AS searches FROM {$table}" . $where_sql . " GROUP BY airport ORDER BY searches DESC, airport ASC LIMIT 5";
@@ -2280,12 +2293,17 @@ function airport_fid_get_search_analytics($site_url = '') {
     $recent_sql = "SELECT id, cache_id, airport, flight_date, sort, source, raw_input, selected_airport, site_url, site_label, created_at FROM {$table}" . $where_sql . " ORDER BY created_at DESC LIMIT 100";
 
     $summary = array(
-        'total' => (int) ($where_sql !== '' ? $wpdb->get_var($wpdb->prepare($total_sql, $where_args)) : $wpdb->get_var($total_sql)),
+        'filters' => array(
+            'site' => $filter_site,
+            'airport' => $filter_airport,
+            'date' => $filter_date,
+        ),
+        'total' => (int) $wpdb->get_var($wpdb->prepare($total_sql, $where_args)),
         'today' => (int) $wpdb->get_var($wpdb->prepare($today_sql, array_merge($where_args, array(current_time('Y-m-d'))))),
-        'top_airports' => $where_sql !== '' ? $wpdb->get_results($wpdb->prepare($top_airports_sql, $where_args), ARRAY_A) : $wpdb->get_results($top_airports_sql, ARRAY_A),
-        'top_sources' => $where_sql !== '' ? $wpdb->get_results($wpdb->prepare($top_sources_sql, $where_args), ARRAY_A) : $wpdb->get_results($top_sources_sql, ARRAY_A),
-        'top_sites' => $where_sql !== '' ? $wpdb->get_results($wpdb->prepare($top_sites_sql, $where_args), ARRAY_A) : $wpdb->get_results($top_sites_sql, ARRAY_A),
-        'recent' => $where_sql !== '' ? $wpdb->get_results($wpdb->prepare($recent_sql, $where_args), ARRAY_A) : $wpdb->get_results($recent_sql, ARRAY_A),
+        'top_airports' => $wpdb->get_results($wpdb->prepare($top_airports_sql, $where_args), ARRAY_A),
+        'top_sources' => $wpdb->get_results($wpdb->prepare($top_sources_sql, $where_args), ARRAY_A),
+        'top_sites' => $wpdb->get_results($wpdb->prepare($top_sites_sql, $where_args), ARRAY_A),
+        'recent' => $wpdb->get_results($wpdb->prepare($recent_sql, $where_args), ARRAY_A),
     );
 
     return $summary;
@@ -2373,10 +2391,29 @@ function airport_fid_render_analytics_section() {
 }
 
 function airport_fid_render_hub_analytics_section() {
-    $analytics = airport_fid_get_search_analytics();
+    $filter_site = isset($_GET['hub_site']) ? untrailingslashit(esc_url_raw((string) wp_unslash($_GET['hub_site']))) : '';
+    $filter_airport = isset($_GET['hub_airport']) ? strtoupper(sanitize_text_field((string) wp_unslash($_GET['hub_airport']))) : '';
+    $filter_date_ui = isset($_GET['hub_date']) ? sanitize_text_field((string) wp_unslash($_GET['hub_date'])) : '';
+    $filter_date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $filter_date_ui) ? str_replace('-', '', $filter_date_ui) : '';
+    $analytics = airport_fid_get_search_analytics('', array(
+        'site' => $filter_site,
+        'airport' => $filter_airport,
+        'date' => $filter_date,
+    ));
     echo '<section class="airport-fid-admin-cache-section">';
     echo '<h2>Hub Analytics</h2>';
     echo '<p>Showing combined analytics from all connected websites grouped by site.</p>';
+    echo '<form method="get" action="' . esc_url(admin_url('admin.php')) . '" class="airport-fid-admin-filter-bar">';
+    echo '<input type="hidden" name="page" value="airport-fid-settings" />';
+    echo '<input type="hidden" name="tab" value="hub" />';
+    echo '<label class="airport-fid-admin-field"><span>Site</span><input type="url" name="hub_site" placeholder="https://example.com" value="' . esc_attr($filter_site) . '" /></label>';
+    echo '<label class="airport-fid-admin-field"><span>Airport</span><input type="text" name="hub_airport" maxlength="3" placeholder="JFK" value="' . esc_attr($filter_airport) . '" /></label>';
+    echo '<label class="airport-fid-admin-field"><span>Date</span><input type="date" name="hub_date" value="' . esc_attr($filter_date_ui) . '" /></label>';
+    echo '<div class="airport-fid-admin-filter-actions">';
+    echo '<button type="submit" class="button button-primary">Apply Filters</button>';
+    echo '<a class="button" href="' . esc_url(admin_url('admin.php?page=airport-fid-settings&tab=hub')) . '">Reset</a>';
+    echo '</div>';
+    echo '</form>';
     echo '<div class="airport-fid-analytics-grid">';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['total'])) . '</strong><span>Total Searches</span></div>';
     echo '<div class="airport-fid-analytics-card"><strong>' . esc_html(number_format_i18n((int) $analytics['today'])) . '</strong><span>Searches Today</span></div>';
