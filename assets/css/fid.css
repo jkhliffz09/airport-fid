@@ -256,6 +256,32 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
+.airport-fid-board.is-light .airport-fid-nearest-modal {
+    background: rgba(245, 245, 245, 0.82);
+}
+
+.airport-fid-board.is-light .airport-fid-nearest-dialog {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16);
+}
+
+.airport-fid-board.is-light .airport-fid-nearest-header,
+.airport-fid-board.is-light .airport-fid-nearest-close,
+.airport-fid-board.is-light .airport-fid-nearest-item {
+    color: #0a0a0a;
+}
+
+.airport-fid-board.is-light .airport-fid-nearest-item {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #ffffff;
+}
+
+.airport-fid-board.is-light .airport-fid-nearest-item:hover {
+    background: rgba(0, 188, 212, 0.08);
+    border-color: var(--fid-accent);
+}
+
 .airport-fid-date {
     max-width: 220px;
 }

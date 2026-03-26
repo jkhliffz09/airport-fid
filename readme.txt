@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.36
+Stable tag: 0.2.37
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,9 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.37 =
+* Fixed nearby-airport popup styling in light mode for readable text and proper contrast.
 
 = 0.2.36 =
 * Removed automatic frontend loading and default airport prefills.
@@ -212,6 +215,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.37 =
+Fixes the nearby-airport modal appearance in light mode.
 
 = 0.2.36 =
 Changes the frontend flow to manual loading and adds a nearby-airport picker for geolocation.
