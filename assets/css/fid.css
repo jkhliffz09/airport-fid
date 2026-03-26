@@ -95,6 +95,8 @@
     letter-spacing: 0.08em;
     text-transform: none;
     margin-top: 2px;
+    margin-bottom: 2px;
+    line-height: 1.5;
 }
 
 .airport-fid-helper.is-hidden {
@@ -110,6 +112,8 @@
     font: inherit;
     cursor: pointer;
     text-decoration: underline;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .airport-fid-controls {

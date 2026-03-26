@@ -628,10 +628,35 @@
                 linkButton.className = 'airport-fid-helper-action';
                 linkButton.textContent = 'Allow Location';
                 linkButton.addEventListener('click', function () {
-                    locateNearestAirport();
+                    requestLocationRetry();
                 });
                 helperEl.appendChild(linkButton);
             }
+        }
+
+        function requestLocationRetry() {
+            if (!navigator.geolocation) {
+                setHelper('Location access is not available in this browser.');
+                return;
+            }
+
+            updateStatus('');
+            setHelper('Requesting your location...');
+
+            navigator.geolocation.getCurrentPosition(
+                function () {
+                    locateNearestAirport();
+                },
+                function () {
+                    setHelper('Location access was not granted. Please allow location in your browser and try again.', {
+                        allowLocation: true,
+                    });
+                },
+                {
+                    timeout: 8000,
+                    maximumAge: 0,
+                }
+            );
         }
 
         function setTheme(mode) {
