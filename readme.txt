@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.40
+Stable tag: 0.2.41
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,9 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.41 =
+* Fixed a missing closing div in the frontend shortcode markup that could break page layout and footer styling.
 
 = 0.2.40 =
 * Added browser-specific screenshots to the location help popup for Chrome, Safari, Edge, and Firefox.
@@ -228,6 +231,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.41 =
+Fixes a broken frontend wrapper that could affect the page layout outside the FID board.
 
 = 0.2.40 =
 Adds screenshot-based browser instructions to the location help popup when geolocation is blocked.
