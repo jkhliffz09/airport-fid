@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.37
+Stable tag: 0.2.38
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.38 =
+* Moved the airport/location helper text below the controls and only show the result status after flights load.
+* Hid the Load more button until results exist and added an Allow Location retry action after geolocation denial.
+* Made the nearby-airport picker scrollable for long airport lists.
 
 = 0.2.37 =
 * Fixed nearby-airport popup styling in light mode for readable text and proper contrast.
@@ -215,6 +220,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.38 =
+Refines the manual search flow, hides Load more until results exist, and improves long nearby-airport lists.
 
 = 0.2.37 =
 Fixes the nearby-airport modal appearance in light mode.

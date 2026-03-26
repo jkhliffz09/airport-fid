@@ -82,6 +82,34 @@
     font-size: var(--fid-field-size, 13px);
     color: var(--fid-accent, #00bcd4);
     margin-bottom: 18px;
+    display: none;
+}
+
+.airport-fid-status.is-visible {
+    display: block;
+}
+
+.airport-fid-helper {
+    font-size: 11px;
+    color: var(--fid-muted);
+    letter-spacing: 0.08em;
+    text-transform: none;
+    margin-top: 2px;
+}
+
+.airport-fid-helper.is-hidden {
+    display: none;
+}
+
+.airport-fid-helper-action {
+    background: transparent;
+    border: none;
+    color: var(--fid-accent);
+    padding: 0;
+    margin-left: 4px;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .airport-fid-controls {
@@ -211,11 +239,14 @@
 
 .airport-fid-nearest-dialog {
     width: min(520px, 100%);
+    max-height: min(80vh, 720px);
     background: #0f1216;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 16px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
 }
 
 .airport-fid-nearest-header {
@@ -239,6 +270,9 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    overflow-y: auto;
+    max-height: min(60vh, 560px);
+    padding-right: 4px;
 }
 
 .airport-fid-nearest-item {
@@ -302,6 +336,10 @@
     text-transform: uppercase;
     letter-spacing: 0.2em;
     cursor: pointer;
+}
+
+.airport-fid-load-more {
+    display: none;
 }
 
 .airport-fid-button:hover {

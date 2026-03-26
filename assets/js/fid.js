@@ -566,6 +566,7 @@
         var pageSize = 5;
 
         var statusEl = board.querySelector('.airport-fid-status');
+        var helperEl = board.querySelector('.airport-fid-helper');
         var wrapper = board.querySelector('.airport-fid-table-wrapper');
         var input = board.querySelector('.airport-fid-input');
         var button = board.querySelector('.airport-fid-load');
@@ -599,7 +600,37 @@
 
         function updateStatus(message) {
             if (statusEl) {
-                statusEl.textContent = message;
+                var text = String(message || '').trim();
+                statusEl.textContent = text;
+                statusEl.classList.toggle('is-visible', !!text);
+            }
+        }
+
+        function setHelper(message, options) {
+            if (!helperEl) {
+                return;
+            }
+            options = options || {};
+            helperEl.innerHTML = '';
+            var text = String(message || '').trim();
+            helperEl.classList.toggle('is-hidden', !text);
+            if (!text) {
+                return;
+            }
+
+            var textNode = document.createElement('span');
+            textNode.textContent = text;
+            helperEl.appendChild(textNode);
+
+            if (options.allowLocation) {
+                var linkButton = document.createElement('button');
+                linkButton.type = 'button';
+                linkButton.className = 'airport-fid-helper-action';
+                linkButton.textContent = 'Allow Location';
+                linkButton.addEventListener('click', function () {
+                    locateNearestAirport();
+                });
+                helperEl.appendChild(linkButton);
             }
         }
 
@@ -714,7 +745,8 @@
             labelIsCode = false;
             currentSearchSource = source || 'manual';
             currentRawInput = rawInput != null ? String(rawInput) : (label || code || '');
-            updateStatus('Selected airport: ' + (label || code || '') + '. Click Load to show result.');
+            updateStatus('');
+            setHelper('Selected airport: ' + (label || code || '') + '. Click Load to show result.');
             closeNearestModal();
             clearSuggestions();
         }
@@ -967,7 +999,8 @@
             currentSearchSource = options.source || currentSearchSource || 'manual';
             currentRawInput = options.rawInput != null ? String(options.rawInput) : (input ? input.value : iata);
 
-            updateStatus('Loading flights for ' + iata + '...');
+            updateStatus('');
+            setHelper('');
             showLoading();
             activeToken += 1;
             var token = activeToken;
@@ -1012,7 +1045,7 @@
                             hideLoading();
                             return { skipRefresh: true };
                         }
-                        updateStatus('Fetching latest flights for ' + currentLabel + '...');
+                        updateStatus('');
                     }
                     return { skipRefresh: false };
                 })
@@ -1032,7 +1065,7 @@
                             }
                             currentLabel = data.airport_name || data.airport || iata;
                             labelIsCode = currentLabel.length === 3;
-                            updateStatus('Fetching flights for ' + currentLabel + '...');
+                            updateStatus('');
                             var destinations = (data && data.destinations) || [];
                             if (!destinations.length) {
                                 updateStatus('No destinations found for ' + currentLabel + '.');
@@ -1090,6 +1123,8 @@
             dateInput.value = toInputDate(getLocalDateString());
         }
 
+        updatePagination();
+
         if (sortSelect) {
             sortSelect.addEventListener('change', function () {
                 if (!allFlights.length) {
@@ -1141,11 +1176,14 @@
 
         function locateNearestAirport() {
             if (!navigator.geolocation) {
-                updateStatus('Geolocation not available.');
+                setHelper('Location access was not granted.', {
+                    allowLocation: false,
+                });
                 return;
             }
 
-            updateStatus('Finding nearest airport...');
+            updateStatus('');
+            setHelper('Requesting your location...');
             navigator.geolocation.getCurrentPosition(
                 function (position) {
                     var lat = position.coords.latitude;
@@ -1160,6 +1198,7 @@
 
                     fetchJson(url)
                         .then(function (data) {
+                            setHelper('');
                             var airports = Array.isArray(data && data.airports) ? data.airports : [];
                             if (!airports.length) {
                                 updateStatus('No nearby airports found.');
@@ -1181,10 +1220,10 @@
                         });
                 },
                 function (error) {
-                    if (error && error.code === 1 && geoButton) {
-                        geoButton.style.display = 'none';
-                    }
-                    updateStatus('Location access was not granted.');
+                    updateStatus('');
+                    setHelper('Location access was not granted.', {
+                        allowLocation: true,
+                    });
                 },
                 {
                     timeout: 8000,
