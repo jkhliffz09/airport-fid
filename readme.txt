@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.39
+Stable tag: 0.2.40
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.40 =
+* Added browser-specific screenshots to the location help popup for Chrome, Safari, Edge, and Firefox.
+* Opens the location help popup when geolocation is blocked for the site.
 
 = 0.2.39 =
 * Moved the airport helper text directly below the airport controls and above the date section.
@@ -224,6 +228,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.40 =
+Adds screenshot-based browser instructions to the location help popup when geolocation is blocked.
 
 = 0.2.39 =
 Moves the helper text to the airport section and improves the Allow Location retry flow.

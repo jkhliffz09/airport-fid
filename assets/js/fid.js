@@ -597,6 +597,8 @@
         var nearestModal = board.querySelector('.airport-fid-nearest-modal');
         var nearestList = board.querySelector('.airport-fid-nearest-list');
         var nearestClose = board.querySelector('.airport-fid-nearest-close');
+        var locationHelpModal = board.querySelector('.airport-fid-location-help-modal');
+        var locationHelpClose = board.querySelector('.airport-fid-location-help-close');
 
         function updateStatus(message) {
             if (statusEl) {
@@ -626,12 +628,28 @@
                 var linkButton = document.createElement('button');
                 linkButton.type = 'button';
                 linkButton.className = 'airport-fid-helper-action';
-                linkButton.textContent = 'Allow Location';
+                linkButton.textContent = 'How to allow location';
                 linkButton.addEventListener('click', function () {
-                    requestLocationRetry();
+                    openLocationHelp();
                 });
                 helperEl.appendChild(linkButton);
             }
+        }
+
+        function openLocationHelp() {
+            if (!locationHelpModal) {
+                return;
+            }
+            locationHelpModal.classList.add('is-open');
+            locationHelpModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeLocationHelp() {
+            if (!locationHelpModal) {
+                return;
+            }
+            locationHelpModal.classList.remove('is-open');
+            locationHelpModal.setAttribute('aria-hidden', 'true');
         }
 
         function requestLocationRetry() {
@@ -643,20 +661,56 @@
             updateStatus('');
             setHelper('Requesting your location...');
 
-            navigator.geolocation.getCurrentPosition(
-                function () {
-                    locateNearestAirport();
-                },
-                function () {
-                    setHelper('Location access was not granted. Please allow location in your browser and try again.', {
-                        allowLocation: true,
+            function retryPrompt() {
+                navigator.geolocation.getCurrentPosition(
+                    function () {
+                        locateNearestAirport();
+                    },
+                    function () {
+                        setHelper(
+                            'Location is blocked for this site. Allow it in your browser site settings, then try again.',
+                            {
+                                allowLocation: true,
+                            }
+                        );
+                        openLocationHelp();
+                        if (geoButton) {
+                            geoButton.focus();
+                        }
+                    },
+                    {
+                        timeout: 8000,
+                        maximumAge: 0,
+                    }
+                );
+            }
+
+            if (navigator.permissions && typeof navigator.permissions.query === 'function') {
+                navigator.permissions
+                    .query({ name: 'geolocation' })
+                    .then(function (permissionStatus) {
+                        if (permissionStatus && permissionStatus.state === 'denied') {
+                            setHelper(
+                                'Location is blocked for this site. Allow it in your browser site settings, then try again.',
+                                {
+                                    allowLocation: true,
+                                }
+                            );
+                            openLocationHelp();
+                            if (geoButton) {
+                                geoButton.focus();
+                            }
+                            return;
+                        }
+                        retryPrompt();
+                    })
+                    .catch(function () {
+                        retryPrompt();
                     });
-                },
-                {
-                    timeout: 8000,
-                    maximumAge: 0,
-                }
-            );
+                return;
+            }
+
+            retryPrompt();
         }
 
         function setTheme(mode) {
@@ -1275,6 +1329,18 @@
             nearestModal.addEventListener('click', function (event) {
                 if (event.target === nearestModal) {
                     closeNearestModal();
+                }
+            });
+        }
+        if (locationHelpClose) {
+            locationHelpClose.addEventListener('click', function () {
+                closeLocationHelp();
+            });
+        }
+        if (locationHelpModal) {
+            locationHelpModal.addEventListener('click', function (event) {
+                if (event.target === locationHelpModal) {
+                    closeLocationHelp();
                 }
             });
         }

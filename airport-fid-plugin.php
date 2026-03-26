@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.39
+ * Version: 0.2.40
  * Author: khliffz
  * Requires at least: 5.8
  * Tested up to: 6.9.1
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.39';
+const AIRPORT_FID_VERSION = '0.2.40';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
@@ -2691,6 +2691,19 @@ function airport_fid_shortcode($atts) {
     $output .= '<div class="airport-fid-nearest-dialog">';
     $output .= '<div class="airport-fid-nearest-header"><strong>Select Nearby Airport</strong><button type="button" class="airport-fid-nearest-close" aria-label="Close nearby airport picker">&times;</button></div>';
     $output .= '<div class="airport-fid-nearest-list"></div>';
+    $output .= '</div>';
+    $output .= '</div>';
+    $output .= '<div class="airport-fid-location-help-modal" aria-hidden="true">';
+    $output .= '<div class="airport-fid-location-help-dialog">';
+    $output .= '<div class="airport-fid-location-help-header"><strong>How to enable location</strong><button type="button" class="airport-fid-location-help-close" aria-label="Close location help">&times;</button></div>';
+    $output .= '<div class="airport-fid-location-help-body">';
+    $output .= '<p class="airport-fid-location-help-intro">Location access is blocked for this site. Allow it in your browser settings, then click Use my location again.</p>';
+    $output .= '<div class="airport-fid-location-help-grid">';
+    $output .= '<div class="airport-fid-location-help-card"><h4>Chrome</h4><img class="airport-fid-location-help-image" src="' . esc_url(plugins_url('assets/img/chrome.png', __FILE__)) . '" alt="Chrome location permission steps" /><ol><li>Click the site settings icon beside the address bar.</li><li>Open Site settings.</li><li>Set Location to Allow.</li><li>Refresh this page and try again.</li></ol></div>';
+    $output .= '<div class="airport-fid-location-help-card"><h4>Safari</h4><img class="airport-fid-location-help-image" src="' . esc_url(plugins_url('assets/img/safari.png', __FILE__)) . '" alt="Safari location permission steps" /><ol><li>Open Safari settings for this website.</li><li>Find Location.</li><li>Change it to Allow.</li><li>Reload the page and try again.</li></ol></div>';
+    $output .= '<div class="airport-fid-location-help-card"><h4>Edge</h4><img class="airport-fid-location-help-image" src="' . esc_url(plugins_url('assets/img/edge.png', __FILE__)) . '" alt="Edge location permission steps" /><ol><li>Click the lock icon in the address bar.</li><li>Open Permissions for this site.</li><li>Set Location to Allow.</li><li>Refresh and try again.</li></ol></div>';
+    $output .= '<div class="airport-fid-location-help-card"><h4>Firefox</h4><img class="airport-fid-location-help-image" src="' . esc_url(plugins_url('assets/img/firefox.png', __FILE__)) . '" alt="Firefox location permission steps" /><ol><li>Click the permissions icon near the address bar.</li><li>Clear the blocked location permission.</li><li>Refresh the page.</li><li>Choose Allow when Firefox asks again.</li></ol></div>';
+    $output .= '</div>';
     $output .= '</div>';
     $output .= '</div>';
     $output .= '</div>';
