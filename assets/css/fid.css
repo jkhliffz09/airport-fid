@@ -194,6 +194,68 @@
     pointer-events: none;
 }
 
+.airport-fid-nearest-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 12, 18, 0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.airport-fid-nearest-modal.is-open {
+    display: flex;
+}
+
+.airport-fid-nearest-dialog {
+    width: min(520px, 100%);
+    background: #0f1216;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.airport-fid-nearest-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: var(--fid-text);
+}
+
+.airport-fid-nearest-close {
+    background: transparent;
+    border: none;
+    color: var(--fid-text);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.airport-fid-nearest-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.airport-fid-nearest-item {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--fid-text);
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.airport-fid-nearest-item:hover {
+    border-color: var(--fid-accent);
+    background: rgba(255, 255, 255, 0.04);
+}
+
 .airport-fid-date {
     max-width: 220px;
 }

@@ -4,7 +4,7 @@ Tags: flights, fid, airport, timetable, departures
 Requires at least: 5.8
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 0.2.35
+Stable tag: 0.2.36
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,11 @@ Updates use GitHub releases (not prereleases). Create a release and WordPress wi
 FlightLookup XML APIs.
 
 == Changelog ==
+
+= 0.2.36 =
+* Removed automatic frontend loading and default airport prefills.
+* Added nearby-airport picker modal for Use My Location when multiple airports are returned.
+* Updated the empty state to prompt users to select an airport or use location first.
 
 = 0.2.35 =
 * Made Hub the primary tab when enabled, otherwise Analytics becomes the default tab.
@@ -207,6 +212,9 @@ FlightLookup XML APIs.
 * Improved day indicator visibility in expanded timeline.
 
 == Upgrade Notice ==
+
+= 0.2.36 =
+Changes the frontend flow to manual loading and adds a nearby-airport picker for geolocation.
 
 = 0.2.35 =
 Improves the admin tab order and streamlines the Analytics view.

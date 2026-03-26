@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Airport FID Board
  * Description: Display flight information in a FID-style table using FlightLookup XML APIs.
- * Version: 0.2.35
+ * Version: 0.2.36
  * Author: khliffz
  * Requires at least: 5.8
  * Tested up to: 6.9.1
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 const AIRPORT_FID_OPTION_KEY = 'airport_fid_settings';
-const AIRPORT_FID_VERSION = '0.2.35';
+const AIRPORT_FID_VERSION = '0.2.36';
 const AIRPORT_FID_CACHE_TABLE = 'airport_fid_cache';
 const AIRPORT_FID_SEARCH_LOG_TABLE = 'airport_fid_search_log';
 const AIRPORT_FID_PAGE_META_FLAG = '_airport_fid_generated_page';
@@ -308,7 +308,7 @@ function airport_fid_set_cache($airport, $date, $sort, $payload) {
 function airport_fid_default_settings() {
     return array(
         'api_key' => '',
-        'default_airport' => 'MNL',
+        'default_airport' => '',
         'use_geolocation_default' => 0,
         'github_repo' => 'https://github.com/jkhliffz09/airport-fid/',
         'github_token' => '',
@@ -789,8 +789,6 @@ function airport_fid_render_settings_page() {
     echo '<h2>General Settings</h2>';
     echo '<div class="airport-fid-admin-grid">';
     airport_fid_admin_text_field('FlightLookup API Key', 'api_key', $settings['api_key']);
-    airport_fid_admin_text_field('Default Airport (IATA)', 'default_airport', $settings['default_airport'], array('maxlength' => '3'));
-    airport_fid_admin_checkbox_field('Use Geolocation by Default', 'use_geolocation_default', (int) $settings['use_geolocation_default']);
     airport_fid_admin_number_field('Max Destinations (0 = unlimited)', 'max_destinations', (int) $settings['max_destinations'], 0, 500);
     airport_fid_admin_number_field('Max Flights (0 = unlimited)', 'max_flights', (int) $settings['max_flights'], 0, 1000);
     airport_fid_admin_number_field('Cache TTL (minutes)', 'cache_ttl_minutes', (int) $settings['cache_ttl_minutes'], 1, 1440);
@@ -2610,8 +2608,8 @@ function airport_fid_shortcode($atts) {
 
     $atts = shortcode_atts(
         array(
-            'airport' => $settings['default_airport'],
-            'use_geolocation' => (string) $settings['use_geolocation_default'],
+            'airport' => '',
+            'use_geolocation' => '0',
             'show_destination' => '1',
             'limit' => $settings['max_flights'],
         ),
@@ -2626,8 +2624,8 @@ function airport_fid_shortcode($atts) {
     $config = array(
         'restUrl' => esc_url_raw(rest_url('airport-fid/v1')),
         'showDestination' => $atts['show_destination'] === '1',
-        'defaultAirport' => strtoupper($atts['airport']),
-        'useGeolocation' => $atts['use_geolocation'] === '1',
+        'defaultAirport' => '',
+        'useGeolocation' => false,
         'limit' => (int) $atts['limit'],
         'nonce' => wp_create_nonce('wp_rest'),
         'enableAnimation' => (int) $settings['enable_animation'] === 1,
@@ -2637,8 +2635,8 @@ function airport_fid_shortcode($atts) {
 
     wp_localize_script('airport-fid-script', 'AirportFID', $config);
 
-    $airport = esc_attr(strtoupper($atts['airport']));
-    $use_geo = $atts['use_geolocation'] === '1' ? '1' : '0';
+    $airport = '';
+    $use_geo = '0';
     $show_destination = $atts['show_destination'] === '1' ? '1' : '0';
 
     $uid = uniqid('airport-fid-');
@@ -2676,7 +2674,7 @@ function airport_fid_shortcode($atts) {
     $output .= '</select>';
     $output .= '</div>';
     $output .= '</div>';
-    $output .= '<div class="airport-fid-status">Loading flight data...</div>';
+    $output .= '<div class="airport-fid-status">Select Airport or Use Location to show result.</div>';
     $output .= '<div class="airport-fid-table-wrapper"></div>';
     $output .= '<div class="airport-fid-pagination">';
     $output .= '<button type="button" class="airport-fid-button airport-fid-load-more">Load more</button>';
@@ -2686,6 +2684,12 @@ function airport_fid_shortcode($atts) {
     $output .= '<div class="airport-fid-loading-card">';
     $output .= '<div class="airport-fid-loading-ring"></div>';
     $output .= '<div class="airport-fid-loading-text">Searching flights...</div>';
+    $output .= '</div>';
+    $output .= '</div>';
+    $output .= '<div class="airport-fid-nearest-modal" aria-hidden="true">';
+    $output .= '<div class="airport-fid-nearest-dialog">';
+    $output .= '<div class="airport-fid-nearest-header"><strong>Select Nearby Airport</strong><button type="button" class="airport-fid-nearest-close" aria-label="Close nearby airport picker">&times;</button></div>';
+    $output .= '<div class="airport-fid-nearest-list"></div>';
     $output .= '</div>';
     $output .= '</div>';
     $output .= '</div>';
@@ -2798,21 +2802,20 @@ function airport_fid_rest_nearest(WP_REST_Request $request) {
         return new WP_REST_Response(array('error' => $xml->get_error_message()), 500);
     }
 
-    $nearest = null;
+    $nearest = array();
     foreach ($xml->Airport as $airport) {
-        $nearest = array(
+        $nearest[] = array(
             'code' => (string) $airport['IATACode'],
             'name' => (string) $airport['AirportName'],
             'distance' => (string) $airport['Distance'],
         );
-        break;
     }
 
-    if (!$nearest) {
+    if (empty($nearest)) {
         return new WP_REST_Response(array('error' => 'No airport found.'), 404);
     }
 
-    return new WP_REST_Response($nearest, 200);
+    return new WP_REST_Response(array('airports' => $nearest), 200);
 }
 
 function airport_fid_rest_board(WP_REST_Request $request) {
